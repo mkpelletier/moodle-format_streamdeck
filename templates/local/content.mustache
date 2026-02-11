@@ -131,6 +131,28 @@
                                     </button>
                                 {{/hasannouncementicon}}
 
+                                {{! ── General forum icon (comments) ──}}
+                                {{#hasgeneralforumicon}}
+                                    <button type="button"
+                                            class="streamdeck-hero-icon-btn streamdeck-hero-generalforum-btn"
+                                            data-generalforum-url="{{generalforumurl}}"
+                                            aria-label="{{#str}} generalforum, format_streamdeck {{/str}}"
+                                            title="{{#str}} generalforum, format_streamdeck {{/str}}">
+                                        <i class="fa fa-comments" aria-hidden="true"></i>
+                                    </button>
+                                {{/hasgeneralforumicon}}
+
+                                {{! ── Participants icon (capability-gated) ──}}
+                                {{#hasparticipantsicon}}
+                                    <button type="button"
+                                            class="streamdeck-hero-icon-btn streamdeck-hero-participants-btn"
+                                            data-participants-url="{{participantsurl}}"
+                                            aria-label="{{#str}} participants, format_streamdeck {{/str}}"
+                                            title="{{#str}} participants, format_streamdeck {{/str}}">
+                                        <i class="fa fa-users" aria-hidden="true"></i>
+                                    </button>
+                                {{/hasparticipantsicon}}
+
                                 {{! ── Live class icon (BigBlueButton) ──}}
                                 {{#hasliveclassicon}}
                                     <button type="button"

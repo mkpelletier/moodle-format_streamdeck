@@ -9,9 +9,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2026012701;     // Bumped for refactor.
+$plugin->version   = 2026021101;     // Bumped for refactor.
 $plugin->requires  = 2024110400;     // Moodle 5.0+.
 $plugin->component = 'format_streamdeck';
-$plugin->maturity  = MATURITY_RC;
-$plugin->release   = '1.0-rc4';
+$plugin->maturity  = MATURITY_BETA;
+$plugin->release   = '1.0-beta5';
 $plugin->dependencies = [];

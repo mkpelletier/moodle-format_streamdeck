@@ -351,6 +351,57 @@ class content extends core_content {
             $data->announcementforumid     = 0;
         }
 
+        // ────────────────────────────────────────────
+        // General forum icon (section 0).
+        // ────────────────────────────────────────────
+        $data->hasgeneralforumicon = false;
+        $data->generalforumurl     = '';
+
+        try {
+            // Scan section 0 only for the first visible, non-news forum.
+            if (!empty($modinfo->sections[0])) {
+                foreach ($modinfo->sections[0] as $cmid) {
+                    $cm = $modinfo->get_cm($cmid);
+                    if (!$cm->uservisible || $cm->modname !== 'forum') {
+                        continue;
+                    }
+                    // Skip the news/announcements forum.
+                    $instance = $DB->get_record('forum', ['id' => $cm->instance], 'id, type', IGNORE_MISSING);
+                    if ($instance && $instance->type !== 'news') {
+                        $data->hasgeneralforumicon = true;
+                        $data->generalforumurl = (new moodle_url('/mod/forum/view.php', [
+                            'id' => $cm->id,
+                        ]))->out(false);
+                        break;
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            debugging('STREAMDECK: error building general forum icon data: ' . $e->getMessage(), DEBUG_DEVELOPER);
+            $data->hasgeneralforumicon = false;
+            $data->generalforumurl     = '';
+        }
+
+        // ────────────────────────────────────────────────────────
+        // Participants icon (capability-gated).
+        // ────────────────────────────────────────────────────────
+        $data->hasparticipantsicon = false;
+        $data->participantsurl     = '';
+
+        try {
+            $context = \context_course::instance($course->id);
+            if (has_capability('moodle/course:viewparticipants', $context)) {
+                $data->hasparticipantsicon = true;
+                $data->participantsurl = (new moodle_url('/user/index.php', [
+                    'id' => $course->id,
+                ]))->out(false);
+            }
+        } catch (\Throwable $e) {
+            debugging('STREAMDECK: error building participants icon data: ' . $e->getMessage(), DEBUG_DEVELOPER);
+            $data->hasparticipantsicon = false;
+            $data->participantsurl     = '';
+        }
+
         // ─────────────────────────────────────────────
         // Live class (BigBlueButton) icon (section 0).
         // ─────────────────────────────────────────────

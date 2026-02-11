@@ -236,6 +236,11 @@ body.editing .streamdeck-episode-page {
     animation-delay: 0.5s;
 }
 
+/* Hero icon modals – widen beyond Bootstrap's default .modal-lg (800px) */
+#page-course-view-streamdeck.format-streamdeck:not(.editing) .modal.show:has(.streamdeck-hero-iframe-wrapper) .modal-dialog, #page-course-view-streamdeck.format-streamdeck:not(.editing) .modal-lg, #page-course-view-streamdeck.format-streamdeck:not(.editing) .modal-xl, #page-course-view-streamdeck.format-streamdeck:not(.editing) .modal-dialog {
+    max-width: min(75vw, 1200px) !important;
+}
+
 /* Hero icon modal iframe wrapper */
 .streamdeck-hero-iframe-wrapper {
     position: relative;
@@ -286,6 +291,19 @@ body.format-streamdeck .badge-text {
     font-size: 1.1rem;
     color: #fff;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* --------------
+Particpant List Styling
+---------------*/
+#page-course-view-participants.format-streamdeck:not(.editing) #region-main, #page-course-view-participants.format-streamdeck:not(.editing) #region-main .bg-light, #page-course-view-participants.format-streamdeck:not(.editing) #region-main .bg-white, #page-course-view-participants.format-streamdeck:not(.editing) #region-main .card, #page-course-view-participants.format-streamdeck:not(.editing) #region-main .dropdown-toggle, #page-course-view-participants.format-streamdeck:not(.editing) #page.drawers .main-inner {
+    background: #000 !important;
+    background-color: #000 !important;
+    color: #fff !important;
+}
+
+#page-course-view-participants.format-streamdeck:not(.editing) #page.drawers {
+    margin-top: 0px !important;
 }
 
 /* ────

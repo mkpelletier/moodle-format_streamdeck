@@ -67,6 +67,8 @@ $string['syllabusschedule'] = 'Course schedule';
 $string['viewcourseschedule'] = 'View course schedule';
 
 $string['announcements'] = 'Announcements';
+$string['generalforum'] = 'Discussion forum';
+$string['participants'] = 'Participants';
 $string['liveclass'] = 'Live class';
 $string['viewgrades'] = 'View grades';
 $string['viewgradescta'] = 'View your grades';

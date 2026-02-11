@@ -189,6 +189,8 @@ define(['jquery', 'core/modal_factory', 'core/modal_events'], function($, ModalF
         registerForumReplyIframe();
         registerAssignViewIframe();
         registerAnnouncementsIcon();
+        registerGeneralForumIcon();
+        registerParticipantsIcon();
         registerLiveClassIcon();
         applyLocalAnnouncementsClearState();
         registerGradesIcon();
@@ -415,6 +417,161 @@ define(['jquery', 'core/modal_factory', 'core/modal_events'], function($, ModalF
 
                                 // Add hook class for custom styling.
                                 $(doc.body).addClass('streamdeck-liveclass-embedded');
+                            } catch (err) {
+                                // Silent failure (cross-origin, etc.).
+                            }
+                        });
+                    } catch (err) {
+                        // Silent failure.
+                    }
+                });
+
+                return modal;
+            }).catch(function() {
+                // Silent fail if modal creation fails.
+            });
+        });
+    };
+
+    /**
+     * Register behaviour for hero General Forum icon.
+     * Opens the general discussion forum in an inline iframe modal.
+     */
+    const registerGeneralForumIcon = () => {
+        $('body').on('click', '.streamdeck-hero-generalforum-btn', function(e) {
+            e.preventDefault();
+
+            const $btn = $(this);
+            const forumUrl = $btn.data('generalforum-url');
+            if (!forumUrl) {
+                return;
+            }
+
+            const title = $btn.attr('aria-label') || 'Discussion forum';
+
+            const bodyContent = `
+                <div class="streamdeck-hero-iframe-wrapper">
+                    <iframe src="${forumUrl}"
+                            title="${title}"
+                            class="streamdeck-hero-iframe"
+                            frameborder="0"
+                            allowfullscreen></iframe>
+                </div>
+            `;
+
+            ModalFactory.create({
+                type: ModalFactory.types.DEFAULT,
+                title: title,
+                body: bodyContent,
+                large: true
+            }).then(function(modal) {
+                modal.show();
+
+                modal.getRoot().on(ModalEvents.shown, function() {
+                    try {
+                        const $iframe = modal.getRoot().find('iframe.streamdeck-hero-iframe').first();
+                        if (!$iframe.length) {
+                            return;
+                        }
+
+                        $iframe.on('load', function() {
+                            try {
+                                const win = this.contentWindow;
+                                const doc = win.document;
+
+                                $(doc).find(
+                                    '#page-header, ' +
+                                    '#page-footer, ' +
+                                    'header[role="banner"], ' +
+                                    'nav.navbar, ' +
+                                    '.navbar, ' +
+                                    '.breadcrumb, ' +
+                                    '.secondary-navigation, ' +
+                                    '.page-context-header, ' +
+                                    '.drawer-toggle, ' +
+                                    '.drawer, ' +
+                                    '.activity-navigation, ' +
+                                    'ul.content-actions-lti'
+                                ).hide();
+
+                                $(doc.body).addClass('streamdeck-generalforum-embedded');
+                            } catch (err) {
+                                // Silent failure (cross-origin, etc.).
+                            }
+                        });
+                    } catch (err) {
+                        // Silent failure.
+                    }
+                });
+
+                return modal;
+            }).catch(function() {
+                // Silent fail if modal creation fails.
+            });
+        });
+    };
+
+    /**
+     * Register behaviour for hero Participants icon.
+     * Opens the course participants list in an inline iframe modal.
+     */
+    const registerParticipantsIcon = () => {
+        $('body').on('click', '.streamdeck-hero-participants-btn', function(e) {
+            e.preventDefault();
+
+            const $btn = $(this);
+            const participantsUrl = $btn.data('participants-url');
+            if (!participantsUrl) {
+                return;
+            }
+
+            const title = $btn.attr('aria-label') || 'Participants';
+
+            const bodyContent = `
+                <div class="streamdeck-hero-iframe-wrapper">
+                    <iframe src="${participantsUrl}"
+                            title="${title}"
+                            class="streamdeck-hero-iframe"
+                            frameborder="0"
+                            allowfullscreen></iframe>
+                </div>
+            `;
+
+            ModalFactory.create({
+                type: ModalFactory.types.DEFAULT,
+                title: title,
+                body: bodyContent,
+                large: true
+            }).then(function(modal) {
+                modal.show();
+
+                modal.getRoot().on(ModalEvents.shown, function() {
+                    try {
+                        const $iframe = modal.getRoot().find('iframe.streamdeck-hero-iframe').first();
+                        if (!$iframe.length) {
+                            return;
+                        }
+
+                        $iframe.on('load', function() {
+                            try {
+                                const win = this.contentWindow;
+                                const doc = win.document;
+
+                                $(doc).find(
+                                    '#page-header, ' +
+                                    '#page-footer, ' +
+                                    'header[role="banner"], ' +
+                                    'nav.navbar, ' +
+                                    '.navbar, ' +
+                                    '.breadcrumb, ' +
+                                    '.secondary-navigation, ' +
+                                    '.page-context-header, ' +
+                                    '.drawer-toggle, ' +
+                                    '.drawer, ' +
+                                    '.activity-navigation'
+                                ).hide();
+
+                                $(doc.body).addClass('streamdeck-participants-embedded');
                             } catch (err) {
                                 // Silent failure (cross-origin, etc.).
                             }
