@@ -1,0 +1,476 @@
+{{! Streamdeck – FINAL CINEMATIC TEMPLATE }}
+
+<div class="format-streamdeck">
+
+    {{#showhero}}
+    <!-- HERO WITH PAGE HEADER OVERLAY -->
+    <section class="hero {{#hascourseimage}}has-image{{/hascourseimage}}"
+        {{#hascourseimage}}style="background-image: url('{{{courseimage}}}');"{{/hascourseimage}}>
+
+        <!-- Dark overlay -->
+        <div class="hero-overlay"></div>
+
+        <!-- Moodle page header in top-left -->
+        <div class="position-absolute top-0 start-0 p-4" style="z-index: 10;">
+            <div id="page-header" class="d-flex align-items-center">
+                {{{output.page_heading}}}
+                {{{output.course_header}}}
+            </div>
+        </div>
+
+        <!-- Main hero content -->
+        <div class="hero-content position-relative" style="z-index: 5;">
+            <div class="container-fluid px-4 px-md-5">
+                <div class="row">
+                    <div class="col-lg-7 col-xl-6">
+
+                        <!-- Text box with dark scrim + blur -->
+                        <div class="p-5 rounded-3" style="background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);">
+                            <h1 class="display-3 fw-bold mb-3 text-white"
+                                style="font-family: 'Lobster', cursive; text-shadow: 3px 3px 12px rgba(0,0,0,0.9);">
+                                {{{fullname}}}
+                            </h1>
+
+                            <!-- Metadata -->
+                            <div class="d-flex flex-wrap align-items-center gap-4 mb-4 text-white fs-5">
+                                <span>{{year}}</span>
+                                <span>•</span>
+                                <span>{{shortname}}</span>
+                                <span>•</span>
+                                <span>{{duration}}</span>
+
+                                {{#hasinstructor}}
+                                    {{^multipleinstructors}}
+                                        <div class="hero-instructor d-inline-flex align-items-center gap-3">
+                                            <a href="{{instructorprofileurl}}" class="hero-instructor-link d-inline-flex align-items-center gap-3 text-decoration-none">
+                                                <div class="hero-instructor-avatar-wrapper">
+                                                    {{{instructoravatarhtml}}}
+                                                </div>
+                                                <div class="hero-instructor-meta d-flex flex-column">
+                                                    {{#instructorrolelabel}}
+                                                        <span class="hero-instructor-label text-uppercase small text-white-50">
+                                                            {{{instructorrolelabel}}}
+                                                        </span>
+                                                    {{/instructorrolelabel}}
+                                                    <span class="hero-instructor-name fw-semibold text-white">{{instructor}}</span>
+                                                </div>
+                                            </a>
+                                        </div>
+                                    {{/multipleinstructors}}
+
+                                    {{#multipleinstructors}}
+                                        <div class="hero-instructor-multi d-inline-flex align-items-center gap-2 flex-wrap">
+                                            {{#instructorgrouplabel}}
+                                                <span class="hero-instructor-label text-uppercase small text-white-50 me-1">
+                                                    {{{instructorgrouplabel}}}
+                                                </span>
+                                            {{/instructorgrouplabel}}
+                                            <div class="hero-instructor-strip-inline d-inline-flex align-items-center gap-2 flex-wrap">
+                                                {{#instructorteam}}
+                                                    <a href="{{contacturl}}" class="hero-instructor-chip-inline text-decoration-none">
+                                                        <div class="hero-instructor-chip-avatar-inline">
+                                                            {{{avatarhtml}}}
+                                                        </div>
+
+                                                        <div class="hero-instructor-popout">
+                                                            <div class="hero-instructor-popout-inner">
+                                                                <div class="hero-instructor-popout-avatar">
+                                                                    {{{avatarhtml}}}
+                                                                </div>
+                                                                <div class="hero-instructor-popout-meta">
+                                                                    <div class="hero-instructor-popout-name">
+                                                                        {{name}}
+                                                                    </div>
+                                                                    {{#rolelabel}}
+                                                                        <div class="hero-instructor-popout-role">
+                                                                            {{rolelabel}}
+                                                                        </div>
+                                                                    {{/rolelabel}}
+                                                                    <div class="hero-instructor-popout-cta">
+                                                                        {{#str}}message, message{{/str}}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                    </a>
+                                                {{/instructorteam}}
+                                            </div>
+                                        </div>
+                                    {{/multipleinstructors}}
+                                {{/hasinstructor}}
+                            </div>
+
+                            {{#summary}}
+                                <p class="lead text-white mb-5 opacity-95" style="max-width: 680px;">
+                                    {{{summary}}}
+                                </p>
+                            {{/summary}}
+
+                            <!-- Buttons + completion -->
+                            <div class="d-flex align-items-center gap-4 flex-wrap">
+                                <a href="{{playurl}}" class="btn btn-primary btn-lg px-5 py-3 shadow-lg" target="_blank">
+                                    ▶ {{playlabel}}
+                                </a>
+                                <button type="button" class="btn btn-outline-light btn-lg px-5 py-3 streamdeck-more-info-btn">
+                                    {{#str}}moreinfo, format_streamdeck{{/str}}
+                                </button>
+                                {{! ── Announcements icon (bullhorn) ──}}
+                                {{#hasannouncementicon}}
+                                    <button type="button"
+                                            class="streamdeck-hero-icon-btn streamdeck-hero-announcements-btn
+                                                   {{#announcementunreadcount}}has-unread{{/announcementunreadcount}}"
+                                            data-announcements-url="{{announcementiconurl}}"
+                                            data-announcements-forumid="{{announcementforumid}}"
+                                            aria-label="{{#str}} announcements, format_streamdeck {{/str}}"
+                                            title="{{#str}} announcements, format_streamdeck {{/str}}">
+                                        <i class="fa fa-bullhorn" aria-hidden="true"></i>
+                                        {{#announcementunreadcount}}
+                                            <span class="streamdeck-hero-icon-badge">{{announcementunreadcount}}</span>
+                                        {{/announcementunreadcount}}
+                                    </button>
+                                {{/hasannouncementicon}}
+
+                                {{! ── Live class icon (BigBlueButton) ──}}
+                                {{#hasliveclassicon}}
+                                    <button type="button"
+                                            class="streamdeck-hero-icon-btn streamdeck-hero-liveclass-btn"
+                                            data-liveclass-url="{{liveclassurl}}"
+                                            aria-label="{{#str}} liveclass, format_streamdeck {{/str}}"
+                                            title="{{#str}} liveclass, format_streamdeck {{/str}}">
+                                        <i class="fa-solid fa-chalkboard-user" aria-hidden="true"></i>
+                                    </button>
+                                {{/hasliveclassicon}}
+
+                                {{#hascompletion}}
+                                <button
+                                    type="button"
+                                    class="streamdeck-hero-grades-btn btn btn-link p-0 text-decoration-none"
+                                    data-grades-url="{{gradesurl}}"
+                                    aria-label="{{#str}}viewgrades, format_streamdeck{{/str}}"
+                                    title="{{#str}}viewgradescta, format_streamdeck{{/str}}">
+                                    <div class="completion-badge d-flex align-items-center gap-3">
+                                        <div
+                                            class="badge-circle"
+                                            style="background: conic-gradient(#e50914 {{completionpercent}}%, #333 {{completionpercent}}% 100%);">
+                                            <span class="badge-text">{{completionpercent}}%</span>
+                                        </div>
+                                        <div class="text-white">
+                                            <span class="text-white-50 small">{{completiontext}}</span>
+                                        </div>
+                                    </div>
+                                </button>
+                                {{/hascompletion}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    {{/showhero}}
+
+{{! SECTION VIEW: EPISODE + RELATED }} 
+{{#issectionview}}
+<section class="streamdeck-episode-page {{#hasrelatedresources}}has-related-resources{{/hasrelatedresources}}">
+    <div class="episode-container">
+        {{#hasrelatedresources}}
+        <div class="streamdeck-related-block">
+            <aside class="related-sidebar">
+                <section class="related-resources">
+                    <h2>{{#str}}relatedresources, format_streamdeck{{/str}}</h2>
+
+                    <ul class="streamdeck-related-episodes">
+                        {{#relatedresources}}
+                        <li class="streamdeck-related-episode">
+                            <a href="{{url}}" class="streamdeck-related-episode-link" target="_blank" rel="noopener">
+                                {{#icon}}
+                                <img src="{{icon}}" alt="" class="streamdeck-related-episode-icon" />
+                                {{/icon}}
+                                <div class="streamdeck-related-episode-main">
+                                    <span class="streamdeck-related-episode-title">{{label}}</span>
+                                </div>
+                            </a>
+                        </li>
+                        {{/relatedresources}}
+                    </ul>
+                </section>
+
+                {{#relatedactivities.0}}
+                <section class="related-activities">
+                    <h2>{{#str}}relatedactivities, format_streamdeck{{/str}}</h2>
+                    <ul class="streamdeck-related-episodes">
+                        {{#relatedactivities}}
+
+                            {{! FORUM: modal preview }}
+                            {{#isforum}}
+                            <li class="streamdeck-related-episode">
+                                <a href="{{url}}"
+                                   class="streamdeck-related-episode-link js-streamdeck-forum-trigger"
+                                   data-forum-cmid="{{cmid}}">
+                                    <img src="{{icon}}" alt="" class="streamdeck-related-episode-icon">
+                                    <div class="streamdeck-related-episode-main">
+                                        <span class="streamdeck-related-episode-title">{{name}}</span>
+
+                                        {{#completionenabled}}
+                                        <span class="streamdeck-related-episode-status {{#iscomplete}}is-complete{{/iscomplete}}">
+                                            {{#iscomplete}}
+                                                {{#str}}completed, format_streamdeck{{/str}}
+                                            {{/iscomplete}}
+                                            {{^iscomplete}}
+                                                {{#str}}todo, format_streamdeck{{/str}}
+                                            {{/iscomplete}}
+                                        </span>
+                                        {{/completionenabled}}
+                                    </div>
+                                </a>
+
+                                {{#forumpreviewhtml}}
+                                <div class="d-none js-streamdeck-forum-content"
+                                     data-forum-cmid="{{cmid}}">
+                                    {{{forumpreviewhtml}}}
+                                </div>
+                                {{/forumpreviewhtml}}
+                            </li>
+                            {{/isforum}}
+
+                            {{! ASSIGNMENT: modal preview, same pattern }}
+                            {{#isassign}}
+                            <li class="streamdeck-related-episode">
+                                <a href="{{url}}"
+                                   class="streamdeck-related-episode-link js-streamdeck-assign-trigger"
+                                   data-assign-cmid="{{cmid}}">
+                                    <img src="{{icon}}" alt="" class="streamdeck-related-episode-icon">
+                                    <div class="streamdeck-related-episode-main">
+                                        <span class="streamdeck-related-episode-title">{{name}}</span>
+
+                                        {{#completionenabled}}
+                                        <span class="streamdeck-related-episode-status {{#iscomplete}}is-complete{{/iscomplete}}">
+                                            {{#iscomplete}}
+                                                {{#str}}completed, format_streamdeck{{/str}}
+                                            {{/iscomplete}}
+                                            {{^iscomplete}}
+                                                {{#str}}todo, format_streamdeck{{/str}}
+                                            {{/iscomplete}}
+                                        </span>
+                                        {{/completionenabled}}
+                                    </div>
+                                </a>
+
+                                {{#assignpreviewhtml}}
+                                <div class="d-none js-streamdeck-assign-content"
+                                     data-assign-cmid="{{cmid}}">
+                                    {{{assignpreviewhtml}}}
+                                </div>
+                                {{/assignpreviewhtml}}
+                            </li>
+                            {{/isassign}}
+
+                            {{! EVERYTHING ELSE: normal link }}
+                            {{^isforum}}
+                            {{^isassign}}
+                            <li class="streamdeck-related-episode">
+                                <a href="{{url}}" class="streamdeck-related-episode-link" target="_blank" rel="noopener">
+                                    <img src="{{icon}}" alt="" class="streamdeck-related-episode-icon">
+                                    <div class="streamdeck-related-episode-main">
+                                        <span class="streamdeck-related-episode-title">{{name}}</span>
+                                        {{#completionenabled}}
+                                        <span class="streamdeck-related-episode-status {{#iscomplete}}is-complete{{/iscomplete}}">
+                                            {{#iscomplete}}
+                                                {{#str}}completed, format_streamdeck{{/str}}
+                                            {{/iscomplete}}
+                                            {{^iscomplete}}
+                                                {{#str}}todo, format_streamdeck{{/str}}
+                                            {{/iscomplete}}
+                                        </span>
+                                        {{/completionenabled}}
+                                    </div>
+                                </a>
+                            </li>
+                            {{/isassign}}
+                            {{/isforum}}
+
+                        {{/relatedactivities}}
+                    </ul>
+                </section>
+                {{/relatedactivities.0}}
+            </aside>
+        </div>
+        {{/hasrelatedresources}}
+        
+        {{#hasepisode}}
+        <article class="streamdeck-episode-card">
+            <div class="streamdeck-episode-header-wrapper d-flex justify-content-between align-items-center mb-3">
+                <h1 class="streamdeck-episode-title mb-0">{{episode.name}}</h1>
+                <a href="{{courseurl}}" class="streamdeck-episode-nav-btn streamdeck-episode-nav-btn--ghost">
+                    ← {{#str}}backtocourse, format_streamdeck{{/str}}
+                </a>
+            </div>
+
+            <header class="streamdeck-episode-header">
+                <div class="streamdeck-episode-tagline">
+                    {{#episodenumber}}
+                    <span class="streamdeck-episode-pill">
+                        {{#str}}episode, format_streamdeck{{/str}} {{episodenumber}}
+                    </span>
+                    {{/episodenumber}} {{#currentsectionname}}
+                    <span class="streamdeck-episode-sectionname"> {{currentsectionname}} </span>
+                    {{/currentsectionname}}
+                </div>
+            </header>
+
+            {{#episode}} {{#h5phtml}} {{{h5phtml}}} {{/h5phtml}} 
+            
+            {{^h5phtml}}
+           <div class="streamdeck-episode-video">
+                <div class="streamdeck-episode-video-inner">
+                    <iframe src="{{embedurl}}" 
+                            class="streamdeck-episode-video-iframe" 
+                            frameborder="0" 
+                            allowfullscreen></iframe>
+                </div>
+            </div>
+            {{/h5phtml}} 
+            
+            {{/episode}} {{! Intro / description }} {{#episode.introhtml}}
+            <div class="streamdeck-episode-intro">{{{episode.introhtml}}}</div>
+            {{/episode.introhtml}}
+
+            <div class="streamdeck-episode-actions">
+                <a href="{{episode.url}}" class="streamdeck-episode-primary">
+                    <span class="streamdeck-episode-primary-icon">▶</span>
+                    <span class="streamdeck-episode-primary-label">
+                        {{#episode.iscomplete}} {{#str}}replay, format_streamdeck{{/str}} {{/episode.iscomplete}}
+                        {{^episode.iscomplete}} {{#str}}play, format_streamdeck{{/str}} {{/episode.iscomplete}}
+                    </span>
+                </a>
+
+                {{#episode.completionenabled}}
+                <span class="streamdeck-episode-status {{#episode.iscomplete}}is-complete{{/episode.iscomplete}}">
+                    {{#episode.iscomplete}} {{#str}}completed, format_streamdeck{{/str}} {{/episode.iscomplete}}
+                    {{^episode.iscomplete}} {{#str}}todo, format_streamdeck{{/str}} {{/episode.iscomplete}}
+                </span>
+                {{/episode.completionenabled}}
+            </div>
+
+            {{! Navigation footer: back + previous + conditional next }}
+            <div class="streamdeck-episode-nav">
+                <div class="streamdeck-episode-nav-spacer"></div>
+
+                {{#hasnextsection}} {{#canshownextbutton}}
+                <a href="{{nextsectionurl}}" class="streamdeck-episode-nav-btn streamdeck-episode-nav-btn--primary">
+                    {{#str}}nextepisode, format_streamdeck{{/str}} →
+                </a>
+                {{/canshownextbutton}} {{/hasnextsection}}
+            </div>
+        </article>
+        {{/hasepisode}}
+    </div>
+</section>
+{{/issectionview}}
+
+    {{! SECTION TILES – only on landing }}
+    {{#showsectiontiles}}
+      {{#sections.0}}
+        <section class="streamdeck-sections-row">
+          <!--<h3 class="streamdeck-row-title">{{#str}}sections, format_streamdeck{{/str}}</h3>-->
+          <div class="streamdeck-card-row">
+            {{#sections}}
+              {{! existing tile/card markup here }}
+            {{/sections}}
+          </div>
+        </section>
+      {{/sections.0}}
+    {{/showsectiontiles}}
+
+    <!-- MAIN CONTENT -->
+    {{! Hidden syllabus container used by JS for the More info modal }}
+    {{#showallmodulesheader}}
+        <section class="streamdeck-main-strip">
+          <div class="container-fluid py-5 px-4">
+            <h2 class="h3 fw-bold mb-4 text-white">{{#str}}allmodules, format_streamdeck{{/str}}</h2>
+            <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 row-cols-xl-6 g-4">
+              {{#sections}}
+              {{> format_streamdeck/card}}
+              {{/sections}}
+            </div>
+          </div>
+        </section>
+    {{/showallmodulesheader}}
+    
+    
+    <div id="streamdeck-syllabus"
+         class="d-none"
+         data-title="{{syllabustitle}}">
+
+        <div class="streamdeck-syllabus-modal">
+            <div class="streamdeck-syllabus-header">
+                <div class="streamdeck-syllabus-title">
+                    {{syllabustitle}}
+                </div>
+                {{#editsyllabusurl}}
+                    <a href="{{.}}" class="streamdeck-syllabus-editbtn">
+                        {{#str}}editsyllabus, format_streamdeck{{/str}}
+                    </a>
+                {{/editsyllabusurl}}
+            </div>
+
+            <div class="streamdeck-syllabus-pills" role="tablist">
+                <button class="streamdeck-pill is-active" data-target="#sd-pill-intro" type="button">
+                    {{#str}}syllabusintro, format_streamdeck{{/str}}
+                </button>
+                <button class="streamdeck-pill" data-target="#sd-pill-outcomes" type="button">
+                    {{#str}}syllabusoutcomes, format_streamdeck{{/str}}
+                </button>
+                <button class="streamdeck-pill" data-target="#sd-pill-assessments" type="button">
+                    {{#str}}syllabusassessments, format_streamdeck{{/str}}
+                </button>
+                <button class="streamdeck-pill" data-target="#sd-pill-materials" type="button">
+                    {{#str}}syllabusmaterials, format_streamdeck{{/str}}
+                </button>
+
+                {{#hasschedule}}
+                    <button class="streamdeck-pill" data-target="#sd-pill-schedule" type="button">
+                        {{#str}}syllabusschedule, format_streamdeck{{/str}}
+                    </button>
+                {{/hasschedule}}
+            </div>
+
+            <div class="streamdeck-syllabus-panels">
+                <div id="sd-pill-intro" class="streamdeck-syllabus-panel is-active">
+                    {{{syllabus.introhtml}}}
+                    {{^syllabus.introhtml}}
+                        {{{summary}}}
+                    {{/syllabus.introhtml}}
+                </div>
+                <div id="sd-pill-outcomes" class="streamdeck-syllabus-panel">
+                    {{{syllabus.outcomeshtml}}}
+                </div>
+                <div id="sd-pill-assessments" class="streamdeck-syllabus-panel">
+                    {{{syllabus.assessmentshtml}}}
+                </div>
+                <div id="sd-pill-materials" class="streamdeck-syllabus-panel">
+                    {{{syllabus.materialshtml}}}
+                </div>
+                {{#hasschedule}}
+                    <div id="sd-pill-schedule" class="streamdeck-syllabus-panel">
+                        {{{schedulehtml}}}
+                    </div>
+                {{/hasschedule}}
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="streamdeck-forum-modal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content streamdeck-syllabus-modal streamdeck-forum-modal">
+          <div class="modal-header">
+            <h5 class="modal-title" id="streamdeck-forum-modal-title"></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"
+        aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="streamdeck-forum-modal-body">
+          </div>
+        </div>
+      </div>
+    </div>
+</div>

@@ -1,0 +1,2751 @@
+/* ────────────────────── GOOGLE FONT: LOBSTER ────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
+
+/* ──────────────────────────────────────────────────────────────
+   GLOBAL LAYOUT – FULL BLEED, ZERO WHITE BORDERS, CINEMATIC HERO
+   ────────────────────────────────────────────────────────────── */
+
+body.format-streamdeck {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden;
+}
+
+#page-course-view-streamdeck.format-streamdeck:not(.editing) #page.drawers,
+#page-course-view-streamdeck.format-streamdeck:not(.editing) #page.drawers .main-inner,
+#page-course-view-streamdeck.format-streamdeck:not(.editing) #topofscroll,
+#page-course-view-streamdeck.format-streamdeck:not(.editing) #page-header,
+#page-course-view-streamdeck.format-streamdeck:not(.editing) #page-content,
+#page-course-view-streamdeck.format-streamdeck:not(.editing) #region-main-box,
+#page-course-view-streamdeck.format-streamdeck:not(.editing) #region-main {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+/* Hide course hint in view mode */
+.format-streamdeck:not(.editing) .course-hint-hidden, #page-mod-lti-view.format-streamdeck:not(.editing) .navbar, #page-mod-lti-view.format-streamdeck:not(.editing) #page-header, #page-mod-lti-view.format-streamdeck:not(.editing) .content-actions-lti, #page-mod-lti-view.format-streamdeck:not(.editing) .activity-header, #page-mod-lti-view.format-streamdeck:not(.editing) .activity-navigation, #page-mod-lti-view.format-streamdeck:not(.editing) #footnote, #page-mod-lti-view.format-streamdeck:not(.editing) #page-footer {
+    display: none !important;
+}
+
+/* Global page header adjustments */
+.format-streamdeck #page-header.header-maxwidth {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    padding-left: 0 !important;
+    background: transparent !important;
+}
+
+/* Ensure course index & drawer toggles are visible in editing mode */
+.format-streamdeck.editing .drawer-toggles,
+.format-streamdeck.editing [data-region="course-index"],
+.format-streamdeck.editing .drawer-left,
+.format-streamdeck.editing .drawer {
+    display: block !important;
+    visibility: visible !important;
+}
+
+.format-streamdeck.editing #page-header.header-maxwidth {
+    padding-top: 60px !important;
+    padding-bottom: 0 !important;
+    padding-left: 10px !important;
+    background: transparent !important;
+}
+
+/* Region main in editing (course view) */
+.format-streamdeck.editing #region-main, #page-course-format-streamdeck-syllabus, #page-course-format-streamdeck-syllabus h3 {
+    padding: 20px !important;
+    border: none !important;
+    background-color: #fff !important;
+    color: #000 !important;
+}
+
+/* Main container when using streamdeck format */
+.format-streamdeck {
+    min-height: 78vh;
+    background: #000;
+    color: #fff;
+}
+
+/* Main role content padding */
+body.format-streamdeck div[role="main"] {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+body.format-streamdeck.editing div[role="main"] {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+}
+
+/* Optional – notifications span padding */
+.format-streamdeck span.notifications {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* Hide default Moodle chrome in non‑editing mode */
+.format-streamdeck:not(.editing) #page-navbar,
+.format-streamdeck:not(.editing) .drawer-toggles,
+.format-streamdeck:not(.editing) .secondary-navigation,
+.format-streamdeck:not(.editing) [data-region="blocks-column"] {
+    display: none !important;
+}
+
+/* In editing mode, hide custom Streamdeck hero/episode chrome, but keep page/drawers alive */
+body.editing .streamdeck-main-strip,
+body.editing .hero,
+body.editing .streamdeck-episode-page {
+    display: none !important;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   EDITING MODE – TEXT & BACKGROUND OVERRIDES
+   ────────────────────────────────────────────────────────────── */
+
+.format-streamdeck.editing {
+    background-color: #fff !important;
+    color: #222 !important;
+}
+
+/* Headings in editing mode */
+.format-streamdeck.editing h1,
+.format-streamdeck.editing h2,
+.format-streamdeck.editing h3,
+.format-streamdeck.editing h4,
+.format-streamdeck.editing h5,
+.format-streamdeck.editing h6,
+/* Other important text in editing mode */
+.format-streamdeck.editing .streamdeck-episode-title,
+.format-streamdeck.editing .streamdeck-related-heading,
+.format-streamdeck.editing .streamdeck-episode-pill,
+.format-streamdeck.editing .streamdeck-episode-sectionname,
+.format-streamdeck.editing p,
+.format-streamdeck.editing span,
+.format-streamdeck.editing a,
+.format-streamdeck.editing li:not(.nav-item),
+.format-streamdeck.editing label,
+.format-streamdeck.editing .streamdeck-episode-intro {
+    color: #000 !important;
+}
+
+.format-streamdeck.editing .btn-primary, .format-streamdeck.editing .bg-dark a {
+    color: #fff !important;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   HERO AREA
+   ────────────────────────────────────────────────────────────── */
+
+/* Base hero container */
+.format-streamdeck .hero {
+    position: relative;
+    min-height: 100vh;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+    background: #000;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Hero overlay for legibility */
+.format-streamdeck .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.75) 0%,
+        rgba(0, 0, 0, 0.4) 50%,
+        rgba(0, 0, 0, 0.85) 100%
+    );
+    z-index: 1;
+}
+
+/* Fallback hero when no image */
+.format-streamdeck .hero:not(.has-image) {
+    background: linear-gradient(135deg, #0f0f0f 0%, #000 100%);
+}
+
+/* Page header visible top‑left over hero */
+.format-streamdeck .hero #page-header {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 20;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+}
+
+/* Hero content spacing */
+.format-streamdeck .hero-content {
+    padding-top: 8vh;
+}
+
+/* Only brighten and shadow the description – clean and minimal */
+.p-5.rounded-3 .p1 {
+    color: #ffffff !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95) !important;
+    font-weight: 400;
+    margin-bottom: 2rem;
+}
+
+/* Hero small icon buttons */
+.streamdeck-hero-icon-btn {
+    border: none;
+    background: transparent;
+    color: #ffffff; /* or your hero text colour */
+    margin-left: 0.5rem;
+    padding: 0.4rem;
+    cursor: pointer;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.streamdeck-hero-icon-btn i.fa {
+    pointer-events: none;
+}
+
+/* Unread badge for announcements */
+.streamdeck-hero-icon-badge {
+    position: absolute;
+    top: 0.1rem;
+    right: 0.1rem;
+    min-width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 999px;
+    background: #e50914; /* Netflix red style */
+    color: #fff;
+    font-size: 0.7rem;
+    line-height: 1.1rem;
+    text-align: center;
+    padding: 0 0.2rem;
+}
+
+/* Wiggle animation when there are unread announcements */
+.streamdeck-hero-announcements-btn.has-unread {
+    animation: streamdeck-bullhorn-wiggle 1.2s ease-in-out infinite;
+    animation-delay: 0.5s;
+}
+
+/* Hero icon modal iframe wrapper */
+.streamdeck-hero-iframe-wrapper {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    overflow: hidden;
+}
+
+.streamdeck-hero-iframe-wrapper iframe.streamdeck-hero-iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Completion badge in hero */
+body.format-streamdeck .completion-badge {
+    margin-left: auto;
+}
+
+/* Badge circle */
+body.format-streamdeck .badge-circle {
+    width: 75px;
+    height: 75px;
+    border-radius: 50%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+}
+
+body.format-streamdeck .badge-circle::before {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    background: #141414;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+body.format-streamdeck .badge-text {
+    position: relative;
+    z-index: 2;
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #fff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* ────
+   GRADES MODAL – PLAYLIST STREAMING LOOK
+   ──── */
+
+body.streamdeck-grades-embedded #page.drawers, body.streamdeck-announcements-embedded #page.drawers {
+    margin-top: 0px !important;
+}
+/* Streamdeck Grades Modal – full UI reskin */
+body.streamdeck-grades-embedded {
+    background: #111 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    color: #e5e5e5 !important;
+    font-family: var(--font-sans, "Inter", sans-serif);
+}
+
+body.streamdeck-grades-embedded p, body.streamdeck-grades-embedded h1, body.streamdeck-grades-embedded h2, body.streamdeck-grades-embedded h3, body.streamdeck-grades-embedded h4, body.streamdeck-grades-embedded h5, body.streamdeck-grades-embedded .h1, body.streamdeck-grades-embedded .h2, body.streamdeck-grades-embedded .h3, body.streamdeck-grades-embedded .h4, body.streamdeck-grades-embedded .h5 {
+    color: #919191;
+}
+
+/* Remove Moodle page chrome */
+body.streamdeck-grades-embedded #page-header,
+body.streamdeck-grades-embedded #page-footer,
+body.streamdeck-grades-embedded #nav-drawer,
+body.streamdeck-grades-embedded .navbar,
+body.streamdeck-grades-embedded .secondary-navigation,
+body.streamdeck-grades-embedded header,
+body.streamdeck-grades-embedded footer {
+    display: none !important;
+}
+
+/* Center content, remove Moodle margins */
+body.streamdeck-grades-embedded #region-main {
+    margin: 0 !important;
+    padding: 1rem !important;
+    max-width: 820px;
+    width: 100%;
+}
+
+/* Wrap the table like a Streamdeck card */
+body.streamdeck-grades-embedded .user-grade {
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    padding: 1rem 1rem 2rem;
+    box-shadow: 0 4px 30px rgba(0,0,0,0.4);
+    backdrop-filter: blur(6px);
+}
+
+/* Table styles match our streaming UI card look */
+body.streamdeck-grades-embedded table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #e5e5e5;
+}
+
+/* Dark rows with hover highlight */
+body.streamdeck-grades-embedded table tr {
+    background: rgba(255,255,255,0.02);
+    transition: background 0.15s ease;
+}
+
+body.streamdeck-grades-embedded table tr:hover {
+    background: rgba(255,255,255,0.06);
+}
+
+/* Table borders */
+body.streamdeck-grades-embedded table th,
+body.streamdeck-grades-embedded table td {
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding: 0.8rem 0.5rem;
+}
+
+/* Headers more visible */
+body.streamdeck-grades-embedded table th {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    color: #bbb;
+}
+
+body.streamdeck-grades-embedded .generaltable tbody td {
+    color: #919191;
+}
+
+/* Activity title links – Netflix blue */
+body.streamdeck-grades-embedded a {
+    color: #63a4ff;
+    text-decoration: none;
+}
+
+body.streamdeck-grades-embedded a:hover {
+    color: #8bc3ff;
+    text-decoration: underline;
+}
+
+/* The big top header (Test Student) */
+body.streamdeck-grades-embedded .page-context-header {
+    background: linear-gradient(90deg, rgba(255,255,255,0.05), transparent);
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+body.streamdeck-grades-embedded .page-context-header .page-header-headings h1 {
+    color: #e5e5e5 !important;
+    font-size: 1.4rem;
+    font-weight: 500;
+}
+
+/* ──── HERO INSTRUCTOR AVATAR / METADATA ──── */
+
+.format-streamdeck .hero-instructor {
+    min-width: 0;
+}
+
+.format-streamdeck .hero-instructor-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.format-streamdeck .hero-instructor-link:hover .hero-instructor-name {
+    text-decoration: underline;
+}
+
+.format-streamdeck .hero-instructor-avatar-wrapper,
+.format-streamdeck .hero-instructor-chip-avatar-inline {
+    overflow: hidden;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.format-streamdeck .hero-instructor-avatar-wrapper {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.format-streamdeck .hero-instructor-avatar-wrapper img,
+.format-streamdeck .hero-instructor-avatar,
+.format-streamdeck .hero-instructor-chip-avatar-inline img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.format-streamdeck .hero-instructor-meta {
+    line-height: 1.2;
+}
+
+.format-streamdeck .hero-instructor-name {
+    font-size: 0.95em;
+}
+
+.format-streamdeck .hero-instructor-contact-btn {
+    border-radius: 999px;
+    padding-inline: 1.1rem;
+    padding-block: 0.25rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-color: rgba(255, 255, 255, 0.6);
+    color: #fff;
+    background: rgba(20, 20, 20, 0.6);
+}
+
+.format-streamdeck .hero-instructor-contact-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: #fff;
+}
+
+.format-streamdeck .hero-instructor-link:hover .hero-instructor-avatar-wrapper {
+    transform: scale(1.04);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.8);
+    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+/* Multi‑instructor inline chips */
+.format-streamdeck .hero-instructor-chip-inline {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.format-streamdeck .hero-instructor-chip-avatar-inline {
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.format-streamdeck .hero-instructor-chip-inline:hover .hero-instructor-chip-avatar-inline,
+.format-streamdeck .hero-instructor-chip-inline:focus-visible .hero-instructor-chip-avatar-inline {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.8);
+    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+}
+
+/* Amazon‑style cast popout */
+.format-streamdeck .hero-instructor-popout {
+    position: absolute;
+    left: 50%;
+    top: 120%;
+    transform: translateX(-50%);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+    z-index: 20;
+}
+
+.format-streamdeck .hero-instructor-popout-inner {
+    position: relative;
+    min-width: 220px;
+    max-width: 260px;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    background: rgba(10, 10, 10, 0.95);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* Popout arrow */
+.format-streamdeck .hero-instructor-popout-inner::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 0 6px 6px 6px;
+    border-style: solid;
+    border-color: transparent transparent rgba(10, 10, 10, 0.95) transparent;
+}
+
+.format-streamdeck .hero-instructor-popout-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.format-streamdeck .hero-instructor-popout-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.format-streamdeck .hero-instructor-popout-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+}
+
+.format-streamdeck .hero-instructor-popout-name {
+    font-weight: 600;
+    color: #fff;
+    font-size: 0.9rem;
+}
+
+.format-streamdeck .hero-instructor-popout-role {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.format-streamdeck .hero-instructor-popout-cta {
+    margin-top: 0.15rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #e5a50a;
+}
+
+/* Show popout on hover/focus */
+.format-streamdeck .hero-instructor-chip-inline:hover .hero-instructor-popout,
+.format-streamdeck .hero-instructor-chip-inline:focus-visible .hero-instructor-popout {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   MAIN STRIP + SECTION CARDS
+   ────────────────────────────────────────────────────────────── */
+
+.streamdeck-main-strip {
+    position: relative;
+    margin-top: -40px;
+    padding: 56px 0 64px;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.85) 0%,
+        rgba(8, 8, 8, 0.98) 40%,
+        #050505 100%
+    );
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.6);
+    z-index: 3;
+}
+
+/* Prevent overlap issues on very small screens */
+@media (max-width: 767.98px) {
+    .streamdeck-main-strip {
+        margin-top: -24px;
+        padding-top: 40px;
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+    }
+}
+
+/* Big cinematic “Sections” heading */
+.streamdeck-row-title-main {
+    margin: 0 0 32px;
+    color: #ffffff;
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+/* Tighten vertical spacing between heading and cards row */
+.streamdeck-section-row {
+    margin-top: 0;
+}
+
+.streamdeck-sections-row {
+    margin-top: 20px;
+    margin-left: 20px;
+}
+
+.streamdeck-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+}
+
+/* Card shell */
+.streamdeck-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: #151515;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    height: 100%;
+}
+
+.streamdeck-card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
+    background: #181818;
+}
+
+/* Image area */
+.streamdeck-card__image-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%;
+    background: #262626;
+    overflow: hidden;
+}
+
+.streamdeck-card__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.25s ease;
+}
+
+.streamdeck-card:hover .streamdeck-card__image {
+    transform: scale(1.06);
+}
+
+/* Placeholder when no image set */
+.streamdeck-card__image-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at top left, #3a3a3a, #1e1e1e);
+    color: #8f8f8f;
+}
+
+.streamdeck-card__placeholder-icon {
+    font-size: 2.4rem;
+    line-height: 1;
+}
+
+/* Completion badge */
+.streamdeck-card__badge-complete {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    border-radius: 999px;
+    background: #27c24a;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    z-index: 3;
+}
+
+.streamdeck-card__badge-icon {
+    transform: translateY(-1px);
+}
+
+/* Progress bar */
+.streamdeck-card__progress {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.18);
+    overflow: hidden;
+}
+
+.streamdeck-card__progress-fill {
+    height: 100%;
+    background: #e50914;
+    transition: width 0.25s ease;
+}
+
+/* Body */
+.streamdeck-card__body {
+    padding: 12px 14px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.streamdeck-card__title {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.3;
+    font-weight: 600;
+    color: #ffffff;
+    max-height: 2.6em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* Meta row (progress chip, locked chip, etc.) */
+.streamdeck-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.streamdeck-card__meta-chip,
+.streamdeck-related-episode-status {
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.2em 0.6em;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    opacity: 1;
+}
+
+.streamdeck-card__meta-chip {
+    font-size: 0.74rem;
+    line-height: 1.4;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #e0e0e0;
+}
+
+.streamdeck-card__meta-chip--locked {
+    background: rgba(244, 67, 54, 0.15);
+    color: #ff867c;
+}
+
+/* Completed / locked states */
+.streamdeck-card--done .streamdeck-card__progress-fill {
+    background: #27c24a;
+}
+
+.streamdeck-card--done .streamdeck-card__meta-chip {
+    background: rgba(39, 194, 74, 0.18);
+    color: #b9f6ca;
+}
+
+.streamdeck-card--locked .streamdeck-card__image {
+    filter: grayscale(0.8) brightness(0.7);
+}
+
+/* Card responsive tweaks */
+@media (max-width: 767.98px) {
+    .streamdeck-card {
+        border-radius: 10px;
+    }
+
+    .streamdeck-card__title {
+        font-size: 0.9rem;
+    }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SYLLABUS MODAL – STREAMING LOOK
+   ────────────────────────────────────────────────────────────── */
+
+/* Transparent Bootstrap modal shell around syllabus */
+.modal.show:has(#streamdeck-syllabus) .modal-header,
+.modal.show:has(#streamdeck-syllabus) .modal-body {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding-top: 48px;
+}
+
+/* Hide default modal header */
+.modal.show:has(#streamdeck-syllabus) .modal-header {
+    display: none;
+}
+
+/* Soften backdrop */
+.modal-backdrop.show {
+    background-color: rgba(0, 0, 0, 0.75);
+}
+
+/* Ensure syllabus container is visible */
+.modal.show #streamdeck-syllabus {
+    display: block !important;
+}
+
+/* Floating close button */
+.modal.show:has(#streamdeck-syllabus) .btn-close {
+    position: absolute;
+    top: calc(50% - 280px);
+    right: calc(50% - 520px);
+    z-index: 1061;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    background-color: rgba(0, 0, 0, 0.85);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.85);
+    opacity: 1;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Replace default glyph */
+.modal.show:has(#streamdeck-syllabus) .btn-close::before {
+    content: '×';
+    font-size: 22px;
+    line-height: 1;
+    color: #f5f5f7;
+    font-weight: 300;
+}
+
+.modal.show:has(#streamdeck-syllabus) .btn-close svg,
+.modal.show:has(#streamdeck-syllabus) .btn-close span,
+.modal.show:has(#streamdeck-syllabus) .btn-close img {
+    display: none;
+}
+
+.modal.show:has(#streamdeck-syllabus) .btn-close:hover,
+.modal.show:has(#streamdeck-syllabus) .btn-close:focus-visible {
+    background-color: rgba(0, 0, 0, 0.98);
+    transform: scale(1.05);
+    transition: all 150ms ease;
+}
+
+/* Floating Streamdeck card */
+.streamdeck-syllabus-modal {
+    position: relative;
+    background: #05060a;
+    color: #f5f5f7;
+    padding: 28px 32px 32px;
+    border-radius: 24px;
+    box-shadow:
+        0 28px 80px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(255, 255, 255, 0.06);
+    max-width: 960px;
+    margin: 0 auto 24px;
+    font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Text",
+        "Segoe UI",
+        sans-serif;
+}
+
+/* Header: title + Edit button */
+.streamdeck-syllabus-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.streamdeck-syllabus-title {
+    font-size: 1.7rem;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+}
+
+/* Edit syllabus button */
+.streamdeck-syllabus-editbtn {
+    border-radius: 999px;
+    padding: 7px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.04);
+    color: #f5f5f7;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 550;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 150ms ease, border-color 150ms ease, transform 120ms ease;
+    text-decoration: none;
+}
+
+.streamdeck-syllabus-editbtn:hover,
+.streamdeck-syllabus-editbtn:focus-visible {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: #ffffff;
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+/* Pills / segmented control */
+.streamdeck-syllabus-pills {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 4px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.02);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    margin-bottom: 16px;
+}
+
+.streamdeck-pill {
+    position: relative;
+    border: none;
+    border-radius: 999px;
+    padding: 7px 16px 8px;
+    font-size: 0.87rem;
+    font-weight: 500;
+    color: rgba(245, 245, 247, 0.7);
+    background: transparent;
+    cursor: pointer;
+    transition:
+        color 140ms ease,
+        background 140ms ease,
+        transform 110ms ease,
+        box-shadow 140ms ease;
+    white-space: nowrap;
+}
+
+.streamdeck-pill:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.streamdeck-pill.is-active {
+    color: #05060a;
+    background: linear-gradient(135deg, #f5c85a, #f97b4f);
+    font-weight: 600;
+    box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.25),
+        0 12px 32px rgba(0, 0, 0, 0.55);
+    transform: translateY(-1px);
+}
+
+/* Panels + typography */
+.streamdeck-syllabus-panels {
+    margin-top: 8px;
+    max-height: 55vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+}
+
+.streamdeck-syllabus-panels::-webkit-scrollbar {
+    width: 6px;
+}
+
+.streamdeck-syllabus-panels::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.streamdeck-syllabus-panels::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+}
+
+/* Individual panels */
+.streamdeck-syllabus-panel {
+    display: none;
+    animation: streamdeck-fade-in 160ms ease-out;
+    line-height: 1.65;
+    font-size: 0.96rem;
+    color: rgba(245, 245, 247, 0.88);
+}
+
+.streamdeck-syllabus-panel.is-active {
+    display: block;
+}
+
+/* Typography inside panels */
+.streamdeck-syllabus-panel p {
+    margin: 0 0 1em;
+}
+
+.streamdeck-syllabus-panel h2,
+.streamdeck-syllabus-panel h3,
+.streamdeck-syllabus-panel h4 {
+    margin-top: 1.5em;
+    margin-bottom: 0.6em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+}
+
+.streamdeck-syllabus-panel ul,
+.streamdeck-syllabus-panel ol {
+    padding-left: 1.5rem;
+    margin: 0.4em 0 1em;
+}
+
+/* Schedule panel – playlist styling */
+#sd-pill-schedule .courseschedule-playlist {
+    margin-top: 12px;
+    border-radius: 16px;
+    background:
+        radial-gradient(circle at top left, rgba(249, 123, 79, 0.14), transparent 55%),
+        rgba(255, 255, 255, 0.02);
+    padding: 16px 16px 14px;
+}
+
+#sd-pill-schedule .courseschedule-playlist .schedule-item {
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    background: rgba(0, 0, 0, 0.32);
+    transition: background 120ms ease;
+}
+
+#sd-pill-schedule .courseschedule-playlist .schedule-item:hover {
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.courseschedule-wrapper .generaltable.courseschedule-table {
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SYLLABUS – LIGHT MODE VARIANT
+   ────────────────────────────────────────────────────────────── */
+
+.streamdeck-syllabus-modal.streamdeck-syllabus-light {
+    background: #f7f7f9;
+    color: #111827;
+}
+
+.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-syllabus-title {
+    color: #111827;
+}
+
+.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-syllabus-editbtn {
+    border-color: rgba(15, 23, 42, 0.12);
+    background: rgba(15, 23, 42, 0.02);
+    color: #111827;
+}
+
+.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-syllabus-editbtn:hover,
+.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-syllabus-editbtn:focus-visible {
+    background: rgba(15, 23, 42, 0.06);
+    color: #020617;
+}
+
+.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-syllabus-pills {
+    background: rgba(15, 23, 42, 0.03);
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06);
+}
+
+.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-pill {
+    color: rgba(15, 23, 42, 0.7);
+}
+
+.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-pill:hover {
+    background: rgba(15, 23, 42, 0.08);
+    color: #111827;
+}
+
+.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-pill.is-active {
+    color: #111827;
+    background: linear-gradient(135deg, #facc15, #f97316);
+    box-shadow:
+        0 0 0 1px rgba(15, 23, 42, 0.12),
+        0 14px 30px rgba(15, 23, 42, 0.35);
+}
+
+.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-syllabus-panel {
+    color: #111827;
+}
+
+.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-syllabus-panel h2,
+.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-syllabus-panel h3,
+.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-syllabus-panel h4 {
+    color: #020617;
+}
+
+.streamdeck-syllabus-modal.streamdeck-syllabus-light #sd-pill-schedule .courseschedule-playlist {
+    background:
+        radial-gradient(circle at top left, rgba(249, 115, 22, 0.16), transparent 55%),
+        rgba(255, 255, 255, 0.8);
+}
+
+.streamdeck-syllabus-modal.streamdeck-syllabus-light #sd-pill-schedule .schedule-item {
+    background: rgba(15, 23, 42, 0.04);
+}
+
+.streamdeck-syllabus-modal.streamdeck-syllabus-light #sd-pill-schedule .schedule-item:hover {
+    background: rgba(15, 23, 42, 0.08);
+}
+
+/* Some Moodle‑specific modal overrides */
+#page-course-view-streamdeck > div:nth-child(5) > div.modal.moodle-has-zindex.show > div > div, #page-mod-assign-view.format-streamdeck:not(.editing) #page.drawers .main-inner, #page-mod-bigbluebuttonbn-view.format-streamdeck:not(.editing) #page.drawers .main-inner, #page-mod-forum-view.format-streamdeck:not(.editing) #page.drawers .main-inner, #page-mod-forum-discuss.format-streamdeck:not(.editing) #page.drawers .main-inner, #page-mod-scorm-view.format-streamdeck:not(.editing) #page.drawers .main-inner, #page-mod-scorm-player.format-streamdeck:not(.editing) #page.drawers .main-inner, #page-mod-forum-discuss.format-streamdeck:not(.editing) .bg-light {
+    background-color: #000 !important;
+}
+
+#page-course-view-streamdeck > div:nth-child(5) > div.modal.moodle-has-zindex.show > div > div > div.modal-header > button {
+    background-color: #fff;
+    color: #000;
+    border-radius: 10px;
+}
+
+#page-course-view-streamdeck .modal-title {
+    display: none;
+}
+
+#sd-pill-schedule > div {
+    border-radius: 10px;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   EPISODE VIEW / SECTION PAGE
+   ────────────────────────────────────────────────────────────── */
+/* H5P / rich embed wrapper – responsive, no extra vertical gap */
+.streamdeck-h5p-embed-wrapper,
+.streamdeck-h5p-iframe-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    /* Use padding-bottom for aspect ratio to account for player controls */
+    padding-bottom: calc(9 / 16 * 100% + 40px); /* 16:9 aspect ratio + 40px for controls */
+    height: 0; /* Set height to 0 when using padding-bottom for aspect ratio */
+    margin-top: 1.2rem;
+    margin-bottom: 1rem;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+}
+
+/* Make the iframe fill the wrapper instead of having its own fixed height */
+.streamdeck-h5p-embed-wrapper iframe,
+.streamdeck-h5p-iframe-wrapper iframe,
+.streamdeck-h5p-embed-iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+#page-mod-scorm-view.format-streamdeck.editing #region-main {
+    background-color: #fff;
+}
+
+.streamdeck-episode-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+.streamdeck-episode-nav-spacer {
+    flex: 1 1 auto;
+}
+
+.streamdeck-episode-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.6rem 1.4rem;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease,
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+    white-space: nowrap;
+}
+
+.streamdeck-episode-nav-btn--ghost {
+    background: transparent;
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.streamdeck-episode-nav-btn--ghost:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* Ghost button variant – overridden later for alt style */
+.streamdeck-episode-nav-btn--ghost {
+    border: 1px solid #fff;
+    color: #fff;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 600;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.streamdeck-episode-nav-btn--ghost:hover {
+    background-color: #fff;
+    color: #000;
+    text-decoration: none;
+}
+
+/* Primary nav button */
+.streamdeck-episode-nav-btn--primary {
+    background: #e50914;
+    color: #ffffff;
+    border-color: #e50914;
+    box-shadow: 0 8px 18px rgba(229, 9, 20, 0.45);
+}
+
+.streamdeck-episode-nav-btn--primary:hover {
+    background: #f6121d;
+    border-color: #f6121d;
+}
+
+/* Episode container/card */
+.streamdeck-episode {
+    max-width: 960px;
+    margin: 0 auto 2rem;
+    padding: 1.5rem;
+    background: var(--card-bg, #111);
+    border-radius: 12px;
+}
+
+.streamdeck-episode-page {
+    max-width: 1600px;
+    margin: 1rem auto 3rem;
+    padding: 0 1.5rem;
+}
+
+/* Bigger episode card (overrides) */
+.streamdeck-episode-card {
+    margin-bottom: 1.5rem;
+    padding: 1.5rem 2rem 1rem;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #111 0%, #050505 40%, #111 100%);
+    box-shadow: 0 22px 55px rgba(0, 0, 0, 0.75);
+}
+
+.streamdeck-episode-header {
+    margin-bottom: 1rem;
+}
+
+.streamdeck-episode-header-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+/* Episode title */
+.streamdeck-episode-title {
+    margin: 0 0 1rem;
+    font-size: 2.2rem;
+    font-weight: 650;
+    color: #fff;
+}
+
+.streamdeck-episode-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+/* Tagline + pills */
+.streamdeck-episode-tagline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    margin-bottom: 0.35rem;
+}
+
+.streamdeck-episode-pill,
+.streamdeck-episode-sectionname {
+    color: #fff;
+}
+
+.streamdeck-episode-pill {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    padding: 0.15rem 0.7rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    opacity: 0.9;
+}
+
+.streamdeck-episode-sectionname {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+/* Intro text */
+.streamdeck-episode-intro {
+    margin-top: 1rem;
+    font-size: 1rem;
+    line-height: 1.7;
+    opacity: 0.9;
+}
+
+/* Actions row */
+.streamdeck-episode-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+    margin-top: 1.3rem;
+}
+
+.streamdeck-episode-actions > a:hover {
+    text-decoration: none;
+}
+
+.streamdeck-episode-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.9rem;
+    border-radius: 999px;
+    background: #0d553f;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.streamdeck-episode-primary:hover {
+    background: #bc8d16;
+}
+
+.streamdeck-episode-primary-icon {
+    font-size: 1rem;
+}
+
+/* Episode status */
+.streamdeck-episode-status {
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.2em 0.6em;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    opacity: 1;
+}
+
+.streamdeck-episode-status:not(.is-complete),
+.streamdeck-related-episode-status:not(.is-complete) {
+    background-color: #ae132a;
+    color: #fff;
+}
+
+.streamdeck-episode-status.is-complete,
+.streamdeck-related-episode-status.is-complete {
+    background-color: #46d369;
+    color: #fff;
+}
+
+/* Episode video */
+.streamdeck-episode-video {
+    margin-top: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.streamdeck-episode-video-inner {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    /* 16:9 aspect ratio for YouTube and other video embeds */
+    aspect-ratio: 16 / 9.5;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #000;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+}
+
+.streamdeck-episode-video-iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.streamdeck-episode-video-iframe .activity-navigation, .streamdeck-episode-video-iframe #footnote {
+    display: none !important;
+}
+
+/* Related block under episode */
+.streamdeck-related-block {
+    margin-top: 0.5rem;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    max-width: 22vw;
+    min-width: 360px;
+}
+
+.streamdeck-related-heading {
+    margin: 0 0 0.6rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #fff;
+}
+
+.streamdeck-related-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.streamdeck-related-item {
+    margin-bottom: 0.75rem;
+}
+
+.streamdeck-related-link,
+.streamdeck-forum-preview-link {
+    color: #aaddff;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.streamdeck-related-link:hover,
+.streamdeck-related-link:focus,
+.streamdeck-forum-preview-link:hover {
+    text-decoration: underline;
+}
+
+/* Related episodes list */
+.streamdeck-related-episodes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.related-activities .streamdeck-related-episodes {
+    background: #222;
+    border-radius: 0.5rem;
+    padding: 1px 0.5rem;
+    margin: 0;
+}
+
+.streamdeck-related-episode + .streamdeck-related-episode {
+    margin-top: 0.4rem;
+}
+
+.streamdeck-related-episode-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.6rem 1rem;
+    border-radius: 12px;
+    text-decoration: none !important;
+    color: inherit;
+    transition: background 0.18s ease, transform 0.1s ease;
+}
+
+.streamdeck-related-episode-link:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateY(-1px);
+}
+
+.streamdeck-related-episode-icon {
+    width: 35px;
+    height: 35px;
+    opacity: 0.9;
+    filter: contrast(0.5) brightness(2.3);
+}
+
+.streamdeck-related-episode-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.streamdeck-related-episode-title {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #fff;
+}
+
+/* Episode + sidebar container */
+.episode-container {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+    gap: 1.5rem;
+    max-width: 96vw;
+    margin: 0 auto;
+    animation: fadeIn 0.5s ease forwards;
+}
+
+/* When no related resources, center the episode card */
+.streamdeck-episode-page:not(.has-related-resources) .episode-container {
+    justify-content: center;
+    align-items: center;
+}
+
+/* Sidebar with related resources */
+.related-sidebar {
+    flex: 0 0 250px;
+    background: #222;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    color: #eee;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    opacity: 0;
+    animation: slideInResources 0.5s ease forwards;
+    animation-delay: 0.7s;
+}
+
+/* Hide sidebar only when no related resources AND has episode (or any content) */
+.streamdeck-episode-page:not(.has-related-resources):not(.no-episode) .related-sidebar {
+    display: none;
+}
+
+.related-resources h2,
+.related-activities h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.2rem;
+    color: #f0f0f0;
+}
+
+/* Episode card takes remaining space (override) */
+.streamdeck-episode-card {
+    flex: 1 1 auto;
+    max-width: 1069px;
+    animation: fadeIn 0.5s ease forwards;
+    animation-delay: 0.3s;
+}
+
+/* When no related resources, expand episode card to full width */
+.streamdeck-episode-page:not(.has-related-resources) .streamdeck-episode-card {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* Episode page when related resources exist */
+.streamdeck-episode-page.has-related-resources {
+    padding-left: .5rem;
+}
+
+/* Tablet / small desktop: allow wrapping, adjust proportions */
+@media (max-width: 1200px) {
+    .episode-container {
+        gap: 1.25rem;
+        padding: 0 1rem;
+    }
+
+    .streamdeck-related-block {
+        min-width: 260px;
+        max-width: 320px;
+    }
+}
+
+/* Below 1000px: stack episode + related, full‑width */
+@media (max-width: 1000px) {
+    .episode-container {
+        flex-direction: column;
+        align-items: stretch;
+        max-width: 100%;
+        padding: 0 1rem;
+    }
+
+    .streamdeck-episode-card {
+        order: 1;
+        max-width: 100%;
+        width: 100%;
+        margin-bottom: .2rem;
+    }
+
+    .streamdeck-related-block {
+        order: 2;
+        width: 100%;
+        margin-top: -0.5rem;
+        min-width: 100%;
+        max-width: 100%;
+    }
+
+}
+
+/* ──────────────────────────────────────────────────────────────
+   FORUM + ASSIGNMENT PREVIEW BLOCKS
+   ────────────────────────────────────────────────────────────── */
+/* Generic close button styling for all modals in Streamdeck */
+.format-streamdeck .modal .btn-close {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    background-color: rgba(0, 0, 0, 0.85);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+    opacity: 1;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    /* Reset any icon‑font assumptions */
+    font-family: inherit;
+}
+
+/* Show a simple × icon */
+.format-streamdeck .modal .btn-close::before {
+    content: '×';
+    font-size: 20px;
+    line-height: 1;
+    color: #f5f5f7;
+    font-weight: 400;
+}
+
+/* Hide any built‑in SVG/icon if present */
+.format-streamdeck .modal .btn-close svg,
+.format-streamdeck .modal .btn-close span,
+.format-streamdeck .modal .btn-close img {
+    display: none;
+}
+
+.format-streamdeck .modal .btn-close:hover,
+.format-streamdeck .modal .btn-close:focus-visible {
+    background-color: rgba(0, 0, 0, 0.98);
+    transform: scale(1.05);
+    transition: all 150ms ease;
+}
+
+/* Forum main regions background */
+#page-mod-forum-view.format-streamdeck #region-main, #page-mod-forum-discuss.format-streamdeck #region-main, #page-mod-scorm-view.format-streamdeck #region-main, #page-mod-scorm-player.format-streamdeck #region-main, #page-mod-bigbluebuttonbn-view.format-streamdeck #region-main, #page-course-view-streamdeck .modal-dialog-scrollable .modal-content, body.format-streamdeck:not(.editing) .modal-dialog-scrollable .modal-content {
+    background-color: #151515 !important;
+    color: #f0f0f0 !important;
+}
+
+#page-mod-forum-view.format-streamdeck.editing #region-main,
+#page-mod-forum-discuss.format-streamdeck.editing #region-main, #page-mod-scorm-view.format-streamdeck.editing #region-main, #page-mod-scorm-player.format-streamdeck.editing #region-main, .format-streamdeck.editing .modal-dialog-scrollable .modal-content, #page-mod-bigbluebuttonbn-view.format-streamdeck.editing #region-main {
+    background-color: #fff !important;
+    color: #000 !important;
+}
+
+/* Forum modal preview */
+.streamdeck-forum-modal .streamdeck-forum-preview-title {
+    font-size: 1.4rem;
+    font-weight: 650;
+    margin-bottom: 0.75rem;
+}
+
+#page-course-view-streamdeck.format-streamdeck:not(.editing) .streamdeck-forum-preview-title {
+    color: #fff;
+}
+
+.streamdeck-forum-preview-list {
+    list-style: none;
+    margin: 0 0 0.75rem;
+    padding: 0;
+}
+
+.streamdeck-forum-preview-item + .streamdeck-forum-preview-item {
+    margin-top: 0.35rem;
+}
+
+.streamdeck-forum-preview-all {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #9ca3af;
+}
+
+/* Single simple discussion inline rendering */
+.streamdeck-forum-single {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.streamdeck-forum-posts {
+    margin: 1.5rem 0;
+}
+
+.streamdeck-forum-post {
+    background: rgba(0, 0, 0, 0.6);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.streamdeck-forum-post-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.streamdeck-forum-post-avatar img {
+    border-radius: 50%;
+}
+
+.streamdeck-forum-post-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.streamdeck-forum-post-author {
+    font-size: 0.95rem;
+    color: #fff;
+}
+
+.streamdeck-forum-post-time {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.streamdeck-forum-post-message {
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+}
+
+.streamdeck-forum-reply-btn {
+    margin-top: 1rem;
+    display: inline-block;
+}
+
+/* Inline reply iframe wrapper */
+.streamdeck-forum-reply-frame-wrapper {
+    margin-top: 1.5rem;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    max-height: 600px;
+    position: relative;
+}
+
+.streamdeck-forum-reply-frame {
+    width: 100%;
+    height: 550px;
+    border: 0;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.7);
+}
+
+.streamdeck-forum-reply-frame-wrapper[hidden] {
+    display: none;
+}
+
+/* Loading state (optional spinner placeholder) */
+.streamdeck-forum-reply-frame-loading {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+.streamdeck-forum-reply-frame-wrapper.is-loading .streamdeck-forum-reply-frame-loading {
+    display: flex;
+}
+
+/* Reply button active */
+.streamdeck-forum-reply-btn.is-active {
+    opacity: 0.9;
+}
+
+/* Quiz views */
+/* Root scope: Quiz intro in streamdeck format, not in editing mode */
+#page-mod-quiz-view.format-streamdeck:not(.editing),
+#page-mod-quiz-attempt.format-streamdeck:not(.editing),
+#page-mod-quiz-summary.format-streamdeck:not(.editing) {
+    background: #f5f7fb; /* soft light background */
+    color: #1f2933;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Shared main content card */
+#page-mod-quiz-view.format-streamdeck:not(.editing) #region-main, #page-mod-quiz-summary.format-streamdeck:not(.editing) #region-main, #page-mod-quiz-view.format-streamdeck:not(.editing) #region-main, #page-mod-quiz-review.format-streamdeck:not(.editing) #region-main {
+    max-width: 1000px;
+    margin: 32px auto 40px auto;
+    padding: 50px 50px !important;
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow:
+        0 18px 60px rgba(15, 23, 42, 0.15),
+        0 0 0 1px rgba(148, 163, 184, 0.16);
+}
+
+#page-mod-quiz-attempt.format-streamdeck:not(.editing) #page.drawers .main-inner, #page-mod-quiz-attempt.format-streamdeck:not(.editing) .header-maxwidth, #page-mod-quiz-attempt.format-streamdeck:not(.editing) #region-main {
+    max-width: 95vw !important;
+}
+
+/* Shared notifications spacing */
+#page-mod-quiz-view.format-streamdeck:not(.editing) #user-notifications,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing) #user-notifications {
+    display: block;
+    margin-bottom: 12px;
+}
+
+/* Shared activity header (present on view and attempt, though sometimes empty) */
+#page-mod-quiz-view.format-streamdeck:not(.editing)
+    .activity-header[data-for="page-activity-header"],
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .activity-header[data-for="page-activity-header"] {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.38);
+    padding-bottom: 16px;
+    background-color: none !important;
+}
+
+/* Shared activity information wrapper */
+#page-mod-quiz-view.format-streamdeck:not(.editing) .activity-information,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing) .activity-information {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Shared completion info style */
+#page-mod-quiz-view.format-streamdeck:not(.editing)
+    .completion-info[data-region="completion-info"],
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .completion-info[data-region="completion-info"] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Completion badges */
+#page-mod-quiz-view.format-streamdeck:not(.editing)
+    .completion-info .badge,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .completion-info .badge {
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #1e293b;
+    border: 1px solid #e0e7ff;
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+#page-mod-quiz-view.format-streamdeck:not(.editing)
+    .completion-info .badge strong,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .completion-info .badge strong {
+    font-weight: 600;
+    color: #4f46e5;
+}
+
+#page-mod-quiz-view.format-streamdeck:not(.editing)
+    .completion-info .badge .fw-normal,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .completion-info .badge .fw-normal {
+    font-weight: 400;
+}
+
+/* Shared activity dates */
+#page-mod-quiz-view.format-streamdeck:not(.editing) .activity-dates,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing) .activity-dates {
+    text-align: right;
+    font-size: 0.95rem;
+    color: #4b5563;
+}
+
+#page-mod-quiz-view.format-streamdeck:not(.editing) .activity-dates strong,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing) .activity-dates strong {
+    font-weight: 600;
+    color: #111827;
+}
+
+/* Shared tertiary nav (top-of-main small nav bar) */
+#page-mod-quiz-view.format-streamdeck:not(.editing) .tertiary-navigation,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing) .tertiary-navigation {
+    margin-top: 12px;
+    margin-bottom: 16px;
+}
+
+/* In both pages, align tertiary nav content to the left */
+#page-mod-quiz-view.format-streamdeck:not(.editing) .tertiary-navigation .d-flex,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing) .tertiary-navigation .d-flex,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing) .tertiary-navigation .row {
+    justify-content: flex-start;
+}
+
+/* Primary CTA buttons (Preview quiz / Attempt / Next page) – shared look */
+#page-mod-quiz-view.format-streamdeck:not(.editing)
+    .quizstartbuttondiv button.btn.btn-primary,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .submitbtns .btn.btn-primary,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .mod_quiz-next-nav.btn.btn-primary {
+    min-width: 190px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    box-shadow: 0 12px 30px rgba(99, 102, 241, 0.35);
+    font-weight: 600;
+    font-size: 0.98rem;
+    letter-spacing: 0.01em;
+    transition:
+        transform 0.06s ease-out,
+        box-shadow 0.06s ease-out,
+        background 0.18s ease-out;
+}
+
+/* Hover/focus/active for primary CTAs */
+#page-mod-quiz-view.format-streamdeck:not(.editing)
+    .quizstartbuttondiv button.btn.btn-primary:hover,
+#page-mod-quiz-view.format-streamdeck:not(.editing)
+    .quizstartbuttondiv button.btn.btn-primary:focus,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .submitbtns .btn.btn-primary:hover,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .submitbtns .btn.btn-primary:focus,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .mod_quiz-next-nav.btn.btn-primary:hover,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .mod_quiz-next-nav.btn.btn-primary:focus {
+    background: linear-gradient(135deg, #4338ca, #4f46e5);
+    transform: translateY(-1px);
+    box-shadow: 0 16px 35px rgba(79, 70, 229, 0.4);
+}
+
+#page-mod-quiz-view.format-streamdeck:not(.editing)
+    .quizstartbuttondiv button.btn.btn-primary:active,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .submitbtns .btn.btn-primary:active,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .mod_quiz-next-nav.btn.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 8px 24px rgba(79, 70, 229, 0.35);
+}
+
+/* Shared bottom activity navigation (present on view; we keep styling shared) */
+#quiz-view.format-streamdeck:not(.editing)
+    .activity-navigation.container-fluid,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .activity-navigation.container-fluid {
+    max-width: 900px;
+    margin: 0 auto 8px auto;
+    padding-top: 10px;
+    border-top: 1px solid rgba(148, 163, 184, 0.35);
+    font-size: 0.92rem;
+}
+
+/* Shared prev/next nav links (if used) */
+#page-mod-quiz-view.format-streamdeck:not(.editing) #prev-activity-link,
+#page-mod-quiz-view.format-streamdeck:not(.editing) #next-activity-link,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing) #prev-activity-link,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing) #next-activity-link {
+    color: #4f46e5;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 2px 0;
+}
+
+#page-mod-quiz-view.format-streamdeck:not(.editing) #prev-activity-link:hover,
+#page-mod-quiz-view.format-streamdeck:not(.editing) #next-activity-link:hover,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing) #prev-activity-link:hover,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing) #next-activity-link:hover {
+    color: #4338ca;
+    text-decoration: underline;
+}
+
+/* Shared "Jump to..." select styling */
+#page-mod-quiz-view.format-streamdeck:not(.editing)
+    .urlselect .form-select.urlselect,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .urlselect .form-select.urlselect {
+    max-width: 260px;
+    font-size: 0.9rem;
+    padding: 6px 32px 6px 10px;
+    border-radius: 999px;
+    border-color: rgba(148, 163, 184, 0.7);
+    background-color: #ffffff;
+    box-shadow: none;
+}
+
+#page-mod-quiz-view.format-streamdeck:not(.editing)
+    .urlselect .form-select.urlselect:focus,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .urlselect .form-select.urlselect:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.2);
+}
+
+/* Shared "quiet" nav buttons */
+#page-mod-quiz-view.format-streamdeck:not(.editing)
+    .activity-navigation .btn.btn-link,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .activity-navigation .btn.btn-link {
+    padding: 0;
+    border-radius: 999px;
+}
+
+/* Shared mobile tweaks */
+@media (max-width: 768px) {
+    #page-mod-quiz-view.,
+    #page-mod-quiz-attempt.format-streamdeck:not(.editing) #region-main {
+        margin: 16px auto 24px auto;
+        padding: 18px 16px;
+        border-radius: 12px;
+    }
+
+    #page-mod-quiz-view.format-streamdeck:not(.editing)
+        .activity-header[data-for="page-activity-header"],
+    #page-mod-quiz-attempt.format-streamdeck:not(.editing)
+        .activity-header[data-for="page-activity-header"] {
+        flex-direction: column;
+        gap: 6px;
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    #page-mod-quiz-view.format-streamdeck:not(.editing) .activity-dates,
+    #page-mod-quiz-attempt.format-streamdeck:not(.editing) .activity-dates {
+        text-align: left;
+    }
+
+    #page-mod-quiz-view.format-streamdeck:not(.editing)
+        .activity-navigation.container-fluid,
+    #page-mod-quiz-attempt.format-streamdeck:not(.editing)
+        .activity-navigation.container-fluid {
+        margin-bottom: 12px;
+    }
+
+    #page-mod-quiz-view.format-streamdeck:not(.editing)
+        .urlselect .form-select.urlselect,
+    #page-mod-quiz-attempt.format-streamdeck:not(.editing)
+        .urlselect .form-select.urlselect {
+        max-width: 100%;
+        width: 100%;
+        margin-top: 6px;
+    }
+
+    #page-mod-quiz-view.format-streamdeck:not(.editing)
+        .activity-navigation .row > [class^="col-md-"],
+    #page-mod-quiz-attempt.format-streamdeck:not(.editing)
+        .activity-navigation .row > [class^="col-md-"] {
+        margin-bottom: 6px;
+        text-align: center;
+    }
+
+    #page-mod-quiz-view.format-streamdeck:not(.editing)
+        .activity-navigation .float-start,
+    #page-mod-quiz-view.format-streamdeck:not(.editing)
+        .activity-navigation .float-end,
+    #page-mod-quiz-attempt.format-streamdeck:not(.editing)
+        .activity-navigation .float-start,
+    #page-mod-quiz-attempt.format-streamdeck:not(.editing)
+        .activity-navigation .float-end {
+        float: none !important;
+    }
+}
+
+/* QUIZ ATTEMPT PAGE – MULTICHOICE CLEANUP
+   Scope: attempt page in streamdeck format, not editing. */
+
+/* Overall question card */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice {
+    margin-top: 12px;
+    margin-bottom: 16px;
+    padding: 18px 18px 16px;
+    border-radius: 14px;
+    background: #f9fafb;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+/* Question header (info row) */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice > .info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 16px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+    padding-bottom: 8px;
+}
+
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice .info h3.no {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+}
+
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice .info .state,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice .info .grade {
+    font-size: 0.86rem;
+    color: #4b5563;
+}
+
+/* Version badge – make it subtle tag */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice .info .badge.bg-primary {
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 0.72rem;
+    background: #e0e7ff;
+    color: #4338ca;
+    border: 1px solid #c7d2fe;
+}
+
+/* Flag button */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice .questionflag.editable .aabtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: #4338ca;
+    border: 1px solid #e0e7ff;
+    font-size: 0.78rem;
+    text-decoration: none;
+}
+
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice .questionflag.editable .aabtn:hover {
+    background: #e0e7ff;
+}
+
+/* Question text block */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice .qtext {
+    margin-bottom: 12px;
+    color: #111827;
+}
+
+/* Remove weird overflow on fieldset */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice fieldset.ablock.no-overflow.visual-scroll-x {
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Legend / prompt text above answers */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice fieldset.ablock .prompt {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: #4b5563;
+}
+
+/* ANSWER LIST LAYOUT
+   Make each answer row a full-width card with a left radio. */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice .answer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Base row container */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice .answer .r0,
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice .answer .r1 {
+    padding: 0;
+    margin: 0;
+}
+
+/* Make radio + label behave like one selectable card */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice .answer input[type="radio"] {
+    /* Keep the native radio but space it correctly */
+    margin-right: 10px;
+    margin-top: 0.4rem;
+}
+
+/* Card container for label+number+content */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice [data-region="answer-label"] {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 8px 10px;
+    margin: 2px 0 0 0;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    background-color: #ffffff;
+    cursor: pointer;
+    transition:
+        background 0.12s ease-out,
+        border-color 0.12s ease-out,
+        box-shadow 0.12s ease-out,
+        transform 0.06s ease-out;
+}
+
+/* Hover and focus within the answer card */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice .answer .r0:hover [data-region="answer-label"],
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice .answer .r1:hover [data-region="answer-label"] {
+    background-color: #f3f4ff;
+    border-color: #c7d2fe;
+    box-shadow: 0 4px 10px rgba(148, 163, 184, 0.35);
+    transform: translateY(-1px);
+}
+
+/* Selected state: approximate via :checked + sibling */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice .answer input[type="radio"]:checked
+    + [data-region="answer-label"] {
+    background: #eef2ff;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.2);
+}
+
+/* Answer number */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice .answernumber {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #4b5563;
+}
+
+/* Answer text / Hebrew letter area */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice [data-region="answer-label"] .flex-fill {
+    display: flex;
+    align-items: center;
+}
+
+/* Hebrew letters: larger, crisp, centered */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice [data-region="answer-label"] h1 {
+    font-size: 1.6rem;
+    margin: 0;
+    line-height: 1.2;
+}
+
+/* "Clear my choice" link – keep but quiet */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice .qtype_multichoice_clearchoice label a.btn.btn-link {
+    font-size: 0.82rem;
+    padding: 0;
+}
+
+/* Question-local "Check" button */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .que.multichoice .im-controls .submit.btn.btn-secondary {
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 0.86rem;
+    background-color: #e5e7eb;
+    border-color: #d1d5db;
+    color: #111827;
+    margin-top: 10px;
+}
+
+/* Bottom nav (Previous / Next) area: align and space */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .submitbtns {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+/* Previous page button – secondary style, rounded */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .submitbtns .mod_quiz-prev-nav.btn.btn-secondary {
+    border-radius: 999px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+}
+
+/* Next page (primary) already shares the primary CTA styling
+   from the earlier rules; we just ensure reasonable padding */
+#page-mod-quiz-attempt.format-streamdeck:not(.editing)
+    .submitbtns .mod_quiz-next-nav.btn.btn-primary {
+    padding: 8px 18px;
+    font-size: 0.9rem;
+}
+
+/* Mobile tweaks for answers */
+@media (max-width: 768px) {
+    #page-mod-quiz-attempt.format-streamdeck:not(.editing)
+        .que.multichoice [data-region="answer-label"] {
+        padding: 8px 10px;
+    }
+
+    #page-mod-quiz-attempt.format-streamdeck:not(.editing)
+        .que.multichoice [data-region="answer-label"] h1 {
+        font-size: 1.4rem;
+    }
+
+    #page-mod-quiz-attempt.format-streamdeck:not(.editing)
+        .submitbtns {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}
+
+/*======================================================*/
+
+
+/* Assignment preview background toggles */
+#page-mod-assign-view.format-streamdeck.editing #region-main,
+.format-streamdeck.editing .generaltable, .format-streamdeck.editing .table,
+#page-mod-assign.format-streamdeck.editing .path-mod .activity-information .activity-dates {
+    background-color: #fff !important;
+    color: #000 !important;
+}
+
+#page-mod-assign-view.format-streamdeck:not(.editing) #region-main,
+#page-mod-assign-view.format-streamdeck:not(.editing) table.generaltable, #page-mod-assign-view.format-streamdeck:not(.editing) .table, #page-mod-assign.format-streamdeck:not(.editing) .path-mod .activity-information .activity-dates {
+    background-color: #000 !important;
+    color: #fff !important;
+}
+
+#page-mod-assign-view.format-streamdeck:not(.editing) #page.drawers .activity-header, #page-mod-scorm-view.format-streamdeck:not(.editing) #page.drawers .activity-header, #page-mod-forum-view.format-streamdeck:not(.editing) #page.drawers .activity-header{
+    background-color: #3a3a3a;
+}
+
+#page-mod-assign-view.streamdeck-assign-embedded .path-mod .automatic-completion-conditions div[class~="badge"], #page-mod-scorm-view.streamdeck-assign-embedded .path-mod .automatic-completion-conditions .badge {
+    mix-blend-mode: unset !important;
+    background-color: #ae132a !important;
+}
+
+#page-mod-course-view.format-streamdeck:not(.editing) table.generaltable thead, #page-mod-assign-view.format-streamdeck:not(.editing) table.generaltable thead, #page-mod-bigbluebuttonbn-view.format-streamdeck:not(.editing) table.generaltable thead, #page-mod-forum-view.format-streamdeck:not(.editing) table.generaltable thead, #page-mod-forum-view.format-streamdeck:not(.editing) .generaltable thead th {
+    background-color: #3a3a3a !important;
+    color: #f3f3f3 !important;
+}
+
+#page-mod-lti-view.format-streamdeck:not(.editing) tr, #page-mod-forum-view.format-streamdeck:not(.editing) tr, #page-mod-bigbluebuttonbn-view.format-streamdeck:not(.editing) tr, #page-mod-scorm-view.format-streamdeck:not(.editing) tr, #page-mod-forum-discuss.format-streamdeck:not(.editing) tr, #page-mod-bigbluebuttonbn-view.format-streamdeck:not(.editing) div[class$="datatable-paginator"]{
+    background: #000 !important;
+    color: #f3f3f3 !important;
+}
+
+#page-mod-lti-view.format-streamdeck:not(.editing) tbody, #page-mod-forum-view.format-streamdeck:not(.editing) tbody, #page-mod-bigbluebuttonbn-view.format-streamdeck:not(.editing) tbody, #page-mod-scorm-view.format-streamdeck:not(.editing) tbody, #page-mod-forum-discuss.format-streamdeck:not(.editing) tbody, #page-mod-assign-view.format-streamdeck:not(.editing) tbody  {
+    background: #3a3a3a !important;
+    color: #f3f3f3 !important;
+}
+
+#page-mod-lti-view.format-streamdeck:not(.editing) #page, #page-mod-forum-view.format-streamdeck:not(.editing) #page, #page-mod-bigbluebuttonbn-view.format-streamdeck:not(.editing) #page, #page-mod-scorm-view.format-streamdeck:not(.editing) #page {
+    margin-top: 0px !important;
+}
+
+.format-streamdeck.editing .activity-header {
+    background-color: #f8f9fa !important;
+    color: #000;
+}
+
+/* Assignment preview card */
+.streamdeck-assign-preview {
+    padding: 1.5rem;
+}
+
+.streamdeck-assign-preview-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #fff;
+}
+
+.streamdeck-assign-preview-intro {
+    margin-bottom: 1.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.6;
+}
+
+.streamdeck-assign-preview-meta {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.streamdeck-assign-preview-meta > div {
+    margin-bottom: 0.5rem;
+}
+
+.streamdeck-assign-preview-meta > div:last-child {
+    margin-bottom: 0;
+}
+
+/* Assignment status colours */
+.streamdeck-assign-overdue {
+    color: #ff6b6b;
+}
+
+.streamdeck-assign-due,
+.streamdeck-assign-submitted {
+    color: #51cf66;
+}
+
+.streamdeck-assign-notsubmitted {
+    color: #ffd43b;
+}
+
+.streamdeck-assign-grade {
+    color: #74c0fc;
+}
+
+.streamdeck-assign-view-btn {
+    margin-top: 1rem;
+}
+
+/* Assignment iframe wrapper (new) */
+.streamdeck-assign-frame-wrapper {
+    position: relative;
+    width: 100%;
+    min-height: 600px;
+    margin-top: 1rem;
+    background: #000;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.streamdeck-assign-frame-wrapper[hidden] {
+    display: none;
+}
+
+.streamdeck-assign-frame-wrapper.is-loading::before {
+    content: 'Loading assignment...';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #999;
+    font-size: 0.9rem;
+}
+
+/* Legacy assignment wrapper (kept for compatibility) */
+.streamdeck-assign-frame-wrapper {
+    margin-top: 1.5rem;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(0, 0, 0, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    max-height: 600px;
+    position: relative;
+}
+
+.streamdeck-assign-frame {
+    width: 100%;
+    height: 600px;
+    border: none;
+    display: block;
+    background: #000;
+}
+
+/* Loading overlay */
+.streamdeck-assign-frame-loading {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+.streamdeck-assign-frame-wrapper.is-loading .streamdeck-assign-frame-loading {
+    display: flex;
+}
+
+/* View button active */
+.streamdeck-assign-view-btn.is-active {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Related activity styling for assignments */
+.streamdeck-related-assign .streamdeck-activity-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   ANIMATIONS
+   ────────────────────────────────────────────────────────────── */
+
+@keyframes streamdeck-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(3px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideRightEpisode {
+    0% {
+        opacity: 0;
+        transform: translateX(0);
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(40px);
+    }
+}
+
+@keyframes slideInResources {
+    0% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes streamdeck-bullhorn-wiggle {
+    0%, 60%, 100% {
+        transform: rotate(0deg);
+    }
+    10%, 20% {
+        transform: rotate(-10deg);
+    }
+    15%, 25% {
+        transform: rotate(10deg);
+    }
+    30%, 40%, 50% {
+        transform: rotate(0deg);
+    }
+}
+
+/* Optional: pause animation on hover/focus to reduce motion distraction */
+.streamdeck-hero-announcements-btn.has-unread:hover,
+.streamdeck-hero-announcements-btn.has-unread:focus {
+    animation-play-state: paused;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   RESPONSIVE ADJUSTMENTS
+   ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+    .streamdeck-syllabus-modal {
+        padding: 22px 18px 26px;
+        border-radius: 20px;
+        margin-bottom: 16px;
+    }
+
+    .streamdeck-syllabus-title {
+        font-size: 1.4rem;
+    }
+
+    .streamdeck-syllabus-pills {
+        display: flex;
+        justify-content: flex-start;
+    }
+
+    .streamdeck-pill {
+        font-size: 0.84rem;
+        padding-inline: 12px;
+    }
+
+    /* Adjust close button position for smaller screens */
+    .modal.show:has(#streamdeck-syllabus) .btn-close {
+        top: 16px;
+        right: 16px;
+    }
+}
+
+/* Larger screens: push hero content slightly down */
+@media (min-width: 1200px) {
+    .format-streamdeck .hero-content {
+    padding-top: 12vh;
+    }
+}
+
+/* ────
+   MOBILE RESPONSIVE REFINEMENTS (600px and below)
+   ──── */
+
+@media (max-width: 600px) {
+    /* Episode page adjustments */
+    .streamdeck-episode-page {
+        margin-top: 1.5rem;
+        padding: 0;
+    }
+
+    /* Remove padding from episode card for full-width content */
+    .streamdeck-episode-card {
+        padding: 1rem 0 1rem;
+        border-radius: 0;
+        margin-bottom: 0;
+    }
+
+    /* Reduce episode title size */
+    .streamdeck-episode-title {
+        font-size: 1.4rem;
+        padding: 0 1rem;
+    }
+
+    /* Episode header adjustments */
+    .streamdeck-episode-header {
+        padding: 0 1rem;
+    }
+
+    .streamdeck-episode-tagline,
+    .streamdeck-episode-intro,
+    .streamdeck-episode-actions {
+        padding: 0 1rem;
+    }
+
+    /* Replace "Learning Episodes" button text with back icon only */
+    .streamdeck-episode-nav-btn--ghost {
+        padding: 0.6rem;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 0;
+        position: relative;
+    }
+
+    .streamdeck-episode-nav-btn--ghost::before {
+        content: '←';
+        font-size: 1.5rem;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        line-height: 1;
+    }
+
+    /* Replace "Fullscreen" button text with icon only */
+    .streamdeck-episode-primary {
+        padding: 0.6rem;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        font-size: 0;
+        position: relative;
+    }
+
+    .streamdeck-episode-primary::before {
+        content: '⛶';
+        font-size: 1.3rem;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        line-height: 1;
+    }
+
+    /* Hide text content in these buttons */
+    .streamdeck-episode-primary-icon {
+        display: none;
+    }
+
+    /* Ensure episode frame fills available space without padding */
+    .streamdeck-episode-video,
+    .streamdeck-h5p-embed-wrapper,
+    .streamdeck-h5p-iframe-wrapper {
+        margin-left: 0;
+        margin-right: 0;
+        border-radius: 0;
+        width: 100%;
+    }
+
+    /* Episode navigation adjustments */
+    .streamdeck-episode-nav {
+        padding: 0 1rem;
+        margin-top: 1rem;
+    }
+
+    /* Related block adjustments */
+    .streamdeck-related-block {
+        min-width: 100%;
+        padding: 1rem;
+        border-radius: 0;
+    }
+
+    /* Episode container adjustments */
+    .episode-container {
+        padding: 0;
+        gap: 0;
+    }
+}
+

@@ -1,0 +1,56 @@
+{{!
+    Streamdeck section card.
+    Context: a single entry from `sections` or `continuewatching` in content.php.
+}}
+
+<div class="col">
+    <a href="{{url}}" class="streamdeck-card-link">
+        <article class="streamdeck-card {{#done}}streamdeck-card--done{{/done}} {{#locked}}streamdeck-card--locked{{/locked}}">
+
+            <div class="streamdeck-card__image-wrapper">
+                {{#hasimage}}
+                    <img src="{{image}}" alt="{{name}}" class="streamdeck-card__image">
+                {{/hasimage}}
+                {{^hasimage}}
+                    <div class="streamdeck-card__image-placeholder">
+                        <span class="streamdeck-card__placeholder-icon">
+                            <!-- simple play/film icon -->
+                            ▶
+                        </span>
+                    </div>
+                {{/hasimage}}
+
+                {{#done}}
+                    <div class="streamdeck-card__badge-complete" aria-label="Module complete">
+                        <span class="streamdeck-card__badge-icon">✓</span>
+                    </div>
+                {{/done}}
+
+                {{#hasprogress}}
+                    <div class="streamdeck-card__progress">
+                        <div class="streamdeck-card__progress-fill" style="width: {{progress}}%;"></div>
+                    </div>
+                {{/hasprogress}}
+            </div>
+
+            <div class="streamdeck-card__body">
+                <h3 class="streamdeck-card__title">{{name}}</h3>
+
+                <div class="streamdeck-card__meta">
+                    {{#hasprogress}}
+                        <span class="streamdeck-card__meta-chip">
+                            {{progress}}% complete
+                        </span>
+                    {{/hasprogress}}
+
+                    {{#locked}}
+                        <span class="streamdeck-card__meta-chip streamdeck-card__meta-chip--locked">
+                            Locked
+                        </span>
+                    {{/locked}}
+                </div>
+            </div>
+
+        </article>
+    </a>
+</div>

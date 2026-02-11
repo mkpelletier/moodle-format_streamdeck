@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="course/format/streamdeck/db" VERSION="2025112600" COMMENT="Streamdeck format tables"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="../../lib/xmldb/xmldb.xsd">
+
+    <TABLES>
+        <TABLE NAME="format_streamdeck_syllabus" COMMENT="Syllabus content per course for Streamdeck format">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true" />
+                <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" />
+                <FIELD NAME="introhtml" TYPE="text" NOTNULL="false" SEQUENCE="false" />
+                <FIELD NAME="outcomeshtml" TYPE="text" NOTNULL="false" SEQUENCE="false" />
+                <FIELD NAME="assessmentshtml" TYPE="text" NOTNULL="false" SEQUENCE="false" />
+                <FIELD NAME="materialshtml" TYPE="text" NOTNULL="false" SEQUENCE="false" />
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false" />
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" />
+                <KEY NAME="courseid_fk" TYPE="foreign" FIELDS="courseid" REFTABLE="course" REFFIELDS="id" />
+            </KEYS>
+            <INDEXES>
+                <INDEX NAME="courseid_idx" UNIQUE="true" FIELDS="courseid" />
+            </INDEXES>
+        </TABLE>
+    </TABLES>
+</XMLDB>
