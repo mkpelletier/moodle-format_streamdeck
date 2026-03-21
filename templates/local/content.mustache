@@ -194,11 +194,12 @@
 
 {{! SECTION VIEW: EPISODE + RELATED }} 
 {{#issectionview}}
-<section class="streamdeck-episode-page {{#hasrelatedresources}}has-related-resources{{/hasrelatedresources}}">
+<section class="streamdeck-episode-page {{#hasrelatedsidebar}}has-related-resources{{/hasrelatedsidebar}}">
     <div class="episode-container">
-        {{#hasrelatedresources}}
+        {{#hasrelatedsidebar}}
         <div class="streamdeck-related-block">
             <aside class="related-sidebar">
+                {{#hasrelatedresources}}
                 <section class="related-resources">
                     <h2>{{#str}}relatedresources, format_streamdeck{{/str}}</h2>
 
@@ -217,6 +218,7 @@
                         {{/relatedresources}}
                     </ul>
                 </section>
+                {{/hasrelatedresources}}
 
                 {{#relatedactivities.0}}
                 <section class="related-activities">
@@ -318,7 +320,7 @@
                 {{/relatedactivities.0}}
             </aside>
         </div>
-        {{/hasrelatedresources}}
+        {{/hasrelatedsidebar}}
         
         {{#hasepisode}}
         <article class="streamdeck-episode-card">

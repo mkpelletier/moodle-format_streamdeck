@@ -26,15 +26,6 @@ defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
 
-    // Admin settings page for this format.
-    $settings = new admin_settingpage(
-        'formatsettingstreamdeck',
-        get_string('pluginname', 'format_streamdeck')
-    );
-
-    // Add under "Courses".
-    $ADMIN->add('courses', $settings);
-
     if ($ADMIN->fulltree) {
 
         // --- Hero instructor role selection ----------------------------.

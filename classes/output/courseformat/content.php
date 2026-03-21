@@ -1046,6 +1046,9 @@ class content extends core_content {
             $data->canshownextbutton = false;
         }
 
+        $data->hasrelatedactivities = !empty($data->relatedactivities);
+        $data->hasrelatedsidebar = $data->hasrelatedresources || $data->hasrelatedactivities;
+
         // Previous / next section navigation.
             $sectionsall = $modinfo->get_section_info_all();
 

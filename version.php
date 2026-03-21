@@ -9,9 +9,9 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2026021101;     // Bumped for refactor.
+$plugin->version   = 2026032101;     // Fix: related activities display independently of resources.
 $plugin->requires  = 2024110400;     // Moodle 5.0+.
 $plugin->component = 'format_streamdeck';
 $plugin->maturity  = MATURITY_BETA;
-$plugin->release   = '1.0-beta5';
+$plugin->release   = '1.0-beta6';
 $plugin->dependencies = [];
