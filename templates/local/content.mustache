@@ -1,6 +1,37 @@
-{{! Streamdeck – FINAL CINEMATIC TEMPLATE }}
+{{!
+    This file is part of Moodle - http://moodle.org/
 
-<div class="format-streamdeck">
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template format_streamdeck/local/content
+
+    Main content template for the Streamdeck course format.
+
+    Context variables required for this template:
+    * showhero - bool - Whether to show the hero section
+    * issectionview - bool - Whether viewing a specific section
+
+    Example context (json):
+    { "showhero": true, "issectionview": false }
+}}
+
+<div class="format-streamdeck {{#enabledrawertoggle}}show-drawer-toggle{{/enabledrawertoggle}}">
+
+    {{#herofontgoogle}}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family={{{herofonturlparam}}}&display=swap">
+    {{/herofontgoogle}}
 
     {{#showhero}}
     <!-- HERO WITH PAGE HEADER OVERLAY -->
@@ -27,7 +58,7 @@
                         <!-- Text box with dark scrim + blur -->
                         <div class="p-5 rounded-3" style="background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);">
                             <h1 class="display-3 fw-bold mb-3 text-white"
-                                style="font-family: 'Lobster', cursive; text-shadow: 3px 3px 12px rgba(0,0,0,0.9);">
+                                style="{{#herofontcss}}font-family: {{{herofontcss}}};{{/herofontcss}} text-shadow: 3px 3px 12px rgba(0,0,0,0.9);">
                                 {{{fullname}}}
                             </h1>
 
@@ -486,7 +517,7 @@
     </div>
     <div class="modal fade" id="streamdeck-forum-modal" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content streamdeck-syllabus-modal streamdeck-forum-modal">
+        <div class="modal-content streamdeck-forum-modal">
           <div class="modal-header">
             <h5 class="modal-title" id="streamdeck-forum-modal-title"></h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal"

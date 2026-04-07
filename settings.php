@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/.
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,16 +25,14 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
-
     if ($ADMIN->fulltree) {
-
-        // --- Hero instructor role selection ----------------------------.
+        // Hero instructor role selection.
 
         // Build list of all roles (roleid => readable name).
         $allroles = role_get_names(null, ROLENAME_ORIGINAL);
         $roleoptions = [];
         foreach ($allroles as $roleid => $role) {
-            // $role is a stdClass; use its localname/name property as a string.
+            // The $role is a stdClass; use its localname/name property as a string.
             $label = isset($role->localname) && $role->localname !== ''
                 ? $role->localname
                 : (isset($role->name) ? $role->name : (string)$roleid);
@@ -63,7 +61,7 @@ if ($hassiteconfig) {
             $roleoptions
         ));
 
-        // --- Instructor label (singular) ----------------------------.
+        // Instructor label (singular).
         $settings->add(new admin_setting_configtext(
             'format_streamdeck/instructorlabel',
             get_string('instructorlabel', 'format_streamdeck'),
@@ -72,7 +70,7 @@ if ($hassiteconfig) {
             PARAM_TEXT
         ));
 
-        // --- Instructor label (plural) ----------------------------.
+        // Instructor label (plural).
         $settings->add(new admin_setting_configtext(
             'format_streamdeck/instructorlabelplural',
             get_string('instructorlabelplural', 'format_streamdeck'),

@@ -15,18 +15,25 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Streamdeck course format – version info.
+ * Privacy provider for format_streamdeck.
  *
  * @package    format_streamdeck
  * @copyright  2025
  * @license    http://www.gnu.org/licenses/gpl-3.0.txt GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace format_streamdeck\privacy;
 
-$plugin->version   = 2026040700;     // Add section thumbnail upload.
-$plugin->requires  = 2024110400;     // Moodle 5.0+.
-$plugin->component = 'format_streamdeck';
-$plugin->maturity  = MATURITY_BETA;
-$plugin->release   = '1.0-beta10';
-$plugin->dependencies = [];
+/**
+ * Privacy provider implementation – this plugin does not store personal data.
+ */
+class provider implements \core_privacy\local\metadata\null_provider {
+    /**
+     * Returns the reason this plugin collects no data.
+     *
+     * @return string The language string key for the privacy metadata.
+     */
+    public static function get_reason(): string {
+        return 'privacy:metadata';
+    }
+}

@@ -32,6 +32,8 @@ Navigate to **Site administration > Plugins > Course formats > Streamdeck** to c
 
 - **Hero instructor roles** — Select which roles appear as instructors in the course hero.
 - **Instructor label** — Customise the singular and plural labels (e.g., "Facilitator" / "Facilitators").
+- **Hero title font** — Choose the font family for the course title in the hero area (Lobster, Montserrat, Poppins, etc.).
+- **Show right drawer toggle** — Optionally display the right drawer toggle in view mode so students can access blocks.
 
 ## Running tests
 
@@ -52,6 +54,15 @@ The repository includes a GitHub Actions workflow (`.github/workflows/ci.yml`) t
 - Mustache lint and Grunt build
 - PHPUnit tests
 - Behat acceptance tests
+
+## Inspiration
+
+This course format was inspired by the concepts presented by **Lewis Carr** at the **Moodle iMoot** in October 2025:
+
+> **Reimagining course design for the streaming generation: why user interface matters**
+> [https://youtu.be/ilQOBxH0K9c](https://youtu.be/ilQOBxH0K9c)
+
+Lewis's presentation made a compelling case for applying the design language of modern streaming platforms to learning management systems — reducing cognitive load, improving visual hierarchy, and meeting learners where they already are. The Streamdeck course format is a direct implementation of those ideas within Moodle.
 
 ## Licence
 

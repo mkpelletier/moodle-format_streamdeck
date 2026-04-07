@@ -1,4 +1,19 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Streamdeck renderer.
  *
@@ -14,17 +29,22 @@
 
 namespace format_streamdeck\output;
 
-defined('MOODLE_INTERNAL') || die();
-
 use core_courseformat\output\section_renderer;
 use renderable;
 
+/**
+ * Streamdeck format renderer.
+ *
+ * @package    format_streamdeck
+ */
 class renderer extends section_renderer {
-
-    public function __construct(\moodle_page $page, $target) {
-        parent::__construct($page, $target);
-    }
-
+    /**
+     * Return the section title.
+     *
+     * @param mixed $section
+     * @param mixed $course
+     * @return string
+     */
     public function section_title($section, $course) {
         try {
             return parent::section_title($section, $course);
@@ -35,6 +55,13 @@ class renderer extends section_renderer {
         }
     }
 
+    /**
+     * Return the section title without link.
+     *
+     * @param mixed $section
+     * @param mixed $course
+     * @return string
+     */
     public function section_title_without_link($section, $course) {
         try {
             return parent::section_title_without_link($section, $course);
@@ -45,6 +72,13 @@ class renderer extends section_renderer {
         }
     }
 
+    /**
+     * Return the section edit control items.
+     *
+     * @param mixed $section
+     * @param mixed $course
+     * @return array
+     */
     protected function section_edit_control_items($section, $course) {
         try {
             // Minimalist UI: No extra edit controls (rely on core actions).
@@ -59,6 +93,12 @@ class renderer extends section_renderer {
         }
     }
 
+    /**
+     * Return the section content.
+     *
+     * @param renderable $sectionrenderable
+     * @return string
+     */
     public function section_content(renderable $sectionrenderable) {
         try {
             return parent::section_content($sectionrenderable);
@@ -78,19 +118,19 @@ class renderer extends section_renderer {
         global $DB;
 
         $result = [
-            'introhtml'      => '',
-            'outcomeshtml'   => '',
-            'assessmentshtml'=> '',
-            'materialshtml'  => '',
+            'introhtml'       => '',
+            'outcomeshtml'    => '',
+            'assessmentshtml' => '',
+            'materialshtml'   => '',
         ];
 
-            $record = $DB->get_record('format_streamdeck_syllabus', ['courseid' => $course->id]);
-            if ($record) {
-                $result['introhtml']       = $record->introhtml ?? '';
-                $result['outcomeshtml']    = $record->outcomeshtml ?? '';
-                $result['assessmentshtml'] = $record->assessmentshtml ?? '';
-                $result['materialshtml']   = $record->materialshtml ?? '';
-            }
+        $record = $DB->get_record('format_streamdeck_syllabus', ['courseid' => $course->id]);
+        if ($record) {
+            $result['introhtml']       = $record->introhtml ?? '';
+            $result['outcomeshtml']    = $record->outcomeshtml ?? '';
+            $result['assessmentshtml'] = $record->assessmentshtml ?? '';
+            $result['materialshtml']   = $record->materialshtml ?? '';
+        }
 
         return $result;
     }
@@ -106,46 +146,83 @@ class renderer extends section_renderer {
      * @return string
      */
     public function get_section_image_for_sectioninfo(\section_info $sectioninfo): string {
-            $sectionnum = (int)$sectioninfo->section;
-            $sectionid  = (int)$sectioninfo->id; // This is course_sections.id (itemid in mdl_files).
+        $sectionnum = (int)$sectioninfo->section;
+        $sectionid  = (int)$sectioninfo->id; // This is course_sections.id (itemid in mdl_files).
 
-            // We still don't want section 0 as an "episode".
-            if ($sectionnum <= 0) {
-                return '';
-            }
+        // We still don't want section 0 as an "episode".
+        if ($sectionnum <= 0) {
+            return '';
+        }
 
-            $summary = $sectioninfo->summary ?? '';
-            if (empty($summary)) {
-                return '';
-            }
+        // Priority 1: Uploaded thumbnail from section settings.
+        $uploaded = $this->get_uploaded_section_image($sectioninfo);
+        if (!empty($uploaded)) {
+            return $uploaded;
+        }
 
-            $context = \context_course::instance($sectioninfo->course);
+        // Priority 2: Extract first image from section description.
+        $summary = $sectioninfo->summary ?? '';
+        if (empty($summary)) {
+            return '';
+        }
 
-            // IMPORTANT: Use $sectionid as itemid, not $sectionnum.
-            $rewritten = file_rewrite_pluginfile_urls(
-                $summary,
-                'pluginfile.php',
-                $context->id,
-                'course',
-                'section',
-                $sectionid
-            );
+        $context = \context_course::instance($sectioninfo->course);
 
-            if (empty($rewritten)) {
-                return '';
-            }
+        // IMPORTANT: Use $sectionid as itemid, not $sectionnum.
+        $rewritten = file_rewrite_pluginfile_urls(
+            $summary,
+            'pluginfile.php',
+            $context->id,
+            'course',
+            'section',
+            $sectionid
+        );
 
-            // Extract first <img src="...">.
-            $pattern = '/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/i';
+        if (empty($rewritten)) {
+            return '';
+        }
 
-            if (!preg_match($pattern, $rewritten, $matches)) {
-                return '';
-            }
+        // Extract first <img src="...">.
+        $pattern = '/<img[^>]+src=["\']([^"\']+)["\'][^>]*>/i';
 
-            $src = $matches[1];
-            return $src;
+        if (!preg_match($pattern, $rewritten, $matches)) {
+            return '';
+        }
 
-        return '';
+        $src = $matches[1];
+        return $src;
     }
-    // Other methods fall back to parent for core editing UI compatibility.
+
+    /**
+     * Get the URL of an uploaded section thumbnail image.
+     *
+     * @param \section_info $sectioninfo The section info object.
+     * @return string The image URL, or empty string if none uploaded.
+     */
+    public function get_uploaded_section_image(\section_info $sectioninfo): string {
+        $context = \context_course::instance($sectioninfo->course);
+        $fs = get_file_storage();
+        $files = $fs->get_area_files(
+            $context->id,
+            'format_streamdeck',
+            'sectionimage',
+            (int)$sectioninfo->id,
+            'sortorder DESC, id ASC',
+            false
+        );
+
+        if (empty($files)) {
+            return '';
+        }
+
+        $file = reset($files);
+        return \moodle_url::make_pluginfile_url(
+            $file->get_contextid(),
+            $file->get_component(),
+            $file->get_filearea(),
+            $file->get_itemid(),
+            $file->get_filepath(),
+            $file->get_filename()
+        )->out(false);
+    }
 }

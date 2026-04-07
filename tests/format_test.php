@@ -1,4 +1,19 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * PHPUnit tests for the format_streamdeck format class.
  *
@@ -9,15 +24,11 @@
 
 namespace format_streamdeck;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Tests for the format_streamdeck course format class (lib.php).
- *
- * @covers \format_streamdeck
  */
-class format_test extends \advanced_testcase {
-
+#[\PHPUnit\Framework\Attributes\CoversClass(\format_streamdeck::class)]
+final class format_test extends \advanced_testcase {
     /**
      * Test that the format uses sections.
      */
@@ -131,7 +142,7 @@ class format_test extends \advanced_testcase {
             $expected = get_string('sectionname', 'format_streamdeck', 1);
             $this->assertEquals($expected, $name);
         } else {
-            // Section is treated as orphaned — verify it gets one of the orphaned labels.
+            // Section is treated as orphaned - verify it gets one of the orphaned labels.
             $this->assertTrue(
                 $name === get_string('orphanedsection', 'format_streamdeck')
                 || strpos($name, 'Orphaned') !== false
@@ -160,6 +171,108 @@ class format_test extends \advanced_testcase {
         $name = $format->get_section_name($sectioninfo);
 
         $this->assertEquals('Custom Name', $name);
+    }
+
+    /**
+     * Test course_format_options returns herofont and enabledrawertoggle with defaults.
+     */
+    public function test_course_format_options_defaults(): void {
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course(['format' => 'streamdeck', 'numsections' => 1]);
+        $format = course_get_format($course);
+
+        $options = $format->get_format_options();
+        $this->assertArrayHasKey('herofont', $options);
+        $this->assertArrayHasKey('enabledrawertoggle', $options);
+        $this->assertEquals('Lobster', $options['herofont']);
+        $this->assertEquals(0, $options['enabledrawertoggle']);
+    }
+
+    /**
+     * Test course_format_options includes form elements when foreditform is true.
+     */
+    public function test_course_format_options_for_edit_form(): void {
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course(['format' => 'streamdeck', 'numsections' => 1]);
+        $format = course_get_format($course);
+
+        $options = $format->course_format_options(true);
+
+        $this->assertArrayHasKey('herofont', $options);
+        $this->assertArrayHasKey('label', $options['herofont']);
+        $this->assertArrayHasKey('element_type', $options['herofont']);
+        $this->assertEquals('select', $options['herofont']['element_type']);
+
+        $this->assertArrayHasKey('enabledrawertoggle', $options);
+        $this->assertArrayHasKey('label', $options['enabledrawertoggle']);
+        $this->assertEquals('select', $options['enabledrawertoggle']['element_type']);
+    }
+
+    /**
+     * Test that herofont can be updated per-course.
+     */
+    public function test_update_herofont_option(): void {
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course(['format' => 'streamdeck', 'numsections' => 1]);
+        $format = course_get_format($course);
+
+        $format->update_course_format_options(['herofont' => 'Poppins']);
+
+        // Re-fetch to confirm persistence.
+        $format = course_get_format($course);
+        $options = $format->get_format_options();
+        $this->assertEquals('Poppins', $options['herofont']);
+    }
+
+    /**
+     * Test that enabledrawertoggle can be updated per-course.
+     */
+    public function test_update_enabledrawertoggle_option(): void {
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course(['format' => 'streamdeck', 'numsections' => 1]);
+        $format = course_get_format($course);
+
+        $format->update_course_format_options(['enabledrawertoggle' => 1]);
+
+        $format = course_get_format($course);
+        $options = $format->get_format_options();
+        $this->assertEquals(1, $options['enabledrawertoggle']);
+    }
+
+    /**
+     * Test page_set_course adds drawer toggle body class when enabled.
+     */
+    public function test_page_set_course_drawer_toggle_class(): void {
+        global $PAGE;
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course(['format' => 'streamdeck', 'numsections' => 1]);
+        $format = course_get_format($course);
+        $format->update_course_format_options(['enabledrawertoggle' => 1]);
+
+        $PAGE->set_course($course);
+        $classes = $PAGE->bodyclasses;
+
+        $this->assertStringContainsString('streamdeck-show-drawer-toggle', $classes);
+    }
+
+    /**
+     * Test page_set_course does not add drawer toggle body class when disabled.
+     */
+    public function test_page_set_course_no_drawer_toggle_class(): void {
+        global $PAGE;
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course(['format' => 'streamdeck', 'numsections' => 1]);
+
+        $PAGE->set_course($course);
+        $classes = $PAGE->bodyclasses;
+
+        $this->assertStringNotContainsString('streamdeck-show-drawer-toggle', $classes);
     }
 
     /**
