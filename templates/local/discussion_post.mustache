@@ -18,7 +18,7 @@
     @template format_streamdeck/local/discussion_post
 
     A reply in an episode's discussion, with the replies to it nested beneath. The caller wraps it in its list item
-    (<li class="sd-reply" data-depth="{{depth}}">).
+    (li.sd-reply, with the post's depth in data-depth).
 
     Context variables required for this template: see format_streamdeck/local/discussion_post_body, plus
     * children - array - Replies to this post
