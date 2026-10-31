@@ -18,11 +18,12 @@
  * Custom edit section form for format_streamdeck.
  *
  * Extends the core editsection_form to add a filemanager element
- * for uploading section thumbnail images.
+ * for uploading section thumbnail images, and lists the section's
+ * activities in the featured activity select.
  *
  * @package    format_streamdeck
  * @copyright  2025
- * @license    http://www.gnu.org/licenses/gpl-3.0.txt GNU GPL v3 or later
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -34,6 +35,9 @@ require_once($CFG->dirroot . '/course/editsection_form.php');
  * Edit section form with thumbnail upload for format_streamdeck.
  */
 class format_streamdeck_editsection_form extends editsection_form {
+    /** @var array Editor options for "About this episode": text only, no file uploads. */
+    private const ABOUT_EDITOR_OPTIONS = ['maxfiles' => 0, 'noclean' => false, 'trusttext' => false];
+
     /** @var array Filemanager options for the section thumbnail. */
     private static $fileoptions = [
         'subdirs' => 0,
@@ -48,6 +52,35 @@ class format_streamdeck_editsection_form extends editsection_form {
         parent::definition();
 
         $mform = $this->_form;
+
+        // The format option lists the whole course; offer only this section's activities.
+        if ($mform->elementExists('featuredcmid') && !empty($this->_customdata['cs'])) {
+            $format = course_get_format($this->_customdata['course']);
+            $select = $mform->getElement('featuredcmid');
+            $select->removeOptions();
+            foreach ($format->get_featured_activity_choices($this->_customdata['cs']->section) as $cmid => $name) {
+                $select->addOption($name, $cmid);
+            }
+        }
+
+        // The "About this episode" text is edited in a rich text editor next to its switch; the format option holds the HTML.
+        if ($mform->elementExists('about')) {
+            $editor = $mform->createElement(
+                'editor',
+                'about_editor',
+                get_string('about', 'format_streamdeck'),
+                ['rows' => 8],
+                self::ABOUT_EDITOR_OPTIONS
+            );
+            $mform->insertElementBefore($editor, 'about');
+            $mform->removeElement('about');
+            $mform->removeElement('aboutformat');
+            $mform->setType('about_editor', PARAM_RAW);
+            $mform->addHelpButton('about_editor', 'about', 'format_streamdeck');
+            foreach (['abouttitle', 'abouticon', 'about_editor'] as $element) {
+                $mform->hideIf($element, 'showabout', 'notchecked');
+            }
+        }
 
         $mform->addElement(
             'header',
@@ -73,6 +106,16 @@ class format_streamdeck_editsection_form extends editsection_form {
      */
     public function set_data($defaultvalues) {
         $defaultvalues = (object)$defaultvalues;
+
+        if (!empty($this->_customdata['cs']) && !isset($defaultvalues->about)) {
+            $options = course_get_format($this->_customdata['course'])->get_format_options($this->_customdata['cs']);
+            $defaultvalues->about = $options['about'] ?? '';
+            $defaultvalues->aboutformat = $options['aboutformat'] ?? FORMAT_HTML;
+        }
+        $defaultvalues->about_editor = [
+            'text' => $defaultvalues->about ?? '',
+            'format' => $defaultvalues->aboutformat ?? FORMAT_HTML,
+        ];
 
         if (!empty($defaultvalues->id)) {
             $context = \context_course::instance($defaultvalues->course);
@@ -100,6 +143,18 @@ class format_streamdeck_editsection_form extends editsection_form {
         $data = parent::get_data();
         if ($data === null || $data === false) {
             return $data;
+        }
+
+        // A hidden editor (switch off) can come back without its text: keep what is stored rather than let the
+        // null that core fills in for missing options wipe it.
+        $editor = $data->about_editor ?? [];
+        unset($data->about_editor);
+        if (array_key_exists('text', $editor)) {
+            $format = (int) ($editor['format'] ?? FORMAT_HTML);
+            $data->about = clean_text($editor['text'], $format);
+            $data->aboutformat = $format;
+        } else {
+            unset($data->about, $data->aboutformat);
         }
 
         if (!empty($data->id) && isset($data->sectionimage_filemanager)) {

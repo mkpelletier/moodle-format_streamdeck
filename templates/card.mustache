@@ -21,6 +21,7 @@
     A single entry from `sections` or `continuewatching` in content.php.
 
     Context variables required for this template:
+    * num - int - The section number
     * url - string - The URL for the section link
     * name - string - The section name
     * done - bool - Whether the section is complete
@@ -28,31 +29,45 @@
     * hasimage - bool - Whether the section has an image
     * hasprogress - bool - Whether progress is available
     * progress - int - The progress percentage
+    * durationtext - string - Running time, if set
+    * isnew - bool - Whether something was added recently and the episode is not started
+    * hasdue - bool - Whether a deadline falls in the coming week
+    * duetext - string - The deadline, e.g. "Due Friday, 6 November, 5:00 PM"
+    * lockedinfo - string - HTML describing how the episode unlocks
 
     Example context (json):
-    { "url": "#", "name": "Section 1", "done": false, "locked": false, "hasimage": false, "hasprogress": true, "progress": 50 }
+    {
+        "num": 1, "url": "#", "name": "Section 1", "done": false, "locked": false, "hasimage": false,
+        "hasprogress": true, "progress": 50, "durationtext": "12 mins", "isnew": true,
+        "hasdue": true, "duetext": "Due Friday, 6 November, 5:00 PM", "lockedinfo": ""
+    }
 }}
 
 <div class="col">
-    <a href="{{url}}" class="streamdeck-card-link">
+    {{^locked}}<a href="{{url}}" class="streamdeck-card-link">{{/locked}}
+    {{! Locked cards stay reachable by keyboard and remote, so learners can hear how they unlock. }}
+    {{#locked}}<div class="streamdeck-card-link" role="link" aria-disabled="true" tabindex="0"
+        aria-describedby="streamdeck-card-lock-{{num}}{{#lockedinfo}} streamdeck-card-lockinfo-{{num}}{{/lockedinfo}}">{{/locked}}
         <article class="streamdeck-card {{#done}}streamdeck-card--done{{/done}} {{#locked}}streamdeck-card--locked{{/locked}}">
 
             <div class="streamdeck-card__image-wrapper">
                 {{#hasimage}}
-                    <img src="{{image}}" alt="{{name}}" class="streamdeck-card__image">
+                    <img src="{{image}}" alt="" class="streamdeck-card__image">
                 {{/hasimage}}
                 {{^hasimage}}
                     <div class="streamdeck-card__image-placeholder">
-                        <span class="streamdeck-card__placeholder-icon">
-                            <!-- simple play/film icon -->
-                            ▶
-                        </span>
+                        <i class="fa-solid fa-play streamdeck-card__placeholder-icon" aria-hidden="true"></i>
                     </div>
                 {{/hasimage}}
 
+                {{#isnew}}
+                    <span class="streamdeck-card__badge-new">{{#str}}new, format_streamdeck{{/str}}</span>
+                {{/isnew}}
+
                 {{#done}}
-                    <div class="streamdeck-card__badge-complete" aria-label="Module complete">
-                        <span class="streamdeck-card__badge-icon">✓</span>
+                    <div class="streamdeck-card__badge-complete">
+                        <i class="fa-solid fa-check streamdeck-card__badge-icon" aria-hidden="true"></i>
+                        <span class="visually-hidden">{{#str}}completed, format_streamdeck{{/str}}</span>
                     </div>
                 {{/done}}
 
@@ -67,20 +82,40 @@
                 <h3 class="streamdeck-card__title">{{name}}</h3>
 
                 <div class="streamdeck-card__meta">
+                    {{#durationtext}}
+                        <span class="streamdeck-card__meta-chip">
+                            <i class="fa-regular fa-clock" aria-hidden="true"></i>
+                            {{durationtext}}
+                        </span>
+                    {{/durationtext}}
+
+                    {{#hasdue}}
+                        <span class="streamdeck-card__meta-chip streamdeck-card__meta-chip--due">
+                            <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+                            {{duetext}}
+                        </span>
+                    {{/hasdue}}
+
                     {{#hasprogress}}
                         <span class="streamdeck-card__meta-chip">
-                            {{progress}}% complete
+                            {{#str}}percentcomplete, format_streamdeck, {{progress}}{{/str}}
                         </span>
                     {{/hasprogress}}
 
                     {{#locked}}
-                        <span class="streamdeck-card__meta-chip streamdeck-card__meta-chip--locked">
-                            Locked
+                        <span class="streamdeck-card__meta-chip streamdeck-card__meta-chip--locked" id="streamdeck-card-lock-{{num}}">
+                            <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                            {{#str}}locked, format_streamdeck{{/str}}
                         </span>
                     {{/locked}}
                 </div>
+
+                {{#lockedinfo}}
+                    <div class="streamdeck-card__lockedinfo" id="streamdeck-card-lockinfo-{{num}}">{{{lockedinfo}}}</div>
+                {{/lockedinfo}}
             </div>
 
         </article>
-    </a>
+    {{^locked}}</a>{{/locked}}
+    {{#locked}}</div>{{/locked}}
 </div>

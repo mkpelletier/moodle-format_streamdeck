@@ -1,0 +1,240 @@
+{{=<% %>=}}
+<%!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+%>
+<%!
+    @template format_streamdeck/mobile_course
+
+    Moodle App course view. Compiled by the app as an Angular template, so it holds no course data: everything
+    comes from CONTENT_OTHERDATA, parsed by mobile/course.js into sd, sdEpisode() and sdSeasonEpisodes().
+
+    Context variables required for this template:
+    * accentstyle - string - The course's accent colour as custom properties (a validated colour), or empty
+
+    Example context (json):
+    {"accentstyle": ""}
+%>
+<div class="format-streamdeck-app"<%#accentstyle%> style="<%accentstyle%>"<%/accentstyle%>>
+
+    @if (CONTENT_OTHERDATA.view === '0') {
+        <!-- Course page: hero, general resources, seasons and episode cards. -->
+        <section class="sd-hero">
+            @if (sd.course.image) {
+                <img class="sd-hero-image" [url]="sd.course.image" core-external-content alt="" />
+            }
+            <div class="sd-hero-scrim">
+                <h1 class="sd-hero-title">{{ sd.course.fullname }}</h1>
+                @if (sd.course.summary) {
+                    <div class="sd-hero-summary">
+                        <core-format-text [text]="sd.course.summary" contextLevel="course" [contextInstanceId]="course.id" />
+                    </div>
+                }
+                <div class="sd-hero-actions">
+                    @if (sd.course.resume) {
+                        <ion-button class="sd-btn-primary" (click)="sdOpen(sd.course.resume)">
+                            <ion-icon name="fas-play" slot="start" aria-hidden="true" />
+                            @if (sd.course.hasstarted) {
+                                {{ 'plugin.format_streamdeck.resume' | translate }}
+                            } @else {
+                                {{ 'plugin.format_streamdeck.start' | translate }}
+                            }
+                        </ion-button>
+                    }
+                    @if (sd.course.hascompletion) {
+                        <div class="sd-hero-progress">
+                            <div class="sd-ring" [style.--sd-progress]="sd.course.percent + '%'">
+                                <span>{{ sd.course.percent }}%</span>
+                            </div>
+                            <span class="sd-hero-progress-text">{{ sd.course.completiontext }}</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 0: announcements, general forum and other course-wide activities. -->
+        @for (section of sections; track section.id) {
+            @if (section.section === 0 && section.modules?.length) {
+                <ion-list class="sd-general">
+                    @for (module of section.modules; track module.id) {
+                        @if (module.visibleoncoursepage !== 0) {
+                            <core-course-module [module]="module" [section]="section" (completionChanged)="refreshContent(false)" />
+                        }
+                    }
+                </ion-list>
+            }
+        }
+
+        <h2 class="sd-strip-title">{{ 'plugin.format_streamdeck.allmodules' | translate }}</h2>
+
+        @if (sd.hasseasons) {
+            <ion-segment class="sd-seasons" [scrollable]="true" [value]="CONTENT_OTHERDATA.season"
+                (ionChange)="CONTENT_OTHERDATA.season = '' + $event.detail.value" [attr.aria-label]="sd.seasonlabel">
+                @for (season of sd.seasons; track season.index) {
+                    <ion-segment-button [value]="season.index">
+                        <ion-label>
+                            <span class="sd-season-kicker">{{ season.kicker }}</span>
+                            <span class="sd-season-name">{{ season.name }}</span>
+                            <span class="sd-season-count">{{ season.episodecount }}</span>
+                        </ion-label>
+                    </ion-segment-button>
+                }
+            </ion-segment>
+            <div class="sd-cards">
+                @for (episode of sdSeasonEpisodes(CONTENT_OTHERDATA.season); track episode.num) {
+                    <ng-container *ngTemplateOutlet="card; context: { $implicit: episode }" />
+                }
+            </div>
+        } @else {
+            <div class="sd-cards">
+                @for (episode of sd.episodes; track episode.num) {
+                    <ng-container *ngTemplateOutlet="card; context: { $implicit: episode }" />
+                }
+            </div>
+        }
+    } @else {
+        <!-- Episode page. -->
+        @if (sdEpisode(CONTENT_OTHERDATA.view); as episode) {
+            <section class="sd-episode">
+                <ion-button fill="clear" size="small" class="sd-back" (click)="sdOpen(0)">
+                    <ion-icon name="fas-arrow-left" slot="start" aria-hidden="true" />
+                    {{ 'plugin.format_streamdeck.backtocourse' | translate }}
+                </ion-button>
+
+                <h1 class="sd-episode-title">{{ episode.name }}</h1>
+                <p class="sd-episode-tagline">
+                    <span class="sd-pill">{{ 'plugin.format_streamdeck.episode' | translate }} {{ episode.num }}</span>
+                    @if (episode.seasonname) {
+                        <span>{{ episode.seasonname }}</span>
+                    }
+                    @if (episode.durationtext) {
+                        <span><ion-icon name="far-clock" aria-hidden="true" /> {{ episode.durationtext }}</span>
+                    }
+                </p>
+
+                @for (section of sections; track section.id) {
+                    @if (section.section === episode.num) {
+                        <!-- The stage: the featured activity. -->
+                        @for (module of section.modules; track module.id) {
+                            @if (module.id === episode.featuredcmid) {
+                                <div class="sd-stage">
+                                    <core-course-module [module]="module" [section]="section" showActivityDates="true"
+                                        showCompletionConditions="true" (completionChanged)="refreshContent(false)" />
+                                </div>
+                            }
+                        }
+
+                        @if (episode.about) {
+                            <ion-accordion-group class="sd-about" value="about">
+                                <ion-accordion value="about">
+                                    <ion-item slot="header">
+                                        @if (episode.abouticon) {
+                                            <ion-icon [name]="episode.abouticon" slot="start" class="sd-about-icon" aria-hidden="true" />
+                                        }
+                                        <ion-label><h2>{{ episode.abouttitle }}</h2></ion-label>
+                                    </ion-item>
+                                    <div slot="content" class="sd-about-body">
+                                        <core-format-text [text]="episode.about" contextLevel="course" [contextInstanceId]="course.id" />
+                                    </div>
+                                </ion-accordion>
+                            </ion-accordion-group>
+                        }
+
+                        @if (section.modules?.length > (episode.featuredcmid ? 1 : 0)) {
+                            <h2 class="sd-related-title">{{ 'plugin.format_streamdeck.relatedactivities' | translate }}</h2>
+                            <ion-list class="sd-related">
+                                @for (module of section.modules; track module.id) {
+                                    @if (module.id !== episode.featuredcmid && module.visibleoncoursepage !== 0) {
+                                        <core-course-module [module]="module" [section]="section" (completionChanged)="refreshContent(false)" />
+                                    }
+                                }
+                            </ion-list>
+                        }
+
+                        @if (!section.modules?.length) {
+                            <p class="sd-empty">{{ 'plugin.format_streamdeck.episodeempty' | translate }}</p>
+                        }
+                    }
+                }
+
+                <nav class="sd-episode-nav">
+                    @if (episode.prev) {
+                        <ion-button fill="outline" (click)="sdOpen(episode.prev)">
+                            <ion-icon name="fas-arrow-left" slot="start" aria-hidden="true" />
+                            {{ 'plugin.format_streamdeck.previousepisode' | translate }}
+                        </ion-button>
+                    }
+                    @if (episode.next) {
+                        @if (episode.canshownext) {
+                            <ion-button class="sd-btn-primary" (click)="sdOpen(episode.next)">
+                                {{ 'plugin.format_streamdeck.nextepisode' | translate }}
+                                <ion-icon name="fas-arrow-right" slot="end" aria-hidden="true" />
+                            </ion-button>
+                        } @else {
+                            <span class="sd-nav-hint">{{ 'plugin.format_streamdeck.nextepisodelocked' | translate }}</span>
+                        }
+                    }
+                </nav>
+            </section>
+        }
+    }
+
+    <!-- An episode card. -->
+    <ng-template #card let-episode>
+        <button type="button" class="sd-card" [class.sd-card-locked]="episode.locked" [disabled]="episode.locked"
+            (click)="sdOpen(episode.num)">
+            <div class="sd-card-image">
+                @if (episode.image) {
+                    <img [url]="episode.image" core-external-content alt="" />
+                } @else {
+                    <div class="sd-card-placeholder"><ion-icon name="fas-play" aria-hidden="true" /></div>
+                }
+                @if (episode.isnew) {
+                    <span class="sd-badge-new">{{ 'plugin.format_streamdeck.new' | translate }}</span>
+                }
+                @if (episode.done) {
+                    <span class="sd-badge-done">
+                        <ion-icon name="fas-check" [attr.aria-label]="'plugin.format_streamdeck.completed' | translate" />
+                    </span>
+                }
+                @if (episode.hasprogress) {
+                    <div class="sd-card-progress"><div [style.width]="episode.progress + '%'"></div></div>
+                }
+            </div>
+            <div class="sd-card-body">
+                <h3 class="sd-card-title">{{ episode.name }}</h3>
+                <div class="sd-card-meta">
+                    @if (episode.durationtext) {
+                        <span class="sd-chip"><ion-icon name="far-clock" aria-hidden="true" /> {{ episode.durationtext }}</span>
+                    }
+                    @if (episode.hasdue) {
+                        <span class="sd-chip sd-chip-due">{{ episode.duetext }}</span>
+                    }
+                    @if (episode.locked) {
+                        <span class="sd-chip sd-chip-locked">
+                            <ion-icon name="fas-lock" aria-hidden="true" /> {{ 'plugin.format_streamdeck.locked' | translate }}
+                        </span>
+                    }
+                </div>
+                @if (episode.lockedinfo) {
+                    <div class="sd-card-lockedinfo">
+                        <core-format-text [text]="episode.lockedinfo" contextLevel="course" [contextInstanceId]="course.id" />
+                    </div>
+                }
+            </div>
+        </button>
+    </ng-template>
+</div>

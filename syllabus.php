@@ -19,7 +19,7 @@
  *
  * @package    format_streamdeck
  * @copyright  2025 Mathieu Pelletier <mathieu@sats.ac.za>
- * @license    http://www.gnu.org/licenses/gpl-3.0.txt GNU GPL v3 or later
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once(__DIR__ . '/../../../config.php');

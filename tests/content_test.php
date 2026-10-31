@@ -19,7 +19,7 @@
  *
  * @package    format_streamdeck
  * @copyright  2025
- * @license    http://www.gnu.org/licenses/gpl-3.0.txt GNU GPL v3 or later
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace format_streamdeck;
@@ -142,51 +142,346 @@ final class content_test extends \advanced_testcase {
     }
 
     /**
-     * Test that related activities appear independently of related resources.
+     * Build the section view for a section, as a learner would see it.
+     *
+     * @param \stdClass $course
+     * @param int $section
+     * @return \stdClass Template data.
      */
-    public function test_related_activities_without_resources(): void {
+    private function export_section(\stdClass $course, int $section): \stdClass {
         global $PAGE;
+
+        // A page's course can only be set once; start a new one for each export.
+        $PAGE = new \moodle_page();
+        $PAGE->set_course($course);
+        $PAGE->set_url(new \moodle_url('/course/view.php', ['id' => $course->id, 'section' => $section]));
+        $PAGE->set_context(\context_course::instance($course->id));
+
+        $_GET['section'] = $section;
+        try {
+            $content = new \format_streamdeck\output\courseformat\content(course_get_format($course));
+            $data = $content->export_for_template($PAGE->get_renderer('format_streamdeck'));
+        } finally {
+            unset($_GET['section']);
+        }
+
+        // The Streamdeck export, not the core fallback used when it throws.
+        $this->assertObjectHasProperty('issectionview', $data);
+        return $data;
+    }
+
+    /**
+     * A unit with only an assignment puts the assignment on stage, and still has episode navigation.
+     */
+    public function test_assessment_only_section_takes_stage(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
 
         $course = $this->getDataGenerator()->create_course([
             'format' => 'streamdeck',
-            'numsections' => 1,
+            'numsections' => 2,
             'enablecompletion' => 1,
         ]);
+        $assign = $this->getDataGenerator()->create_module('assign', [
+            'course' => $course->id,
+            'section' => 1,
+            'name' => 'Final assignment',
+            'intro' => 'Hand in your final portfolio.',
+        ]);
 
-        // Add an assignment (activity) but no resources to section 1.
+        $data = $this->export_section($course, 1);
+
+        $this->assertTrue($data->hasepisode);
+        $this->assertFalse($data->noepisode);
+        $this->assertEquals($assign->cmid, $data->episode->cmid);
+        $this->assertTrue($data->episode->isstage);
+        $this->assertTrue($data->episode->stage['isassessment']);
+        $this->assertStringContainsString('Hand in your final portfolio.', $data->episode->introhtml);
+        $this->assertFalse($data->hasrelatedactivities);
+        $this->assertTrue($data->hasnextsection);
+    }
+
+    /**
+     * A quiz on stage shows its settings and offers to start.
+     */
+    public function test_quiz_stage_facts(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $course = $this->getDataGenerator()->create_course(['format' => 'streamdeck', 'numsections' => 1]);
+        $this->getDataGenerator()->create_module('quiz', [
+            'course' => $course->id,
+            'section' => 1,
+            'timelimit' => HOURSECS,
+            'attempts' => 2,
+        ]);
+
+        $data = $this->export_section($course, 1);
+        $stage = $data->episode->stage;
+
+        $this->assertEquals(get_string('stageaction:start', 'format_streamdeck'), $stage['actionlabel']);
+        $values = array_column($stage['facts'], 'value', 'label');
+        $this->assertEquals(format_time(HOURSECS), $values[get_string('timelimit', 'quiz')]);
+        $this->assertEquals(2, $values[get_string('attemptsallowed', 'quiz')]);
+    }
+
+    /**
+     * Learning content keeps the stage; assessments move to the sidebar.
+     */
+    public function test_learning_activity_takes_stage_over_assessment(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $course = $this->getDataGenerator()->create_course(['format' => 'streamdeck', 'numsections' => 1]);
+        $assign = $this->getDataGenerator()->create_module('assign', ['course' => $course->id, 'section' => 1]);
+        $url = $this->getDataGenerator()->create_module('url', [
+            'course' => $course->id,
+            'section' => 1,
+            'externalurl' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        ]);
+
+        $data = $this->export_section($course, 1);
+
+        $this->assertEquals($url->cmid, $data->episode->cmid);
+        $this->assertFalse($data->episode->isstage);
+        $this->assertEquals([$assign->cmid], array_column($data->relatedactivities, 'cmid'));
+    }
+
+    /**
+     * A teacher can pin any activity to the stage.
+     */
+    public function test_pinned_activity_takes_stage(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $course = $this->getDataGenerator()->create_course(['format' => 'streamdeck', 'numsections' => 1]);
+        $forum = $this->getDataGenerator()->create_module('forum', ['course' => $course->id, 'section' => 1]);
+        $this->getDataGenerator()->create_module('url', [
+            'course' => $course->id,
+            'section' => 1,
+            'externalurl' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        ]);
+        $section = get_fast_modinfo($course)->get_section_info(1);
+        course_get_format($course)->update_section_format_options(['id' => $section->id, 'featuredcmid' => $forum->cmid]);
+
+        $data = $this->export_section($course, 1);
+
+        $this->assertEquals($forum->cmid, $data->episode->cmid);
+        $this->assertTrue($data->episode->isstage);
+        $this->assertFalse($data->episode->stage['isassessment']);
+    }
+
+    /**
+     * Precedence of the automatic choice.
+     */
+    public function test_select_featured_activity(): void {
+        $item = fn(int $cmid, string $modname, string $youtube = '') =>
+            (object) ['cmid' => $cmid, 'modname' => $modname, 'youtubeembedurl' => $youtube];
+        $select = fn(array $items, int $pinned = 0) =>
+            \format_streamdeck\output\courseformat\content::select_featured_activity($items, $pinned)?->cmid;
+
+        $this->assertNull($select([]));
+        $this->assertNull($select([$item(1, 'label'), $item(2, 'resource')]));
+        $this->assertEquals(2, $select([$item(1, 'label'), $item(2, 'quiz')]));
+        $this->assertEquals(3, $select([$item(2, 'quiz'), $item(3, 'lesson')]));
+        $this->assertEquals(4, $select([$item(3, 'lesson'), $item(4, 'url', 'https://www.youtube.com/embed/x')]));
+        $this->assertEquals(2, $select([$item(2, 'quiz'), $item(3, 'lesson')], 2));
+        $this->assertEquals(3, $select([$item(3, 'lesson'), $item(5, 'forum')], 99));
+        $this->assertEquals(5, $select([$item(1, 'label'), $item(5, 'forum')]));
+    }
+
+    /**
+     * Build the course overview page, as a learner would see it.
+     *
+     * @param \stdClass $course
+     * @return \stdClass Template data.
+     */
+    private function export_overview(\stdClass $course): \stdClass {
+        global $PAGE;
+
+        $PAGE->set_course($course);
+        $PAGE->set_url(new \moodle_url('/course/view.php', ['id' => $course->id]));
+        $PAGE->set_context(\context_course::instance($course->id));
+
+        $content = new \format_streamdeck\output\courseformat\content(course_get_format($course));
+        $data = $content->export_for_template($PAGE->get_renderer('format_streamdeck'));
+        $this->assertObjectHasProperty('issectionview', $data);
+        return $data;
+    }
+
+    /**
+     * Name a section's season and running time.
+     *
+     * @param \stdClass $course
+     * @param int $sectionnum
+     * @param array $options
+     */
+    private function set_section_options(\stdClass $course, int $sectionnum, array $options): void {
+        $section = get_fast_modinfo($course)->get_section_info($sectionnum);
+        course_get_format($course)->update_section_format_options(['id' => $section->id] + $options);
+    }
+
+    /**
+     * Seasons group the cards, open on the season the learner is working through, and carry the course's label.
+     */
+    public function test_seasons_on_overview(): void {
+        $this->resetAfterTest();
+        $student = $this->getDataGenerator()->create_user();
+
+        $course = $this->getDataGenerator()->create_course([
+            'format' => 'streamdeck',
+            'numsections' => 4,
+            'enablecompletion' => 1,
+        ]);
+        $this->getDataGenerator()->enrol_user($student->id, $course->id, 'student');
+        course_get_format($course)->update_course_format_options(['seasonlabel' => 'Part']);
+        $this->set_section_options($course, 2, ['seasonname' => 'Nouns']);
+        $this->set_section_options($course, 4, ['seasonname' => 'Verbs']);
+        $page = $this->getDataGenerator()->create_module('page', [
+            'course' => $course->id,
+            'section' => 4,
+            'completion' => COMPLETION_TRACKING_MANUAL,
+        ]);
+
+        $this->setUser($student);
+        $data = $this->export_overview($course);
+
+        $this->assertTrue($data->hasseasons);
+        $this->assertSame('Part', $data->seasonlabel);
+        $this->assertSame(
+            [get_string('seasonopening', 'format_streamdeck'), 'Nouns', 'Verbs'],
+            array_column($data->seasons, 'name')
+        );
+        $this->assertSame(['Part 1', 'Part 2', 'Part 3'], array_column($data->seasons, 'kicker'));
+        $this->assertSame([1, 2, 1], array_map(fn($season) => count($season->sections), $data->seasons));
+        $this->assertSame(
+            [
+                get_string('seasonepisode', 'format_streamdeck'),
+                get_string('seasonepisodes', 'format_streamdeck', 2),
+                get_string('seasonepisode', 'format_streamdeck'),
+            ],
+            array_column($data->seasons, 'episodecount')
+        );
+        // The only unfinished activity is in "Verbs", so that tab opens.
+        $this->assertSame([false, false, true], array_column($data->seasons, 'selected'));
+        $this->assertCount(4, $data->sections);
+        $this->assertStringContainsString('id=' . $page->cmid, $data->playurl);
+    }
+
+    /**
+     * Courses that name no season keep a single shelf.
+     */
+    public function test_no_seasons(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $course = $this->getDataGenerator()->create_course(['format' => 'streamdeck', 'numsections' => 2]);
+        $data = $this->export_overview($course);
+
+        $this->assertFalse($data->hasseasons);
+        $this->assertCount(2, $data->sections);
+    }
+
+    /**
+     * Cards show the running time, a "New" badge and an upcoming deadline.
+     */
+    public function test_episode_metadata(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $course = $this->getDataGenerator()->create_course(['format' => 'streamdeck', 'numsections' => 2]);
+        $this->set_section_options($course, 1, ['duration' => 12]);
         $this->getDataGenerator()->create_module('assign', [
             'course' => $course->id,
             'section' => 1,
-            'name' => 'Test Assignment',
+            'duedate' => time() + 2 * DAYSECS,
+        ]);
+        $old = $this->getDataGenerator()->create_module('page', ['course' => $course->id, 'section' => 2]);
+        $DB->set_field('course_modules', 'added', time() - 30 * DAYSECS, ['id' => $old->cmid]);
+        rebuild_course_cache($course->id, true);
+
+        $cards = $this->export_overview($course)->sections;
+
+        $this->assertSame(format_time(12 * MINSECS), $cards[0]->durationtext);
+        $this->assertTrue($cards[0]->isnew);
+        $this->assertTrue($cards[0]->hasdue);
+        $this->assertStringStartsWith(get_string('duesoon', 'format_streamdeck', ''), $cards[0]->duetext);
+
+        $this->assertSame('', $cards[1]->durationtext);
+        $this->assertFalse($cards[1]->isnew);
+        $this->assertFalse($cards[1]->hasdue);
+    }
+
+    /**
+     * The episode page names its season and running time.
+     */
+    public function test_episode_page_season_and_duration(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $course = $this->getDataGenerator()->create_course(['format' => 'streamdeck', 'numsections' => 2]);
+        $this->set_section_options($course, 1, ['seasonname' => 'Nouns', 'duration' => 90]);
+
+        $data = $this->export_section($course, 1);
+
+        $this->assertSame(get_string('season', 'format_streamdeck') . ' 1: Nouns', $data->episodeseasonname);
+        $this->assertSame(format_time(90 * MINSECS), $data->episodedurationtext);
+    }
+
+    /**
+     * "About this episode" shows only when switched on and filled in, and gives the page a left column.
+     */
+    public function test_about_this_episode(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $course = $this->getDataGenerator()->create_course(['format' => 'streamdeck', 'numsections' => 3]);
+        $this->getDataGenerator()->create_module('url', [
+            'course' => $course->id,
+            'section' => 1,
+            'externalurl' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        ]);
+        $objectives = '<ul><li>Name the parts of speech</li></ul>';
+        $this->set_section_options($course, 1, [
+            'showabout' => 1,
+            'about' => $objectives,
+            'aboutformat' => FORMAT_HTML,
+            'abouttitle' => 'Learning objectives',
+            'abouticon' => 'bullseye',
+        ]);
+        $this->set_section_options($course, 2, ['showabout' => 0, 'about' => $objectives, 'aboutformat' => FORMAT_HTML]);
+        $this->set_section_options($course, 3, ['showabout' => 1, 'about' => '<p> </p>', 'aboutformat' => FORMAT_HTML]);
+
+        $data = $this->export_section($course, 1);
+        $this->assertStringContainsString('Name the parts of speech', $data->about);
+        $this->assertSame('Learning objectives', $data->abouttitle);
+        $this->assertSame('bullseye', $data->abouticon);
+        $this->assertFalse($data->hasrelatedsidebar);
+        $this->assertTrue($data->hasleftcolumn);
+
+        $this->assertSame('', $this->export_section($course, 2)->about);
+        $this->assertSame('', $this->export_section($course, 3)->about);
+        $this->assertFalse($this->export_section($course, 3)->hasleftcolumn);
+    }
+
+    /**
+     * The card falls back to "About this episode" and no icon.
+     */
+    public function test_about_this_episode_defaults(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+
+        $course = $this->getDataGenerator()->create_course(['format' => 'streamdeck', 'numsections' => 1]);
+        $this->set_section_options($course, 1, [
+            'showabout' => 1,
+            'about' => '<p>Read the chapter.</p>',
+            'aboutformat' => FORMAT_HTML,
+            'abouticon' => 'not-an-offered-icon',
         ]);
 
-        $PAGE->set_course($course);
-        $PAGE->set_url(new \moodle_url('/course/view.php', [
-            'id' => $course->id,
-            'section' => 1,
-        ]));
-        $PAGE->set_context(\context_course::instance($course->id));
-
-        // Simulate the section parameter so the content class picks up section view.
-        $_GET['section'] = 1;
-
-        $format = course_get_format($course);
-        $content = new \format_streamdeck\output\courseformat\content($format);
-        $renderer = $PAGE->get_renderer('format_streamdeck');
-
-        $data = $content->export_for_template($renderer);
-
-        // Related resources should be empty.
-        $this->assertFalse($data->hasrelatedresources);
-
-        // Related activities should still show.
-        $this->assertTrue($data->hasrelatedactivities);
-        $this->assertTrue($data->hasrelatedsidebar);
-        $this->assertNotEmpty($data->relatedactivities);
-
-        // Clean up superglobal.
-        unset($_GET['section']);
+        $data = $this->export_section($course, 1);
+        $this->assertSame(get_string('about', 'format_streamdeck'), $data->abouttitle);
+        $this->assertSame('', $data->abouticon);
     }
 }

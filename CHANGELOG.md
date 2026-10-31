@@ -1,65 +1,97 @@
 # Changelog
 
-All notable changes to the Streamdeck course format plugin are documented in this file.
+## [1.0-beta12] - 2026-10-31
+
+### Added
+- Moodle App support: streaming course home, season tabs, episode cards and episode pages.
+- Seasons: group episodes under named seasons, shown as tabs. The label is configurable per course.
+- Episode cards show running time, "New", "Due soon" and unlock conditions.
+- "About this episode" card with optional title and icon.
+- TV display: large type, safe margins and remote navigation. Set from the View menu, a `?display=tv` link, or detected on TV browsers.
+- Arrow-key navigation on the episode shelf.
+- Rebuilt episode discussions: a threaded panel with an inline composer. Options, attachments and tags sit in a single bar of chips; the thread refreshes in place after posting.
+- The course's discussion forum (hero) opens in the same panel: a list of discussions, with "Start a discussion".
+- Accent colour course setting, with a colour picker. It replaces the default red everywhere in the course, including the Moodle App, and is adjusted where needed to stay legible in light and dark mode.
+- Announcements open as a "What's new" feed: date tiles, "New" badges, the newest open and the rest expanding in place. Teachers post, edit and delete from the feed.
+
+### Changed
+- Focus order follows the page: episode before related items; hidden navbar no longer focusable; locked cards reachable.
+- One visible focus ring for all controls.
+- Colour mode menu replaced by a View menu (Appearance and Display).
+- Completion read once per page from core's cache.
+
+### Fixed
+- Once announcements had been opened on a device, the badge stopped showing new ones; it now follows the forum's read tracking.
+- Copyleaks plagiarism notice illegible in dark mode.
+- Right drawer toggle did nothing on Moodle 5.3.
+- Empty episodes showed no navigation.
+- Completed activities could show as "To do".
+
+## [1.0-beta11] - 2026-10-30
+
+Requires Moodle 5.1 or later.
+
+### Added
+- Light, Dark and Auto colour modes per learner, with a site default. Defers to Boost's colour modes when enabled.
+- Consistent styling for every activity page, including the full quiz flow.
+- Activity page toolbar: back to the episode and the course.
+- Assessment-only units put the quiz or assignment centre stage.
+- "Featured activity" section setting.
+- "Previous episode" button on every unit.
+- Locked sections shown as locked cards.
+- Reduced-motion support.
+- Privacy provider for the colour mode preference.
+
+### Changed
+- Course index hidden from learners outside edit mode.
+- JavaScript rewritten on `core/modal` and `core/str`, with accessibility fixes.
+- Stylesheet reorganised around design tokens.
+- Hardcoded English moved to language strings.
+- CI runs on Moodle 5.1, 5.2 and main.
+
+### Fixed
+- Grades modal title.
+- Unnamed sections titled "Orphaned activities".
+- Announcements icon missing on a course's first view.
+- Activity descriptions missing from episode pages.
+- Subsections shown as episodes.
+- `install.xml` schema path and a missing capability string.
 
 ## [1.0-beta10] - 2026-04-07
 
 ### Added
-- Privacy API implementation (`classes/privacy/provider.php`) — null provider declaration.
-- Section thumbnail upload field in section settings (replaces requiring images in section descriptions).
-- Circular SVG countdown timer on quiz attempt pages with colour transitions (green/yellow/red) based on remaining time percentage.
-- "Back to course" button on quiz overview, summary, review, and assignment pages (suppressed inside iframes).
-- Quiz page dark theme: overrides for formulation, info, tables, badges, navigation, and timer elements.
-- Per-course settings: hero font selector, right drawer toggle, instructor labels.
-- Navbar auto-hide with toggle pill on course and activity pages.
-- Forum and announcements modal restyle with cinematic streaming aesthetic.
-- Unified grader pages reset to white background for readability.
-- Left drawer space reclamation on quiz, forum, and assignment pages.
-- Missing `nextepisode` language string definition.
-
-### Fixed
-- N+1 database query performance: batch-prefetch URL, advurl, H5P, forum counts, roles, and user records before loops.
-- Activity icon fuchsia SVG filter no longer overridden by plugin styles.
-- Completion condition badges (`mix-blend-mode: multiply`) now legible on dark backgrounds.
-- Right drawer toggle correctly scoped; auto-hides by default using custom `.streamdeck-drawer-open` class.
-- Quiz "Next page" button changed from bright red to ghost style matching "Previous".
-- Forum grade button opens in new tab inside assignment iframes.
-- Syllabus modal chrome stripped (transparent background, floating close button).
-- PHPCS, stylelint, and mustache lint compliance.
-- Language string ordering (alphabetical).
+- Section thumbnail upload.
+- Circular quiz timer.
+- "Back to course" button on quiz and assignment pages.
+- Dark quiz theme.
+- Course settings: hero font, right drawer toggle, instructor labels.
+- Auto-hiding navbar.
+- Privacy provider.
 
 ### Changed
-- Right drawer opens only on toggle click, closes on click-outside (bypasses Boost's `.show` persistence).
-- Quiz timer reads total duration from quiz settings for accurate ring progress.
-- Forum reply button and multi-discussion list restyled for streaming aesthetic.
+- Right drawer opens on toggle and closes on click outside.
+- Forum previews restyled.
+
+### Fixed
+- N+1 queries on the course page.
+- Completion badges illegible on dark backgrounds.
+- Coding standards and language string order.
 
 ## [1.0-beta6] - 2026-03-21
 
-### Fixed
-- Related activities sidebar now displays independently of related resources. Previously, activities (quizzes, assignments, forums) were hidden when no resources (PDFs, documents) were present in a section.
-
 ### Added
-- PHPUnit test suite with 22 tests covering the format class, syllabus CRUD, content output, and YouTube URL extraction.
-- GitHub Actions CI workflow (`ci.yml`) running lint, code checks, PHPUnit, and Behat against Moodle 5.0 with PHP 8.2/8.3 and PostgreSQL/MariaDB.
-- `.gitignore` for development artefacts.
+- PHPUnit tests and GitHub Actions CI.
 
-### Changed
-- Fixed duplicate admin settings page registration that produced "Duplicate admin page name" warnings during install and PHPUnit init.
+### Fixed
+- Related activities hidden when a section had no resources.
+- Duplicate admin settings page warning.
 
 ## [1.0-beta5] - 2026-02-11
 
 ### Added
-- General discussions forum and participants links in the course hero section.
+- General discussion forum and participants links in the hero.
 
 ## [1.0-beta4] - 2026-02-11
 
 ### Added
-- Initial commit of the Streamdeck course format plugin.
-- Netflix-style episode grid with hero banner, section cards, and continue-watching row.
-- Episode view with related resources and related activities sidebar.
-- Inline forum and assignment preview modals.
-- Completion gating with "Next" button.
-- Syllabus editor (overview, outcomes, assessments, materials).
-- Course schedule integration via `mod_courseschedule`.
-- YouTube auto-embedding for URL activities.
-- Configurable instructor roles and labels in admin settings.
+- First release: episode grid with hero, episode pages with related items, forum and assignment previews, completion-gated "Next", syllabus editor, course schedule integration, YouTube embedding, configurable instructor labels.

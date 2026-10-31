@@ -19,7 +19,7 @@
  *
  * @package    format_streamdeck
  * @copyright  2025
- * @license    http://www.gnu.org/licenses/gpl-3.0.txt GNU GPL v3 or later
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace format_streamdeck;

@@ -21,7 +21,7 @@
  *
  * @package    format_streamdeck
  * @copyright  2025
- * @license    http://www.gnu.org/licenses/gpl-3.0.txt GNU GPL v3 or later
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace format_streamdeck\output\courseformat;
@@ -37,6 +37,15 @@ use stdClass;
  * @package    format_streamdeck
  */
 class content extends core_content {
+    /** @var string[] Modules listed under "Related resources" rather than as activities. */
+    public const RESOURCE_TYPES = ['label', 'resource'];
+
+    /** @var string[] Learning activities that can play on the episode stage. */
+    public const LEARNING_TYPES = ['lesson', 'scorm', 'lti', 'url', 'advurl', 'h5pactivity'];
+
+    /** @var string[] Activities that take the stage when a unit has no learning activity. */
+    public const ASSESSMENT_TYPES = ['quiz', 'assign', 'workshop'];
+
     /**
      * Get the name of the template to use for this templatable.
      *
@@ -62,12 +71,12 @@ class content extends core_content {
      * @return stdClass data context for a mustache template
      */
     public function export_for_template(renderer_base $output): stdClass {
-        global $PAGE;
+        global $PAGE, $USER;
 
         try {
             $course     = $this->format->get_course();
             $modinfo    = $this->format->get_modinfo();
-            $completion = new \completion_info($course);
+            $progress   = new \format_streamdeck\local\course_progress($modinfo, new \completion_info($course), (int) $USER->id);
             $context    = \context_course::instance($course->id);
 
             $data = new stdClass();
@@ -82,16 +91,16 @@ class content extends core_content {
 
             // 2. Hero / overview vs. section-view defaults.
             if ($data->showhero) {
-                $this->build_hero_view($data, $course, $context, $modinfo, $completion);
+                $this->build_hero_view($data, $course, $context, $modinfo, $progress);
             } else {
                 $this->build_section_view_hero_defaults($data, $course, $context);
             }
 
             // 3. Section tiles and continue watching row (overview only).
-            $this->build_section_tiles($data, $course, $modinfo, $completion);
+            $this->build_section_tiles($data, $course, $modinfo, $progress);
 
             // 4. Section view (episode, related activities, navigation).
-            $this->build_section_view($data, $course, $modinfo, $completion, $currentsection);
+            $this->build_section_view($data, $course, $modinfo, $progress, $currentsection);
 
             // 5. Schedule and syllabus (More info).
             $this->build_schedule_and_syllabus($data, $course, $context);
@@ -149,6 +158,9 @@ class content extends core_content {
 
         // Right drawer toggle visibility.
         $data->enabledrawertoggle = !empty($formatoptions['enabledrawertoggle']);
+
+        // The view menu: appearance (unless Boost owns the colour mode) and display.
+        $data->colourmode = \format_streamdeck\local\colour_mode::export_menu();
     }
 
     /**
@@ -179,14 +191,14 @@ class content extends core_content {
      * @param stdClass          $course
      * @param \context_course   $context
      * @param \course_modinfo   $modinfo
-     * @param \completion_info  $completion
+     * @param \format_streamdeck\local\course_progress $progress
      */
     private function build_hero_view(
         stdClass $data,
         stdClass $course,
         \context_course $context,
         \course_modinfo $modinfo,
-        \completion_info $completion
+        \format_streamdeck\local\course_progress $progress
     ): void {
         global $CFG, $USER, $DB, $PAGE;
 
@@ -219,9 +231,9 @@ class content extends core_content {
             if ($weeks >= 6) {
                 $rounded = (int) (round($weeks / 12) * 12);
                 $rounded = $rounded === 0 ? 12 : $rounded;
-                $data->duration = $rounded . ' week' . ($rounded > 1 ? 's' : '');
+                $data->duration = get_string('numweeks', 'moodle', $rounded);
             } else {
-                $data->duration = $days . ' day' . ($days > 1 ? 's' : '');
+                $data->duration = get_string($days === 1 ? 'numday' : 'numdays', 'moodle', $days);
             }
         } else {
             $data->duration = '—';
@@ -350,7 +362,7 @@ class content extends core_content {
 
         // Announcements / News forum icon (section 0).
         $data->hasannouncementicon      = false;
-        $data->announcementiconurl      = '';
+        $data->announcementcontextid    = 0;
         $data->announcementunreadcount  = 0;
         $data->announcementforumid      = 0;
 
@@ -371,17 +383,16 @@ class content extends core_content {
                 );
 
                 if ($newsforumcm) {
-                    // Get full cm_info object for visibility checks.
-                    $cm = $modinfo->get_cm($newsforumcm->id);
+                    // Get full cm_info object for visibility checks. Re-read the course modules, as
+                    // forum_get_course_forum() creates the forum on a course's first view.
+                    $cm = get_fast_modinfo($course)->get_cm($newsforumcm->id);
 
                     // For announcements, we relax uservisible slightly:
                     // Show if visible OR if it's just hidden from students but exists.
                     // This mirrors how Moodle navigation treats announcements.
                     if ($cm->visible || $cm->uservisible) {
                         $data->hasannouncementicon = true;
-                        $data->announcementiconurl = (new moodle_url('/mod/forum/view.php', [
-                            'id' => $cm->id,
-                        ]))->out(false);
+                        $data->announcementcontextid = $cm->context->id;
                         $data->announcementforumid = (int)$newsforum->id;
 
                         // Default 0, then try to compute unread posts.
@@ -402,14 +413,14 @@ class content extends core_content {
         } catch (\Throwable $e) {
             debugging('STREAMDECK: error building announcements icon data: ' . $e->getMessage(), DEBUG_DEVELOPER);
             $data->hasannouncementicon     = false;
-            $data->announcementiconurl     = '';
+            $data->announcementcontextid   = 0;
             $data->announcementunreadcount = 0;
             $data->announcementforumid     = 0;
         }
 
         // General forum icon (section 0).
-        $data->hasgeneralforumicon = false;
-        $data->generalforumurl     = '';
+        $data->hasgeneralforumicon   = false;
+        $data->generalforumcontextid = 0;
 
         try {
             // Scan section 0 only for the first visible, non-news forum.
@@ -423,17 +434,15 @@ class content extends core_content {
                     $instance = $DB->get_record('forum', ['id' => $cm->instance], 'id, type', IGNORE_MISSING);
                     if ($instance && $instance->type !== 'news') {
                         $data->hasgeneralforumicon = true;
-                        $data->generalforumurl = (new moodle_url('/mod/forum/view.php', [
-                            'id' => $cm->id,
-                        ]))->out(false);
+                        $data->generalforumcontextid = $cm->context->id;
                         break;
                     }
                 }
             }
         } catch (\Throwable $e) {
             debugging('STREAMDECK: error building general forum icon data: ' . $e->getMessage(), DEBUG_DEVELOPER);
-            $data->hasgeneralforumicon = false;
-            $data->generalforumurl     = '';
+            $data->hasgeneralforumicon   = false;
+            $data->generalforumcontextid = 0;
         }
 
         // Participants icon (capability-gated).
@@ -485,48 +494,16 @@ class content extends core_content {
         }
 
         // Completion across the whole course + resume button.
-        $total    = 0;
-        $complete = 0;
-
-        foreach ($modinfo->get_cms() as $cm) {
-            if ($cm->uservisible && $cm->completion != COMPLETION_TRACKING_NONE) {
-                $total++;
-                $cdata = $completion->get_data($cm, true, $USER->id);
-                if (
-                    $cdata->completionstate == COMPLETION_COMPLETE
-                    || $cdata->completionstate == COMPLETION_COMPLETE_PASS
-                ) {
-                    $complete++;
-                }
-            }
-        }
-
-        $data->hascompletion     = $total > 0;
-        $data->completionpercent = $total ? (int) round(($complete / $total) * 100) : 0;
-        $data->completiontext    = $total ? "$complete/$total complete" : '';
+        $counts = $progress->get_course_counts();
+        $data->hascompletion     = $counts['total'] > 0;
+        $data->completionpercent = \format_streamdeck\local\course_progress::percent($counts);
+        $data->completiontext    = $counts['total']
+            ? get_string('activitiescomplete', 'format_streamdeck', $counts)
+            : '';
 
         // First incomplete activity for "Play / Resume" CTA.
-        $firstincompleteurl = null;
-        foreach ($modinfo->get_section_info_all() as $sectioninfo) {
-            if (!$sectioninfo->uservisible) {
-                continue;
-            }
-            foreach ($modinfo->sections[$sectioninfo->section] ?? [] as $cmid) {
-                $cm = $modinfo->get_cm($cmid);
-                if ($cm->uservisible && $cm->completion != COMPLETION_TRACKING_NONE) {
-                    $cdata = $completion->get_data($cm, true, $USER->id);
-                    if (
-                        $cdata->completionstate != COMPLETION_COMPLETE
-                        && $cdata->completionstate != COMPLETION_COMPLETE_PASS
-                    ) {
-                        $firstincompleteurl = new moodle_url('/mod/' . $cm->modname . '/view.php', [
-                            'id' => $cmid,
-                        ]);
-                        break 2;
-                    }
-                }
-            }
-        }
+        $next = $progress->get_first_incomplete();
+        $firstincompleteurl = $next ? new moodle_url('/mod/' . $next->modname . '/view.php', ['id' => $next->id]) : null;
 
         // Build grades modal.
         $gradeurl = new moodle_url('/grade/report/user/index.php', [
@@ -581,24 +558,24 @@ class content extends core_content {
     }
 
     /**
-     * Build section tiles (Netflix-style cards) and continue-watching row
-     * for the overview page.
+     * Build the episode cards for the overview page, grouped into seasons when the course uses them.
      *
      * @param stdClass          $data
      * @param stdClass          $course
      * @param \course_modinfo   $modinfo
-     * @param \completion_info  $completion
+     * @param \format_streamdeck\local\course_progress $progress
      */
     private function build_section_tiles(
         stdClass $data,
         stdClass $course,
         \course_modinfo $modinfo,
-        \completion_info $completion
+        \format_streamdeck\local\course_progress $progress
     ): void {
-        global $PAGE, $USER;
+        global $PAGE;
 
-        $data->sections         = [];
-        $data->continuewatching = [];
+        $data->sections = [];
+        $data->hasseasons = false;
+        $data->seasons = [];
 
         if (!$data->showsectiontiles) {
             return;
@@ -606,53 +583,80 @@ class content extends core_content {
 
         /** @var \format_streamdeck\output\renderer $frenderer */
         $frenderer = $PAGE->get_renderer('format_streamdeck');
+        $episodes = new \format_streamdeck\local\episodes($this->format, $modinfo, $progress);
 
+        $cards = [];
         foreach ($modinfo->get_section_info_all() as $sectioninfo) {
-            if ($sectioninfo->section == 0 || !$sectioninfo->visible || !$sectioninfo->available) {
+            // Subsections are shown inside their parent episode, not as episodes of their own.
+            if ($sectioninfo->section == 0 || !empty($sectioninfo->component) || !$sectioninfo->visible) {
+                continue;
+            }
+            // Restricted sections stay on the shelf as locked cards, unless set to be hidden entirely.
+            if (!$sectioninfo->uservisible && empty($sectioninfo->availableinfo)) {
                 continue;
             }
 
             $section         = new stdClass();
+            $section->num    = (int) $sectioninfo->section;
             $section->name   = $this->format->get_section_name($sectioninfo);
-            $section->url    = $this->format->get_view_url($sectioninfo->section)->out(false);
+            $section->locked = !$sectioninfo->uservisible;
+            $section->url    = $section->locked ? '' : $this->format->get_view_url($sectioninfo->section)->out(false);
+            $section->lockedinfo = $section->locked
+                ? \core_availability\info::format_info($sectioninfo->availableinfo, $course)
+                : '';
 
             $sectionimage = '';
             if ($frenderer && method_exists($frenderer, 'get_section_image_for_sectioninfo')) {
                 $sectionimage = $frenderer->get_section_image_for_sectioninfo($sectioninfo);
             }
-
             $section->image    = $sectionimage;
             $section->hasimage = !empty($sectionimage);
-            $section->locked   = !$sectioninfo->available;
 
-            // Progress within the section.
-            $complete = 0;
-            $total    = 0;
+            $counts = $progress->get_section_counts($sectioninfo->section);
+            $section->progress    = \format_streamdeck\local\course_progress::percent($counts);
+            $section->hasprogress = $counts['total'] > 0;
+            $section->done        = $section->hasprogress && $counts['complete'] === $counts['total'];
 
-            foreach ($modinfo->sections[$sectioninfo->section] ?? [] as $cmid) {
-                $cm = $modinfo->get_cm($cmid);
-                if ($cm->uservisible && $cm->completion != COMPLETION_TRACKING_NONE) {
-                    $total++;
-                    $cdata = $completion->get_data($cm, true, $USER->id);
-                    if (
-                        $cdata->completionstate == COMPLETION_COMPLETE
-                        || $cdata->completionstate == COMPLETION_COMPLETE_PASS
-                    ) {
-                        $complete++;
-                    }
-                }
+            foreach ($episodes->get_metadata($sectioninfo) as $key => $value) {
+                $section->$key = $value;
             }
 
-            $section->progress    = $total ? (int) round(($complete / $total) * 100) : 0;
-            $section->hasprogress = $total > 0;
-            $section->done        = $section->progress === 100 && $total > 0;
+            $cards[$sectioninfo->section] = $section;
+        }
+        $data->sections = array_values($cards);
 
-            $data->sections[] = $section;
-
-            if ($section->hasprogress && $section->progress > 0 && $section->progress < 100) {
-                $data->continuewatching[] = $section;
+        // Seasons: one tab per season, opening on the one the learner is working through.
+        $seasons = $this->format->get_seasons();
+        if (!$seasons) {
+            return;
+        }
+        $label = $this->format->get_season_label();
+        $next = $progress->get_first_incomplete();
+        $current = 0;
+        foreach ($seasons as $index => $season) {
+            if ($next && in_array((int) $next->sectionnum, $season['sections'], true)) {
+                $current = $index;
             }
         }
+        foreach ($seasons as $index => $season) {
+            $seasoncards = array_values(array_filter(array_map(fn($num) => $cards[$num] ?? null, $season['sections'])));
+            if (!$seasoncards) {
+                continue;
+            }
+            $number = $index + 1;
+            $data->seasons[] = (object) [
+                'id' => 'streamdeck-season-' . $number,
+                'kicker' => $label . ' ' . $number,
+                'name' => $season['name'] !== '' ? $season['name'] : get_string('seasonopening', 'format_streamdeck'),
+                'sections' => $seasoncards,
+                'selected' => $index === $current,
+                'episodecount' => count($seasoncards) === 1
+                    ? get_string('seasonepisode', 'format_streamdeck')
+                    : get_string('seasonepisodes', 'format_streamdeck', count($seasoncards)),
+            ];
+        }
+        $data->hasseasons = count($data->seasons) > 0;
+        $data->seasonlabel = $label;
     }
 
     /**
@@ -662,14 +666,14 @@ class content extends core_content {
      * @param stdClass          $data
      * @param stdClass          $course
      * @param \course_modinfo   $modinfo
-     * @param \completion_info  $completion
+     * @param \format_streamdeck\local\course_progress $progress
      * @param int               $currentsection
      */
     private function build_section_view(
         stdClass $data,
         stdClass $course,
         \course_modinfo $modinfo,
-        \completion_info $completion,
+        \format_streamdeck\local\course_progress $progress,
         int $currentsection
     ): void {
         global $CFG, $DB, $PAGE, $USER;
@@ -677,7 +681,6 @@ class content extends core_content {
         // Defaults.
         $data->hasepisode        = false;
         $data->episode           = null;
-        $data->is_scorm_episode  = false;
         $data->relatedactivities = [];
 
         $data->courseurl       = (new moodle_url('/course/view.php', ['id' => $course->id]))->out(false);
@@ -689,24 +692,41 @@ class content extends core_content {
         $data->prevsectionname = '';
         $data->canshownextbutton = false;
 
-        if (!$data->issectionview || !isset($modinfo->sections[$currentsection])) {
+        if (!$data->issectionview) {
             return;
         }
 
-        $sectioncms  = $modinfo->sections[$currentsection];
+        // An episode with no activities yet still gets its header, empty state and navigation.
+        $sectioncms  = $modinfo->sections[$currentsection] ?? [];
         $sectioninfo = $modinfo->get_section_info($currentsection);
 
         // Do not render Streamdeck episode view for hidden/unavailable sections,
         // even for teachers. Hidden sections are edited in core's edit UI.
-        if (!$sectioninfo->visible || !$sectioninfo->available) {
+        if (!$sectioninfo || !$sectioninfo->visible || !$sectioninfo->available) {
             return;
         }
 
         $data->currentsectionname = $this->format->get_section_name($sectioninfo);
         $data->episodenumber      = $currentsection;
-
-        // Episode candidate types.
-        $episodecandidates = ['lesson', 'scorm', 'lti', 'url', 'advurl', 'h5pactivity'];
+        $minutes = max(0, (int) $sectioninfo->duration);
+        $data->episodedurationtext = $minutes ? format_time($minutes * MINSECS) : '';
+        $data->episodeseasonname = '';
+        $data->about = $sectioninfo->showabout ? $this->get_episode_about($sectioninfo) : '';
+        if ($data->about !== '') {
+            $options = $this->format->get_format_options($sectioninfo);
+            $title = trim((string) ($options['abouttitle'] ?? ''));
+            $data->abouttitle = $title !== ''
+                ? format_string($title, true, ['context' => \context_course::instance($course->id)])
+                : get_string('about', 'format_streamdeck');
+            $icon = (string) ($options['abouticon'] ?? '');
+            $data->abouticon = in_array($icon, \format_streamdeck::ABOUT_ICONS, true) ? $icon : '';
+        }
+        foreach ($this->format->get_seasons() as $index => $season) {
+            if (in_array($currentsection, $season['sections'], true)) {
+                $data->episodeseasonname = $this->format->get_season_label() . ' ' . ($index + 1) .
+                    ($season['name'] !== '' ? ': ' . $season['name'] : '');
+            }
+        }
 
         // Collect "Related Resources" (mod_label / mod_resource).
         $relatedresources = [];
@@ -763,9 +783,7 @@ class content extends core_content {
         $data->relatedresources = $relatedresources;
         $data->hasrelatedresources = !empty($relatedresources);
 
-        $episodecm          = null;
-        $youtubeurlcandidate = null;
-        $related             = [];
+        $related = [];
 
         // Batch-prefetch module instance data to avoid N+1 queries inside the loop.
         $urlids = [];
@@ -863,14 +881,8 @@ class content extends core_content {
             $item->name      = format_string($cm->name, true, ['context' => $cm->context]);
             $item->url       = $cm->url ? $cm->url->out(false) : '';
             $item->icon      = $cm->get_icon_url()->out(false);
-            $item->completionenabled = $cm->completion != COMPLETION_TRACKING_NONE;
-
-            $cdata           = $completion->get_data($cm, true, $USER->id);
-            $item->iscomplete = in_array(
-                $cdata->completionstate,
-                [COMPLETION_COMPLETE, COMPLETION_COMPLETE_PASS],
-                true
-            );
+            $item->completionenabled = $progress->is_tracked($cm->id);
+            $item->iscomplete = $progress->is_complete($cm->id);
 
             $item->isforum = false;
 
@@ -889,7 +901,15 @@ class content extends core_content {
                 $item->forumdiscussions = $forumdisccounts[$cm->instance] ?? 0;
                 $item->forumposts = $forumpostcounts[$cm->instance] ?? 0;
                 $item->forumunread = $forumunreadcounts[$cm->instance] ?? 0;
-                $item->forumpreviewhtml = $this->build_forum_preview_html($cm, $course);
+                try {
+                    $item->forumpreviewhtml = \format_streamdeck\output\discussion::render_preview($cm);
+                } catch (\Throwable $e) {
+                    debugging(
+                        'STREAMDECK: discussion preview failed for cmid ' . $cm->id . ': ' . $e->getMessage(),
+                        DEBUG_DEVELOPER
+                    );
+                    $item->forumpreviewhtml = '';
+                }
             }
 
             // Assignment.
@@ -907,16 +927,6 @@ class content extends core_content {
                 }
             }
 
-            // Intro + embed meta.
-            $cmrecord = $cm->get_course_module_record();
-
-            if (!empty($cmrecord->intro) && isset($cmrecord->introformat)) {
-                $item->introhtml = format_text($cmrecord->intro, $cmrecord->introformat, [
-                    'context' => $cm->context,
-                    'para'    => true,
-                ]);
-            }
-
             // YOUTUBE EMBEDDING (URL module — using batch-prefetched data).
             if ($cm->modname === 'url') {
                 $urlrec = $urlcache[$cm->instance] ?? null;
@@ -926,9 +936,6 @@ class content extends core_content {
                     if (!empty($youtubeembedurl)) {
                         $item->youtubeembedurl = $youtubeembedurl;
                         $item->url             = $externalurl;
-                        if ($youtubeurlcandidate === null) {
-                            $youtubeurlcandidate = $item;
-                        }
                     }
                 }
             }
@@ -942,9 +949,6 @@ class content extends core_content {
                     if (!empty($youtubeembedurl)) {
                         $item->youtubeembedurl = $youtubeembedurl;
                         $item->url             = $externalurl;
-                        if ($youtubeurlcandidate === null) {
-                            $youtubeurlcandidate = $item;
-                        }
                     }
                 }
             }
@@ -1050,13 +1054,8 @@ class content extends core_content {
 
             // Generic embeddability flags.
             if ($cm->modname === 'scorm') {
-                $scormid = $cm->id;
-                $scoid   = $DB->get_field('scorm_scoes', 'id', ['scorm' => $scormid], IGNORE_MISSING);
-                $baseurl = new moodle_url('/mod/scorm/view.php', ['id' => $cm->id]);
-                $embedurl        = $baseurl->out(false) . '&mode=embed';
-                $item->embedurl  = $embedurl;
-                $item->canembed  = true;
-                $data->is_scorm_episode = true;
+                $item->embedurl = (new moodle_url('/mod/scorm/view.php', ['id' => $cm->id, 'mode' => 'embed']))->out(false);
+                $item->canembed = true;
             } else if (($cm->modname === 'url' || $cm->modname === 'advurl') && !empty($item->youtubeembedurl)) {
                 $item->embedurl = $item->youtubeembedurl;
                 $item->canembed = true;
@@ -1069,85 +1068,188 @@ class content extends core_content {
                 $item->embedurl = '';
             }
 
-            if ($episodecm === null && in_array($cm->modname, $episodecandidates, true)) {
-                $episodecm = $item;
-            }
-
             $related[] = $item;
         }
 
-        // Select final episode: YouTube URL (if any) takes precedence.
-        $finalepisode = $youtubeurlcandidate ?? $episodecm;
+        $pinnedcmid = (int) $sectioninfo->featuredcmid;
+        $finalepisode = self::select_featured_activity($related, $pinnedcmid);
 
-        if ($finalepisode !== null) {
-            $data->hasepisode = true;
-            $data->episode    = $finalepisode;
-
-            $data->relatedactivities = array_values(
-                array_filter($related, function ($r) use ($finalepisode) {
-                    return (isset($r->modname) ? !in_array($r->modname, ['label', 'resource']) : true)
-                        && ((int) $r->cmid !== (int) $finalepisode->cmid);
-                })
-            );
-
-            $allepisodecomplete = $finalepisode->completionenabled ? $finalepisode->iscomplete : true;
-            $allrelatedcomplete = true;
-
-            foreach ($data->relatedactivities as $ra) {
-                if ($ra->completionenabled && !$ra->iscomplete) {
-                    $allrelatedcomplete = false;
-                    break;
-                }
-            }
-
-            $data->canshownextbutton = $allepisodecomplete && $allrelatedcomplete;
-        } else {
-            $data->hasepisode        = false;
-            $data->episode           = null;
-            $data->relatedactivities = array_values(
-                array_filter($related, function ($r) {
-                    return isset($r->modname) ? !in_array($r->modname, ['label', 'resource']) : true;
-                })
-            );
-            $data->canshownextbutton = false;
-        }
-
+        // Labels and resources live in "Related resources"; everything else not on stage is a related activity.
+        $data->relatedactivities = array_values(array_filter($related, function ($r) use ($finalepisode) {
+            return !in_array($r->modname, self::RESOURCE_TYPES, true)
+                && ($finalepisode === null || (int) $r->cmid !== (int) $finalepisode->cmid);
+        }));
         $data->hasrelatedactivities = !empty($data->relatedactivities);
         $data->hasrelatedsidebar = $data->hasrelatedresources || $data->hasrelatedactivities;
+        $data->hasleftcolumn = $data->hasrelatedsidebar || $data->about !== '';
 
-        // Previous / next section navigation.
+        if ($finalepisode !== null) {
+            // Activities that cannot play inside the page (quizzes, assignments...) get a launch panel instead.
+            $finalepisode->introhtml = $this->get_activity_intro($modinfo->get_cm($finalepisode->cmid));
+            $finalepisode->isstage = $finalepisode->h5phtml === '' && empty($finalepisode->canembed);
+            if ($finalepisode->isstage) {
+                $finalepisode->stage = $this->build_activity_stage($modinfo->get_cm($finalepisode->cmid), $finalepisode);
+            }
+            $data->hasepisode = true;
+            $data->episode    = $finalepisode;
+        }
+        $data->noepisode = !$data->hasepisode;
+
+        // The "Next episode" button waits until everything with completion tracking in this unit is done.
+        $data->canshownextbutton = true;
+        foreach (array_merge($data->relatedactivities, $finalepisode ? [$finalepisode] : []) as $item) {
+            if ($item->completionenabled && !$item->iscomplete) {
+                $data->canshownextbutton = false;
+                break;
+            }
+        }
+
+        // Previous / next episode: the nearest visible top-level sections. Delegated sections (subsections)
+        // are shown inside their parent, so they are not episodes of their own.
         $sectionsall = $modinfo->get_section_info_all();
+        $isepisode = function (\section_info $sinfo): bool {
+            return $sinfo->section > 0 && $sinfo->uservisible && empty($sinfo->component);
+        };
 
-        // Previous visible section (>0, <current).
-        for ($i = $currentsection - 1; $i >= 1; $i--) {
-            if (!isset($sectionsall[$i])) {
-                continue;
+        foreach (array_reverse($sectionsall) as $sinfo) {
+            if ($sinfo->section < $currentsection && $isepisode($sinfo)) {
+                $data->hasprevsection  = true;
+                $data->prevsectionname = $this->format->get_section_name($sinfo);
+                $data->prevsectionurl  = $this->format->get_view_url($sinfo->section)->out(false);
+                break;
             }
-            $sinfo = $sectionsall[$i];
-            if (!$sinfo->uservisible) {
-                continue;
-            }
-            $data->hasprevsection  = true;
-            $data->prevsectionname = $this->format->get_section_name($sinfo);
-            $data->prevsectionurl  = $this->format->get_view_url($sinfo->section)->out(false);
-            break;
         }
 
-        // Next visible section.
-        $maxsectionnum = max(array_keys($modinfo->sections));
-        for ($i = $currentsection + 1; $i <= $maxsectionnum; $i++) {
-            if (!isset($sectionsall[$i])) {
-                continue;
+        foreach ($sectionsall as $sinfo) {
+            if ($sinfo->section > $currentsection && $isepisode($sinfo)) {
+                $data->hasnextsection  = true;
+                $data->nextsectionname = $this->format->get_section_name($sinfo);
+                $data->nextsectionurl  = $this->format->get_view_url($sinfo->section)->out(false);
+                break;
             }
-            $sinfo = $sectionsall[$i];
-            if (!$sinfo->uservisible) {
-                continue;
-            }
-            $data->hasnextsection  = true;
-            $data->nextsectionname = $this->format->get_section_name($sinfo);
-            $data->nextsectionurl  = $this->format->get_view_url($sinfo->section)->out(false);
-            break;
         }
+    }
+
+    /**
+     * Choose the activity that takes centre stage on an episode page.
+     *
+     * In order: the activity a teacher pinned in the section settings, a YouTube link, the first learning
+     * activity, the first assessment, then any other activity. Labels and resources never take the stage.
+     *
+     * @param stdClass[] $items Section items in course order, each with cmid, modname and youtubeembedurl.
+     * @param int $pinnedcmid The section's featured activity, or 0 for automatic.
+     * @return stdClass|null
+     */
+    public static function select_featured_activity(array $items, int $pinnedcmid = 0): ?stdClass {
+        $candidates = array_values(array_filter($items, function ($item) {
+            return !in_array($item->modname, self::RESOURCE_TYPES, true);
+        }));
+
+        $rules = [
+            fn($item) => $pinnedcmid && (int) $item->cmid === $pinnedcmid,
+            fn($item) => !empty($item->youtubeembedurl),
+            fn($item) => in_array($item->modname, self::LEARNING_TYPES, true),
+            fn($item) => in_array($item->modname, self::ASSESSMENT_TYPES, true),
+        ];
+        foreach ($rules as $rule) {
+            foreach ($candidates as $item) {
+                if ($rule($item)) {
+                    return $item;
+                }
+            }
+        }
+        return $candidates[0] ?? null;
+    }
+
+    /**
+     * The section's "About this episode" text, formatted, or '' when it is empty.
+     *
+     * @param \section_info $sectioninfo
+     * @return string
+     */
+    private function get_episode_about(\section_info $sectioninfo): string {
+        $options = $this->format->get_format_options($sectioninfo);
+        $about = (string) ($options['about'] ?? '');
+        if (trim(strip_tags($about, '<img>')) === '') {
+            return '';
+        }
+        return format_text($about, (int) ($options['aboutformat'] ?? FORMAT_HTML), [
+            'context' => \context_course::instance($this->format->get_courseid()),
+        ]);
+    }
+
+    /**
+     * The activity's description, formatted, or '' when it has none.
+     *
+     * @param \cm_info $cm
+     * @return string
+     */
+    private function get_activity_intro(\cm_info $cm): string {
+        global $DB;
+
+        if (!plugin_supports('mod', $cm->modname, FEATURE_MOD_INTRO, true)) {
+            return '';
+        }
+        $instance = $DB->get_record($cm->modname, ['id' => $cm->instance], 'id, intro, introformat', IGNORE_MISSING);
+        if (!$instance || trim(strip_tags($instance->intro, '<img>')) === '') {
+            return '';
+        }
+        return format_module_intro($cm->modname, $instance, $cm->id);
+    }
+
+    /**
+     * Launch panel for an activity that is featured but cannot be embedded, such as a quiz or an assignment.
+     *
+     * @param \cm_info $cm
+     * @param stdClass $item The section item built for the activity.
+     * @return array Template context for format_streamdeck/local/activity_stage.
+     */
+    private function build_activity_stage(\cm_info $cm, stdClass $item): array {
+        global $CFG, $USER;
+
+        $facts = [];
+        foreach (\core\activity_dates::get_dates_for_module($cm, $USER->id) as $date) {
+            $facts[] = [
+                'label' => $date['label'],
+                'value' => userdate($date['timestamp'], get_string('strftimedatetime', 'langconfig')),
+            ];
+        }
+
+        $action = 'open';
+        if ($cm->modname === 'quiz') {
+            require_once($CFG->dirroot . '/mod/quiz/lib.php');
+            try {
+                $quiz = \mod_quiz\quiz_settings::create_for_cmid($cm->id, $USER->id)->get_quiz();
+                if ($quiz->timelimit > 0) {
+                    $facts[] = ['label' => get_string('timelimit', 'quiz'), 'value' => format_time($quiz->timelimit)];
+                }
+                $facts[] = [
+                    'label' => get_string('attemptsallowed', 'quiz'),
+                    'value' => $quiz->attempts ? $quiz->attempts : get_string('unlimited'),
+                ];
+                $attempts = quiz_get_user_attempts($quiz->id, $USER->id, 'all');
+                $last = end($attempts);
+                if ($last && $last->state === \mod_quiz\quiz_attempt::IN_PROGRESS) {
+                    $action = 'continue';
+                } else if ($last) {
+                    $action = 'review';
+                } else {
+                    $action = 'start';
+                }
+            } catch (\Throwable $e) {
+                debugging('STREAMDECK: quiz stage data for cmid ' . $cm->id . ': ' . $e->getMessage(), DEBUG_DEVELOPER);
+            }
+        } else if (in_array($cm->modname, self::ASSESSMENT_TYPES, true)) {
+            $action = $item->iscomplete ? 'review' : 'start';
+        }
+
+        return [
+            'modulename' => get_string('modulename', $cm->modname),
+            'isassessment' => in_array($cm->modname, self::ASSESSMENT_TYPES, true),
+            'facts' => $facts,
+            'hasfacts' => !empty($facts),
+            'actionlabel' => get_string('stageaction:' . $action, 'format_streamdeck'),
+        ];
     }
 
     /**
@@ -1309,244 +1411,6 @@ class content extends core_content {
     }
 
     /**
-     * Build a forum preview for the Streamdeck modal.
-     *
-     * Behaviour:
-     *  - If the forum has exactly ONE discussion, render that discussion
-     *    (all posts) inline in the modal, plus a Reply button and an
-     *    iframe wrapper for the full discuss.php page.
-     *  - If the forum has MULTIPLE discussions, render a short list of
-     *    recent discussions with links.
-     *
-     * No calls to mod/forum/lib.php are made, to avoid API/signature issues.
-     *
-     * @param \cm_info  $cm     Course module info for the forum.
-     * @param \stdClass $course Course record.
-     * @return string HTML snippet or empty string on failure.
-     */
-    private function build_forum_preview_html(\cm_info $cm, \stdClass $course): string {
-        global $DB;
-
-        try {
-            $context = $cm->context;
-
-            // Fetch all discussions for this forum.
-            $alldiscs = $DB->get_records(
-                'forum_discussions',
-                ['forum' => $cm->instance],
-                'timemodified ASC'
-            );
-
-            if (empty($alldiscs)) {
-                return '';
-            }
-
-            $count = count($alldiscs);
-
-            // Case 1: exactly one discussion - inline full discussion.
-            if ($count === 1) {
-                /** @var \stdClass $discussion */
-                $discussion = reset($alldiscs);
-
-                // Fetch all posts in this discussion, ordered by creation time.
-                $posts = $DB->get_records(
-                    'forum_posts',
-                    ['discussion' => $discussion->id],
-                    'created ASC'
-                );
-
-                if (empty($posts)) {
-                    return '';
-                }
-
-                $discussionurl = (new moodle_url('/mod/forum/discuss.php', ['d' => $discussion->id]))->out(false);
-
-                $o  = \html_writer::start_div('streamdeck-forum-preview streamdeck-forum-single');
-
-                $o .= \html_writer::tag(
-                    'span',
-                    get_string('community', 'format_streamdeck'),
-                    ['class' => 'streamdeck-forum-section-label']
-                );
-
-                // Use discussion name as title.
-                $o .= \html_writer::tag(
-                    'h3',
-                    format_string($discussion->name, true, ['context' => $context]),
-                    ['class' => 'streamdeck-forum-preview-title']
-                );
-
-                // Batch-fetch all post authors to avoid N+1 user lookups.
-                $postuserids = array_unique(array_filter(array_map(
-                    function ($p) {
-                        return $p->userid;
-                    },
-                    $posts
-                )));
-                $postusers = !empty($postuserids)
-                    ? $DB->get_records_list('user', 'id', $postuserids)
-                    : [];
-
-                // Posts container.
-                $o .= \html_writer::start_div('streamdeck-forum-posts');
-
-                foreach ($posts as $post) {
-                    $o .= $this->render_forum_post($post, $context, $postusers);
-                }
-
-                $o .= \html_writer::end_div(); // Posts div.
-
-                // Reply button that JS will use to show the iframe.
-                $o .= \html_writer::start_tag('button', [
-                    'type' => 'button',
-                    'class' => 'streamdeck-forum-reply-btn',
-                    'data-discussion-url' => $discussionurl,
-                ]);
-                $o .= get_string('reply', 'forum');
-                $o .= \html_writer::end_tag('button');
-
-                // Hidden iframe wrapper - populated by JS on first open.
-                $o .= \html_writer::start_div('streamdeck-forum-reply-frame-wrapper', [
-                    'data-discussion-id' => $discussion->id,
-                    'hidden' => 'hidden',
-                ]);
-
-                // Optional loading placeholder.
-                $o .= \html_writer::div('', 'streamdeck-forum-reply-frame-loading');
-
-                // Iframe itself; src set lazily via JS.
-                $o .= \html_writer::tag('iframe', '', [
-                    'class' => 'streamdeck-forum-reply-frame',
-                    'src' => '',
-                    'loading' => 'lazy',
-                    'title' => format_string($discussion->name, true, ['context' => $context]),
-                    'frameborder' => '0',
-                    'allowfullscreen' => 'allowfullscreen',
-                ]);
-
-                $o .= \html_writer::end_div(); // Frame wrapper div.
-
-                $o .= \html_writer::end_div(); // Preview div.
-
-                return $o;
-            }
-
-            // Case 2: multiple discussions - short list.
-            // Sort by latest activity for the preview.
-            $recentdiscs = $DB->get_records(
-                'forum_discussions',
-                ['forum' => $cm->instance, 'course' => $course->id],
-                'timemodified DESC',
-                'id, name, timemodified',
-                0,
-                5
-            );
-
-            if (empty($recentdiscs)) {
-                $recentdiscs = $alldiscs; // Fallback, in case course filter did not match.
-            }
-
-            $o  = \html_writer::start_div('streamdeck-forum-preview');
-
-            $o .= \html_writer::tag(
-                'span',
-                get_string('discussions', 'format_streamdeck'),
-                ['class' => 'streamdeck-forum-section-label']
-            );
-
-            // Forum title.
-            $o .= \html_writer::tag(
-                'h3',
-                format_string($cm->name, true, ['context' => $context]),
-                ['class' => 'streamdeck-forum-preview-title']
-            );
-
-            $o .= \html_writer::start_tag('ul', ['class' => 'streamdeck-forum-preview-list']);
-
-            foreach ($recentdiscs as $disc) {
-                $discurl = new moodle_url('/mod/forum/discuss.php', ['d' => $disc->id]);
-
-                $o .= \html_writer::start_tag('li', ['class' => 'streamdeck-forum-preview-item']);
-                $o .= \html_writer::link(
-                    $discurl,
-                    format_string($disc->name, true, ['context' => $context]),
-                    ['class' => 'streamdeck-forum-preview-link']
-                );
-                $o .= \html_writer::end_tag('li');
-            }
-
-            $o .= \html_writer::end_tag('ul');
-
-            // View all discussions (cmid-based).
-            $o .= \html_writer::link(
-                new moodle_url('/mod/forum/view.php', ['id' => $cm->id]),
-                get_string('viewalldiscussions', 'forum'),
-                ['class' => 'streamdeck-forum-preview-all']
-            );
-
-            $o .= \html_writer::end_div(); // Preview div.
-
-            return $o;
-        } catch (\Throwable $e) {
-            debugging(
-                'STREAMDECK: build_forum_preview_html failed for cmid ' . $cm->id . ': ' . $e->getMessage(),
-                DEBUG_DEVELOPER
-            );
-            return '';
-        }
-    }
-
-    /**
-     * Render a single forum post for inline display in the Streamdeck modal.
-     *
-     * @param \stdClass $post      Forum post record.
-     * @param \context  $context   Course module context.
-     * @param array     $usercache Pre-fetched user records keyed by ID.
-     * @return string HTML for the post.
-     */
-    private function render_forum_post(\stdClass $post, \context $context, array $usercache = []): string {
-        global $OUTPUT;
-
-        try {
-            $user = $usercache[$post->userid] ?? null;
-            if (!$user) {
-                $user = (object)['id' => 0, 'firstname' => 'Unknown', 'lastname' => 'User'];
-            }
-
-            $userpicture = new \user_picture($user);
-            $userpicture->size = 50;
-            $avatarhtml = $OUTPUT->render($userpicture);
-
-            $fullname = fullname($user);
-            $posttime = userdate($post->created, get_string('strftimedatetimeshort', 'langconfig'));
-
-            $message = format_text($post->message, $post->messageformat, [
-                'context' => $context,
-                'para'    => true,
-            ]);
-
-            $o  = \html_writer::start_div('streamdeck-forum-post');
-            $o .= \html_writer::start_div('streamdeck-forum-post-header');
-            $o .= \html_writer::div($avatarhtml, 'streamdeck-forum-post-avatar');
-            $o .= \html_writer::start_div('streamdeck-forum-post-meta');
-            $o .= \html_writer::tag('strong', $fullname, ['class' => 'streamdeck-forum-post-author']);
-            $o .= \html_writer::tag('span', $posttime, ['class' => 'streamdeck-forum-post-time']);
-            $o .= \html_writer::end_div(); // Meta div.
-            $o .= \html_writer::end_div(); // Header div.
-            $o .= \html_writer::div($message, 'streamdeck-forum-post-message');
-            $o .= \html_writer::end_div(); // Post div.
-
-            return $o;
-        } catch (\Throwable $e) {
-            debugging(
-                'STREAMDECK: render_forum_post failed for post ' . $post->id . ': ' . $e->getMessage(),
-                DEBUG_DEVELOPER
-            );
-            return '';
-        }
-    }
-
-    /**
      * Build an assignment preview body for the Streamdeck modal.
      *
      * Embeds the assignment view page in an iframe so students can submit inline.
@@ -1662,7 +1526,7 @@ class content extends core_content {
      * @param string $text The URL string to parse
      * @return string The YouTube embed URL, or empty string if not a valid YouTube URL
      */
-    private function extract_youtube_embed_url(string $text): string {
+    public static function extract_youtube_embed_url(string $text): string {
         if (stripos($text, 'youtube.com') === false && stripos($text, 'youtu.be') === false) {
             return '';
         }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <XMLDB PATH="course/format/streamdeck/db" VERSION="2025112600" COMMENT="Streamdeck format tables"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:noNamespaceSchemaLocation="../../lib/xmldb/xmldb.xsd">
+       xsi:noNamespaceSchemaLocation="../../../../lib/xmldb/xmldb.xsd">
 
     <TABLES>
         <TABLE NAME="format_streamdeck_syllabus" COMMENT="Syllabus content per course for Streamdeck format">

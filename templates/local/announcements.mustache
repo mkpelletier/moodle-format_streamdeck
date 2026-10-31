@@ -1,0 +1,141 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template format_streamdeck/local/announcements
+
+    The course's announcements as a "What's new" feed: a date tile, title, who posted and when, with the newest
+    open and the rest opening in place. Discuss opens the announcement's replies in the same panel; posting, editing
+    and deleting open mod_forum's form in the composer (amd/src/main.js).
+
+    Context variables required for this template:
+    * forumname - string
+    * forumurl - string - The forum page
+    * newcount - string - "2 new", or empty
+    * items - array - id, discussionid, title, day, month, time, datetime, author, avatar, isnew, pinned, expanded,
+      excerpt, message, attachments, candiscuss, replies, canedit, editurl, candelete, deleteurl, hasactions
+    * hasitems - bool
+    * hasmore - bool - Whether there are older announcements than those shown
+    * canpost - bool
+    * posturl - string
+
+    Example context (json):
+    {
+        "forumname": "Announcements", "forumurl": "#", "newcount": "1 new", "hasitems": true, "hasmore": false,
+        "canpost": false, "posturl": "",
+        "items": [{"id": 5, "discussionid": 2, "title": "Welcome", "day": "31", "month": "Oct", "time": "2 hours ago",
+            "datetime": "", "author": "Terry Teacher", "avatar": "", "isnew": true, "pinned": false, "expanded": true,
+            "excerpt": "Welcome to the course.", "message": "<p>Welcome to the course.</p>", "attachments": [],
+            "hasattachments": false, "candiscuss": false, "replies": "0 replies", "canedit": false, "candelete": false,
+            "hasactions": false}]
+    }
+}}
+<div class="sd-thread sd-news" data-region="sd-news">
+    <header class="sd-thread-header">
+        <div class="sd-thread-heading">
+            <span class="sd-thread-kicker">{{#str}}whatsnew, format_streamdeck{{/str}}</span>
+            <h3 class="sd-thread-title">{{forumname}}</h3>
+            {{#newcount}}<span class="sd-thread-meta sd-news-count">{{newcount}}</span>{{/newcount}}
+        </div>
+        <a class="sd-icon-btn sd-thread-open" href="{{forumurl}}"
+           aria-label="{{#str}}openfulldiscussion, format_streamdeck{{/str}}"
+           title="{{#str}}openfulldiscussion, format_streamdeck{{/str}}">
+            <i class="fa-solid fa-up-right-from-square" aria-hidden="true"></i>
+        </a>
+    </header>
+
+    {{#canpost}}
+        <div class="sd-reply-bar" data-region="sd-composer-slot">
+            <button type="button" class="sd-reply-bar-button" data-action="sd-compose" data-url="{{posturl}}">
+                <i class="fa-solid fa-bullhorn" aria-hidden="true"></i> {{#str}}postannouncement, format_streamdeck{{/str}}
+            </button>
+        </div>
+    {{/canpost}}
+
+    {{^hasitems}}
+        <p class="sd-discussion-empty">{{#str}}noannouncements, format_streamdeck{{/str}}</p>
+    {{/hasitems}}
+
+    {{#hasitems}}
+        <ol class="sd-news-feed">
+            {{#items}}
+                <li class="sd-news-item{{#isnew}} is-new{{/isnew}}{{#expanded}} is-expanded{{/expanded}}"
+                    data-region="sd-post" data-postid="{{id}}">
+                    <div class="sd-news-date" aria-hidden="true">
+                        <span class="sd-news-day">{{day}}</span>
+                        <span class="sd-news-month">{{month}}</span>
+                    </div>
+                    <div class="sd-news-main">
+                        <h4 class="sd-news-title">
+                            <button type="button" class="sd-news-toggle" data-action="sd-news-toggle"
+                                    aria-expanded="{{#expanded}}true{{/expanded}}{{^expanded}}false{{/expanded}}"
+                                    aria-controls="sd-news-body-{{id}}">
+                                {{#pinned}}<i class="fa-solid fa-thumbtack" aria-hidden="true"></i>{{/pinned}}
+                                {{title}}
+                            </button>
+                        </h4>
+                        <div class="sd-news-meta">
+                            {{#isnew}}<span class="sd-news-badge">{{#str}}new, format_streamdeck{{/str}}</span>{{/isnew}}
+                            {{#avatar}}<img class="sd-avatar" src="{{avatar}}" alt="">{{/avatar}}
+                            <span class="sd-news-author">{{author}}</span>
+                            <time class="sd-news-time" title="{{datetime}}">{{time}}</time>
+                        </div>
+                        <p class="sd-news-excerpt">{{excerpt}}</p>
+                        <div class="sd-news-body" id="sd-news-body-{{id}}"{{^expanded}} hidden{{/expanded}}>
+                            <div class="sd-post-message">{{{message}}}</div>
+                            {{#hasattachments}}
+                                <ul class="sd-post-attachments" aria-label="{{#str}}attachments, forum{{/str}}">
+                                    {{#attachments}}
+                                        <li>
+                                            <a href="{{url}}" class="sd-attachment">
+                                                <i class="fa-solid fa-paperclip" aria-hidden="true"></i> {{name}}
+                                            </a>
+                                        </li>
+                                    {{/attachments}}
+                                </ul>
+                            {{/hasattachments}}
+                            {{#hasactions}}
+                                <div class="sd-post-actions">
+                                    {{#candiscuss}}
+                                        <button type="button" class="sd-post-action" data-action="sd-discussion-open"
+                                                data-discussionid="{{discussionid}}">
+                                            <i class="fa-regular fa-comment" aria-hidden="true"></i>
+                                            {{#str}}discuss, format_streamdeck{{/str}} · {{replies}}
+                                        </button>
+                                    {{/candiscuss}}
+                                    {{#canedit}}
+                                        <button type="button" class="sd-post-action" data-action="sd-compose" data-url="{{editurl}}">
+                                            <i class="fa-solid fa-pen" aria-hidden="true"></i> {{#str}}edit{{/str}}
+                                        </button>
+                                    {{/canedit}}
+                                    {{#candelete}}
+                                        <button type="button" class="sd-post-action" data-action="sd-compose" data-url="{{deleteurl}}">
+                                            <i class="fa-solid fa-trash" aria-hidden="true"></i> {{#str}}delete{{/str}}
+                                        </button>
+                                    {{/candelete}}
+                                </div>
+                            {{/hasactions}}
+                            <div data-region="sd-composer-slot" data-postid="{{id}}"></div>
+                        </div>
+                    </div>
+                </li>
+            {{/items}}
+        </ol>
+        {{#hasmore}}
+            <a class="sd-news-all" href="{{forumurl}}">{{#str}}announcementsall, format_streamdeck{{/str}}</a>
+        {{/hasmore}}
+    {{/hasitems}}
+</div>

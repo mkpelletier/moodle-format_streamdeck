@@ -17,13 +17,13 @@
 /**
  * Streamdeck course format entry point.
  *
- * Moodle 5.0+ compliant.
+ * Moodle 5.1+.
  * - Viewing mode  -> Custom Netflix-style UI
  * - Editing mode  -> Core Moodle editing UI (drawer + activity cards) - NO DELEGATION NEEDED
  *
  * @package    format_streamdeck
  * @copyright  2025 Your Name
- * @license    http://www.gnu.org/licenses/gpl-3.0.txt GNU GPL v3 or later
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -54,6 +54,7 @@ course_create_sections_if_missing($COURSE, [0]);
 // 4. Load our JS only in viewing mode.
 if (!$PAGE->user_is_editing()) {
     $PAGE->requires->js_call_amd('format_streamdeck/main', 'init');
+    $PAGE->requires->js_call_amd('format_streamdeck/colour_mode', 'init');
 }
 
 // 5. Editing mode: use core course editor with streamdeck format.

@@ -19,7 +19,7 @@
  *
  * @package    format_streamdeck
  * @copyright  2025
- * @license    http://www.gnu.org/licenses/gpl-3.0.txt GNU GPL v3 or later
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace format_streamdeck;
@@ -42,15 +42,53 @@ final class format_test extends \advanced_testcase {
     }
 
     /**
-     * Test that the format uses the course index.
+     * The course index is offered to editors only.
      */
     public function test_uses_course_index(): void {
+        global $PAGE, $USER;
         $this->resetAfterTest();
+        $this->setAdminUser();
 
         $course = $this->getDataGenerator()->create_course(['format' => 'streamdeck', 'numsections' => 1]);
+        $PAGE->set_course($course);
         $format = course_get_format($course);
 
+        $USER->editing = 0;
+        $this->assertFalse($format->uses_course_index());
+
+        $USER->editing = 1;
         $this->assertTrue($format->uses_course_index());
+    }
+
+    /**
+     * The featured activity is stored per section.
+     */
+    public function test_featured_activity_section_option(): void {
+        $this->resetAfterTest();
+
+        $course = $this->getDataGenerator()->create_course(['format' => 'streamdeck', 'numsections' => 2]);
+        $quiz = $this->getDataGenerator()->create_module('quiz', ['course' => $course->id, 'section' => 2]);
+        $format = course_get_format($course);
+        $section = get_fast_modinfo($course)->get_section_info(2);
+
+        $this->assertEquals(0, $format->get_format_options($section)['featuredcmid']);
+
+        $format->update_section_format_options(['id' => $section->id, 'featuredcmid' => $quiz->cmid]);
+        $section = get_fast_modinfo($course)->get_section_info(2);
+        $this->assertEquals($quiz->cmid, course_get_format($course)->get_format_options($section)['featuredcmid']);
+    }
+
+    /**
+     * The colour mode preference can be set through the user preference web services.
+     */
+    public function test_user_preferences_callback(): void {
+        global $CFG;
+        require_once($CFG->dirroot . '/course/format/streamdeck/lib.php');
+
+        $preferences = format_streamdeck_user_preferences();
+
+        $this->assertArrayHasKey(local\colour_mode::PREFERENCE, $preferences);
+        $this->assertSame(['light', 'dark', 'auto'], $preferences[local\colour_mode::PREFERENCE]['choices']);
     }
 
     /**
@@ -130,26 +168,10 @@ final class format_test extends \advanced_testcase {
         );
 
         $format = course_get_format($course);
-        // Verify numsections is set correctly in format options.
-        $coursedata = $format->get_course();
-        $numsections = $coursedata->numsections ?? 0;
+        $name = $format->get_section_name($format->get_section(1));
 
-        $section = $format->get_section(1);
-        $name = $format->get_section_name($section);
-
-        if ($numsections >= 1) {
-            // Normal case: section 1 is within numsections.
-            $expected = get_string('sectionname', 'format_streamdeck', 1);
-            $this->assertEquals($expected, $name);
-        } else {
-            // Section is treated as orphaned - verify it gets one of the orphaned labels.
-            $this->assertTrue(
-                $name === get_string('orphanedsection', 'format_streamdeck')
-                || strpos($name, 'Orphaned') !== false
-                || strpos($name, 'orphaned') !== false,
-                "Section name should indicate orphaned status, got: $name"
-            );
-        }
+        // This format has no numsections option, so every section is a numbered episode.
+        $this->assertEquals(get_string('sectionname', 'format_streamdeck', 1), $name);
     }
 
     /**

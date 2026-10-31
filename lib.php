@@ -17,21 +17,27 @@
 /**
  * Streamdeck course format – core library functions.
  *
- * Defines the format class (format_streamdeck extending core_courseformat\base) for Moodle 5.0+.
+ * Defines the format class (format_streamdeck extending core_courseformat\base) for Moodle 5.1+.
  * Handles section management with robust fallbacks for orphaned/unused sections.
  *
  * @package    format_streamdeck
  * @copyright  2025
- * @license    http://www.gnu.org/licenses/gpl-3.0.txt GNU GPL v3 or later
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
  * Streamdeck course format class.
  *
- * Extends core base for Moodle 5.0+ compliance.
+ * Extends core base for Moodle 5.1+.
  * Supports reactive components and inplace editing.
  */
 class format_streamdeck extends \core_courseformat\base {
+    /** @var string[] Font Awesome (free, solid) icons offered for the "About this episode" card. */
+    public const ABOUT_ICONS = [
+        'circle-info', 'bullseye', 'list-check', 'lightbulb', 'graduation-cap', 'book-open',
+        'compass', 'star', 'flag', 'brain', 'puzzle-piece', 'clipboard-list',
+    ];
+
     /**
      * Indicates this format uses sections.
      *
@@ -49,13 +55,14 @@ class format_streamdeck extends \core_courseformat\base {
     /**
      * Whether this format uses the course index drawer (left nav).
      *
-     * Required so Boost/Boost Union knows to build the course index navigation
-     * for this format (sections, activities, etc.).
+     * Learners move through the course with the hero, the episode cards and the episode navigation, so the drawer
+     * is only offered to editors, where it helps reorganise the course.
      *
      * @return bool
      */
     public function uses_course_index(): bool {
-        return true;
+        global $PAGE;
+        return $PAGE->user_is_editing();
     }
 
     /**
@@ -128,17 +135,6 @@ class format_streamdeck extends \core_courseformat\base {
             return get_string('section0name', 'format_streamdeck');
         }
 
-        $numsections = $this->get_course()->numsections ?? 0;
-
-        if ($section->section > $numsections) {
-            // Try core string for orphaned activities; fallback to plugin string.
-            if (get_string_manager()->string_exists('orphanedactivities', 'course')) {
-                return get_string('orphanedactivities', 'course');
-            }
-            // Double-fallback: plugin string (defined below).
-            return get_string('orphanedsection', 'format_streamdeck');
-        }
-
         return get_string('sectionname', 'format_streamdeck', $section->section);
     }
 
@@ -191,6 +187,14 @@ class format_streamdeck extends \core_courseformat\base {
                     'default' => 0,
                     'type' => PARAM_INT,
                 ],
+                'seasonlabel' => [
+                    'default' => '',
+                    'type' => PARAM_TEXT,
+                ],
+                'accentcolour' => [
+                    'default' => '',
+                    'type' => PARAM_TEXT,
+                ],
             ];
         }
         if ($foreditform && !isset($courseformatoptions['herofont']['label'])) {
@@ -222,8 +226,233 @@ class format_streamdeck extends \core_courseformat\base {
                     1 => get_string('yes'),
                 ],
             ];
+
+            $courseformatoptions['seasonlabel']['label'] = get_string('seasonlabel', 'format_streamdeck');
+            $courseformatoptions['seasonlabel']['help'] = 'seasonlabel';
+            $courseformatoptions['seasonlabel']['help_component'] = 'format_streamdeck';
+            $courseformatoptions['seasonlabel']['element_type'] = 'text';
+            $courseformatoptions['seasonlabel']['element_attributes'] = [
+                ['placeholder' => get_string('season', 'format_streamdeck'), 'maxlength' => 50],
+            ];
+
+            $courseformatoptions['accentcolour']['label'] = get_string('accentcolour', 'format_streamdeck');
+            $courseformatoptions['accentcolour']['help'] = 'accentcolour';
+            $courseformatoptions['accentcolour']['help_component'] = 'format_streamdeck';
+            $courseformatoptions['accentcolour']['element_type'] = 'text';
+            $courseformatoptions['accentcolour']['element_attributes'] = [
+                ['placeholder' => \format_streamdeck\local\accent_colour::DEFAULT, 'maxlength' => 7, 'size' => 9],
+            ];
         }
         return $courseformatoptions;
+    }
+
+    /**
+     * Course and section settings: the course settings get a colour picker beside the accent colour field.
+     *
+     * @param MoodleQuickForm $mform
+     * @param bool $forsection
+     * @return array
+     */
+    public function create_edit_form_elements(&$mform, $forsection = false) {
+        global $PAGE;
+        $elements = parent::create_edit_form_elements($mform, $forsection);
+        if (!$forsection && $mform->elementExists('accentcolour')) {
+            $PAGE->requires->js_call_amd('format_streamdeck/accent_picker', 'init', [
+                'id_accentcolour',
+                \format_streamdeck\local\accent_colour::DEFAULT,
+            ]);
+        }
+        return $elements;
+    }
+
+    /**
+     * The accent colour must be a colour (#rrggbb), or empty for the default.
+     *
+     * @param array $data
+     * @param array $files
+     * @param array $errors
+     * @return array
+     */
+    public function edit_form_validation($data, $files, $errors) {
+        $errors = parent::edit_form_validation($data, $files, $errors);
+        $accent = trim($data['accentcolour'] ?? '');
+        if ($accent !== '' && !\format_streamdeck\local\accent_colour::is_valid($accent)) {
+            $errors['accentcolour'] = get_string('accentcolourinvalid', 'format_streamdeck');
+        }
+        return $errors;
+    }
+
+    /**
+     * Section-level format options for the Streamdeck format.
+     *
+     * The featured activity is edited through format_streamdeck_editsection_form, which builds its select element.
+     * All but the "About this episode" text are cached in the course modinfo, so they are read as section_info
+     * properties without a query.
+     *
+     * @param bool $foreditform Whether the options are for the section edit form.
+     * @return array Format options.
+     */
+    public function section_format_options($foreditform = false): array {
+        $options = [
+            'seasonname' => [
+                'default' => '',
+                'type' => PARAM_TEXT,
+                'cache' => true,
+                'cachedefault' => '',
+            ],
+            'duration' => [
+                'default' => 0,
+                'type' => PARAM_INT,
+                'cache' => true,
+                'cachedefault' => 0,
+            ],
+            'featuredcmid' => [
+                'default' => 0,
+                'type' => PARAM_INT,
+                'cache' => true,
+                'cachedefault' => 0,
+            ],
+            'showabout' => [
+                'default' => 0,
+                'type' => PARAM_BOOL,
+                'cache' => true,
+                'cachedefault' => 0,
+            ],
+            // Only the episode page reads these, so they are not cached.
+            'abouttitle' => [
+                'default' => '',
+                'type' => PARAM_TEXT,
+            ],
+            'abouticon' => [
+                'default' => '',
+                'type' => PARAM_ALPHANUMEXT,
+            ],
+            'about' => [
+                'default' => '',
+                'type' => PARAM_RAW,
+            ],
+            'aboutformat' => [
+                'default' => FORMAT_HTML,
+                'type' => PARAM_INT,
+            ],
+        ];
+        if ($foreditform) {
+            $label = $this->get_season_label();
+            $options['seasonname'] += [
+                'label' => get_string('seasonname', 'format_streamdeck', $label),
+                'help' => 'seasonname',
+                'help_component' => 'format_streamdeck',
+                'element_type' => 'text',
+                'element_attributes' => [['maxlength' => 100]],
+            ];
+            $options['showabout'] += [
+                'label' => get_string('showabout', 'format_streamdeck'),
+                'help' => 'showabout',
+                'help_component' => 'format_streamdeck',
+                'element_type' => 'advcheckbox',
+            ];
+            $options['abouttitle'] += [
+                'label' => get_string('abouttitle', 'format_streamdeck'),
+                'help' => 'abouttitle',
+                'help_component' => 'format_streamdeck',
+                'element_type' => 'text',
+                'element_attributes' => [['maxlength' => 100, 'placeholder' => get_string('about', 'format_streamdeck')]],
+            ];
+            $icons = ['' => get_string('none')];
+            foreach (self::ABOUT_ICONS as $icon) {
+                $icons[$icon] = get_string('abouticon:' . $icon, 'format_streamdeck');
+            }
+            $options['abouticon'] += [
+                'label' => get_string('abouticon', 'format_streamdeck'),
+                'help' => 'abouticon',
+                'help_component' => 'format_streamdeck',
+                'element_type' => 'select',
+                'element_attributes' => [$icons],
+            ];
+            // Edited through the about_editor element added by format_streamdeck_editsection_form.
+            $options['about'] += ['label' => '', 'element_type' => 'hidden'];
+            $options['aboutformat'] += ['label' => '', 'element_type' => 'hidden'];
+            $options['duration'] += [
+                'label' => get_string('duration', 'format_streamdeck'),
+                'help' => 'duration',
+                'help_component' => 'format_streamdeck',
+                'element_type' => 'text',
+                'element_attributes' => [['size' => 4]],
+            ];
+            // Every activity in the course is a valid value; the section form narrows the list to its own section.
+            $options['featuredcmid'] += [
+                'label' => get_string('featuredactivity', 'format_streamdeck'),
+                'help' => 'featuredactivity',
+                'help_component' => 'format_streamdeck',
+                'element_type' => 'select',
+                'element_attributes' => [$this->get_featured_activity_choices()],
+            ];
+        }
+        return $options;
+    }
+
+    /**
+     * What this course calls a season, e.g. "Season", "Part" or "Module".
+     *
+     * @return string
+     */
+    public function get_season_label(): string {
+        $label = $this->courseid ? trim((string) ($this->get_format_options()['seasonlabel'] ?? '')) : '';
+        if ($label === '') {
+            return get_string('season', 'format_streamdeck');
+        }
+        return format_string($label, true, ['context' => \context_course::instance($this->courseid)]);
+    }
+
+    /**
+     * Group the episodes into seasons.
+     *
+     * A section whose season name is set starts a new season, which runs until the next such section, so seasons
+     * follow the order of the sections. Episodes before the first named season form an untitled opening season.
+     *
+     * @return array List of ['name' => string, 'sections' => int[]]; empty when the course uses no seasons.
+     */
+    public function get_seasons(): array {
+        if (!$this->courseid) {
+            return [];
+        }
+        $context = \context_course::instance($this->courseid);
+        $seasons = [];
+        $named = false;
+        foreach ($this->get_modinfo()->get_section_info_all() as $sectioninfo) {
+            if ($sectioninfo->section == 0 || !empty($sectioninfo->component)) {
+                continue;
+            }
+            $name = trim((string) $sectioninfo->seasonname);
+            if ($name !== '' || !$seasons) {
+                $seasons[] = ['name' => $name === '' ? '' : format_string($name, true, ['context' => $context]), 'sections' => []];
+                $named = $named || $name !== '';
+            }
+            $seasons[count($seasons) - 1]['sections'][] = (int) $sectioninfo->section;
+        }
+        return $named ? $seasons : [];
+    }
+
+    /**
+     * Activities that can be featured on an episode page: everything with a page of its own, except labels and resources.
+     *
+     * @param int|null $sectionnum Limit to one section, or null for the whole course.
+     * @return array cmid => name, starting with 0 => "Automatic".
+     */
+    public function get_featured_activity_choices(?int $sectionnum = null): array {
+        $choices = [0 => get_string('featuredactivityauto', 'format_streamdeck')];
+        if (!$this->courseid) {
+            return $choices;
+        }
+        foreach ($this->get_modinfo()->get_cms() as $cm) {
+            if ($cm->deletioninprogress || !$cm->has_view() || in_array($cm->modname, ['label', 'resource'], true)) {
+                continue;
+            }
+            if ($sectionnum === null || $cm->sectionnum == $sectionnum) {
+                $choices[$cm->id] = $cm->get_formatted_name();
+            }
+        }
+        return $choices;
     }
 
     /**
@@ -239,69 +468,30 @@ class format_streamdeck extends \core_courseformat\base {
         if (!empty($options['enabledrawertoggle'])) {
             $page->add_body_class('streamdeck-show-drawer-toggle');
         }
+    }
 
-        // Load our JS on quiz pages for the circular timer and drawer toggle.
-        $pagetype = $page->pagetype ?? '';
-        if (strpos($pagetype, 'mod-quiz-') === 0 && !$page->user_is_editing()) {
-            $page->requires->js_call_amd('format_streamdeck/main', 'init');
+    /**
+     * Set up activity pages for this course format.
+     *
+     * Quiz pages get the circular timer, which needs the effective time limit (overrides included).
+     *
+     * @param \moodle_page $page The page object.
+     */
+    public function page_set_cm(\moodle_page $page): void {
+        global $USER;
+        parent::page_set_cm($page);
 
-            // Pass the quiz timelimit so the circular timer can calculate the correct fraction.
-            $cmid = optional_param('cmid', 0, PARAM_INT);
-            if (!$cmid) {
-                // Attempt pages use 'attempt' param; get cmid from the attempt record.
-                $attemptid = optional_param('attempt', 0, PARAM_INT);
-                if ($attemptid) {
-                    global $DB;
-                    $attempt = $DB->get_record('quiz_attempts', ['id' => $attemptid], 'quiz');
-                    if ($attempt) {
-                        $cm = get_coursemodule_from_instance('quiz', $attempt->quiz, $this->courseid);
-                        if ($cm) {
-                            $cmid = $cm->id;
-                        }
-                    }
-                }
-            }
-            if ($cmid) {
-                global $DB;
-                $quizid = $DB->get_field('course_modules', 'instance', ['id' => $cmid]);
-                if ($quizid) {
-                    $timelimit = (int) $DB->get_field('quiz', 'timelimit', ['id' => $quizid]);
-                    if ($timelimit > 0) {
-                        $page->requires->js_amd_inline("
-                            require([], function() {
-                                window.streamdeckQuizTimelimit = {$timelimit};
-                            });
-                        ");
-                    }
-                }
-            }
+        if ($page->cm->modname !== 'quiz' || $page->user_is_editing()) {
+            return;
         }
-        $showbackbtn = in_array($pagetype, [
-            'mod-quiz-view',
-            'mod-quiz-summary',
-            'mod-quiz-review',
-            'mod-assign-view',
-        ], true);
-        if ($showbackbtn) {
-            $course = $this->get_course();
-            $courseurl = (new \moodle_url('/course/view.php', ['id' => $course->id]))->out(false);
-            $label = get_string('backtocourse', 'format_streamdeck');
-            $page->requires->js_amd_inline("
-                require([], function() {
-                    // Do not inject the button inside iframes (e.g. streamdeck-assign-frame).
-                    if (window.self !== window.top) { return; }
-                    var container = document.getElementById('region-main');
-                    if (!container) { return; }
-                    var existing = container.querySelector('.streamdeck-back-to-course');
-                    if (existing) { return; }
-                    var btn = document.createElement('a');
-                    btn.href = " . json_encode($courseurl) . ";
-                    btn.className = 'streamdeck-back-to-course streamdeck-episode-nav-btn streamdeck-episode-nav-btn--ghost';
-                    btn.textContent = '← ' + " . json_encode($label) . ";
-                    container.insertBefore(btn, container.firstChild);
-                });
-            ");
+
+        $timelimit = 0;
+        try {
+            $timelimit = (int) \mod_quiz\quiz_settings::create_for_cmid($page->cm->id, $USER->id)->get_quiz()->timelimit;
+        } catch (\moodle_exception $e) {
+            debugging('STREAMDECK: Unable to read quiz time limit: ' . $e->getMessage(), DEBUG_DEVELOPER);
         }
+        $page->requires->js_call_amd('format_streamdeck/main', 'init', [['quiztimelimit' => $timelimit]]);
     }
 
     /**
@@ -320,6 +510,66 @@ class format_streamdeck extends \core_courseformat\base {
         }
         return new \format_streamdeck_editsection_form($action, $customdata);
     }
+}
+
+/**
+ * User preferences this plugin lets the user set through the web services.
+ *
+ * @return array
+ */
+function format_streamdeck_user_preferences(): array {
+    return [
+        \format_streamdeck\local\colour_mode::PREFERENCE => [
+            'type' => PARAM_ALPHA,
+            'null' => NULL_NOT_ALLOWED,
+            'default' => \format_streamdeck\local\colour_mode::get_site_default(),
+            'choices' => \format_streamdeck\local\colour_mode::get_modes(),
+            'permissioncallback' => [core_user::class, 'is_current_user'],
+        ],
+    ];
+}
+
+/**
+ * Fragment: an episode's discussion thread, to open from the list of discussions or to refresh after a post.
+ *
+ * The fragment API has already logged the user in to the forum's context.
+ *
+ * @param array $args context (the forum's module context), discussionid, backtolist.
+ * @return string
+ */
+function format_streamdeck_output_fragment_discussion(array $args): string {
+    global $OUTPUT;
+
+    $context = $args['context'];
+    if ($context->contextlevel != CONTEXT_MODULE) {
+        throw new \moodle_exception('invalidcontext');
+    }
+    [, $cm] = get_course_and_cm_from_cmid($context->instanceid, 'forum');
+    $data = \format_streamdeck\output\discussion::export_thread($cm, (int) $args['discussionid']);
+    if ($data === null) {
+        return '';
+    }
+    $data['backtolist'] = !empty($args['backtolist']);
+    return $OUTPUT->render_from_template('format_streamdeck/local/discussion', $data);
+}
+
+/**
+ * Fragment: a forum's panel (the list of discussions, or the announcements feed) for the hero's buttons, and to
+ * refresh it after a post.
+ *
+ * @param array $args context (the forum's module context), alwayslist, view ('news' for the announcements feed).
+ * @return string
+ */
+function format_streamdeck_output_fragment_forum(array $args): string {
+    $context = $args['context'];
+    if ($context->contextlevel != CONTEXT_MODULE) {
+        throw new \moodle_exception('invalidcontext');
+    }
+    [, $cm] = get_course_and_cm_from_cmid($context->instanceid, 'forum');
+    if (($args['view'] ?? '') === 'news') {
+        return \format_streamdeck\output\discussion::render_news($cm);
+    }
+    return \format_streamdeck\output\discussion::render_view($cm, !empty($args['alwayslist']));
 }
 
 /**

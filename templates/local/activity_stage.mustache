@@ -1,0 +1,81 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template format_streamdeck/local/activity_stage
+
+    Launch panel shown on the episode stage for an activity that cannot be embedded, such as a quiz.
+
+    Context variables required for this template:
+    * name - string - Activity name
+    * url - string - Activity URL
+    * icon - string - Activity icon URL
+    * iscomplete - bool - Whether the activity is complete
+    * completionenabled - bool - Whether completion is tracked
+    * stage - object - modulename, isassessment, facts (label, value), hasfacts, actionlabel
+
+    Example context (json):
+    {
+        "name": "Final exam",
+        "url": "https://example.com/mod/quiz/view.php?id=5",
+        "icon": "https://example.com/theme/image.php/boost/quiz/1/monologo",
+        "iscomplete": false,
+        "completionenabled": true,
+        "stage": {
+            "modulename": "Quiz",
+            "isassessment": true,
+            "facts": [{"label": "Time limit", "value": "1 hour"}],
+            "hasfacts": true,
+            "actionlabel": "Start"
+        }
+    }
+}}
+<div class="streamdeck-stage {{#stage.isassessment}}streamdeck-stage--assessment{{/stage.isassessment}}">
+    <div class="streamdeck-stage-inner">
+        <div class="streamdeck-stage-kicker">
+            <img src="{{icon}}" alt="" class="streamdeck-stage-icon">
+            <span>{{stage.modulename}}</span>
+            {{#stage.isassessment}}
+                <span class="streamdeck-stage-badge">{{#str}}assessment, format_streamdeck{{/str}}</span>
+            {{/stage.isassessment}}
+        </div>
+
+        {{#stage.hasfacts}}
+            <dl class="streamdeck-stage-facts">
+                {{#stage.facts}}
+                    <div class="streamdeck-stage-fact">
+                        <dt>{{label}}</dt>
+                        <dd>{{value}}</dd>
+                    </div>
+                {{/stage.facts}}
+            </dl>
+        {{/stage.hasfacts}}
+
+        <div class="streamdeck-stage-actions">
+            <a href="{{url}}" class="sd-btn sd-btn--primary sd-btn--lg">
+                <i class="fa-solid fa-play" aria-hidden="true"></i>
+                {{stage.actionlabel}}
+                <span class="visually-hidden">{{name}}</span>
+            </a>
+            {{#completionenabled}}
+                <span class="streamdeck-episode-status {{#iscomplete}}is-complete{{/iscomplete}}">
+                    {{#iscomplete}}{{#str}}completed, format_streamdeck{{/str}}{{/iscomplete}}
+                    {{^iscomplete}}{{#str}}todo, format_streamdeck{{/str}}{{/iscomplete}}
+                </span>
+            {{/completionenabled}}
+        </div>
+    </div>
+</div>

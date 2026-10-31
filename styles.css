@@ -1,616 +1,1469 @@
 /* stylelint-disable declaration-no-important */
 
 /* ──────────────────────────────────────────────────────────────
-   UNIFIED GRADER – reset to default Moodle appearance
+   Streamdeck styles
+
+   Pages in a Streamdeck course carry data-streamdeck-mode on <html>
+   (see classes/hook_listener.php). Editing pages and pages that keep
+   Moodle's own look (syllabus editor, unified grader) do not, so every
+   page-level rule is scoped to that attribute. data-bs-theme picks the
+   light or dark token set below.
+
+   Sections: tokens → page shell → shared components → course page
+   (hero, cards) → syllabus and modals → episode page → forum and
+   assignment previews → quiz → motion.
    ────────────────────────────────────────────────────────────── */
-#page-local-unifiedgrader-grade.format-streamdeck,
-#page-local-unifiedgrader-grade.format-streamdeck #page.drawers,
-#page-local-unifiedgrader-grade.format-streamdeck #page.drawers .main-inner,
-#page-local-unifiedgrader-grade.format-streamdeck #topofscroll,
-#page-local-unifiedgrader-grade.format-streamdeck #page-content,
-#page-local-unifiedgrader-grade.format-streamdeck #region-main-box,
-#page-local-unifiedgrader-grade.format-streamdeck #region-main,
-#page-local-unifiedgrader-overrides_extensions.format-streamdeck,
-#page-local-unifiedgrader-overrides_extensions.format-streamdeck #page.drawers,
-#page-local-unifiedgrader-overrides_extensions.format-streamdeck #page.drawers .main-inner,
-#page-local-unifiedgrader-overrides_extensions.format-streamdeck #topofscroll,
-#page-local-unifiedgrader-overrides_extensions.format-streamdeck #page-content,
-#page-local-unifiedgrader-overrides_extensions.format-streamdeck #region-main-box,
-#page-local-unifiedgrader-overrides_extensions.format-streamdeck #region-main {
-    background: #fff !important;
-    color: #1d2125 !important;
+
+/* ──────────────────────────────────────────────────────────────
+   TOKENS
+   ────────────────────────────────────────────────────────────── */
+:root {
+    --sd-font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --sd-radius-sm: 8px;
+    --sd-radius-md: 12px;
+    --sd-radius-lg: 16px;
+    --sd-radius-xl: 24px;
+    --sd-radius-pill: 999px;
+    --sd-speed-fast: 0.15s;
+    --sd-speed: 0.25s;
+    --sd-speed-slow: 0.4s;
+    --sd-z-raised: 10;
+    --sd-z-drawer-toggle: 1035;
+    --sd-z-navbar: 1040;
+    --sd-z-navbar-toggle: 1041;
+    --sd-content-width: 1200px;
+    --sd-focus-width: 3px;
+    --sd-focus-offset: 2px;
+}
+
+/* Dark is the default: the course page hero and cards are designed for it. */
+:root,
+[data-bs-theme="dark"] {
+    --sd-bg: #000;
+    --sd-bg-rgb: 0, 0, 0;
+    --sd-surface-1: #111;
+    --sd-surface-2: #181818;
+    --sd-surface-3: #262626;
+    --sd-overlay-1: rgba(255, 255, 255, 0.04);
+    --sd-overlay-2: rgba(255, 255, 255, 0.08);
+    --sd-overlay-3: rgba(255, 255, 255, 0.14);
+    --sd-text: #f5f5f7;
+    --sd-text-rgb: 245, 245, 247;
+    --sd-text-muted: rgba(245, 245, 247, 0.68);
+    --sd-text-subtle: rgba(245, 245, 247, 0.45);
+    --sd-border: rgba(255, 255, 255, 0.1);
+    --sd-border-strong: rgba(255, 255, 255, 0.22);
+    --sd-link: #8bc3ff;
+    --sd-link-rgb: 139, 195, 255;
+    --sd-link-hover: #b3d7ff;
+    --sd-accent: #e50914;
+    --sd-accent-rgb: 229, 9, 20;
+    --sd-accent-hover: #f6121d;
+    --sd-accent-soft: rgba(229, 9, 20, 0.15);
+    --sd-accent-ring: rgba(229, 9, 20, 0.35);
+    --sd-on-accent: #fff;
+    --sd-success: #46d369;
+    --sd-success-text: #b9f6ca;
+    --sd-success-soft: rgba(70, 211, 105, 0.16);
+    --sd-warning: #f0a500;
+    --sd-warning-text: #ffd43b;
+    --sd-warning-soft: rgba(240, 165, 0, 0.14);
+    --sd-danger-text: #ff867c;
+    --sd-info-text: #74c0fc;
+    --sd-shadow-1: 0 4px 14px rgba(0, 0, 0, 0.45);
+    --sd-shadow-2: 0 10px 28px rgba(0, 0, 0, 0.6);
+    --sd-shadow-3: 0 24px 64px rgba(0, 0, 0, 0.75);
+    --sd-icon-filter: contrast(0.5) brightness(2.3);
+    --sd-select-arrow: url([[pix:format_streamdeck|select-arrow-light]]);
+}
+
+[data-bs-theme="light"] {
+    --sd-bg: #f4f4f6;
+    --sd-bg-rgb: 244, 244, 246;
+    --sd-surface-1: #fff;
+    --sd-surface-2: #f7f7f9;
+    --sd-surface-3: #ececf0;
+    --sd-overlay-1: rgba(15, 23, 42, 0.03);
+    --sd-overlay-2: rgba(15, 23, 42, 0.06);
+    --sd-overlay-3: rgba(15, 23, 42, 0.1);
+    --sd-text: #111827;
+    --sd-text-rgb: 17, 24, 39;
+    --sd-text-muted: rgba(17, 24, 39, 0.7);
+    --sd-text-subtle: rgba(17, 24, 39, 0.5);
+    --sd-border: rgba(15, 23, 42, 0.12);
+    --sd-border-strong: rgba(15, 23, 42, 0.25);
+    --sd-link: #0b5cad;
+    --sd-link-rgb: 11, 92, 173;
+    --sd-link-hover: #084785;
+    --sd-accent: #d10812;
+    --sd-accent-rgb: 209, 8, 18;
+    --sd-accent-hover: #b1060f;
+    --sd-accent-soft: rgba(209, 8, 18, 0.08);
+    --sd-accent-ring: rgba(209, 8, 18, 0.3);
+    --sd-success: #1f8a3a;
+    --sd-success-text: #146c2e;
+    --sd-success-soft: rgba(31, 138, 58, 0.12);
+    --sd-warning: #b26b00;
+    --sd-warning-text: #8a5300;
+    --sd-warning-soft: rgba(178, 107, 0, 0.12);
+    --sd-danger-text: #b42318;
+    --sd-info-text: #0b5cad;
+    --sd-shadow-1: 0 2px 8px rgba(15, 23, 42, 0.08);
+    --sd-shadow-2: 0 8px 24px rgba(15, 23, 42, 0.12);
+    --sd-shadow-3: 0 20px 50px rgba(15, 23, 42, 0.18);
+    --sd-icon-filter: none;
+    --sd-select-arrow: url([[pix:format_streamdeck|select-arrow-dark]]);
 }
 
 /* ──────────────────────────────────────────────────────────────
-   GLOBAL LAYOUT – FULL BLEED, ZERO WHITE BORDERS, CINEMATIC HERO
+   PAGE SHELL – every themed page in the course
+   Bootstrap and Moodle components read these variables, so cards,
+   tables, forms, menus and modals follow the mode without
+   per-module selectors.
    ────────────────────────────────────────────────────────────── */
-body.format-streamdeck {
+[data-streamdeck-mode] body.format-streamdeck {
+    --bs-body-bg: var(--sd-bg);
+    --bs-body-bg-rgb: var(--sd-bg-rgb);
+    --bs-body-color: var(--sd-text);
+    --bs-body-color-rgb: var(--sd-text-rgb);
+    --bs-emphasis-color: var(--sd-text);
+    --bs-emphasis-color-rgb: var(--sd-text-rgb);
+    --bs-heading-color: var(--sd-text);
+    --bs-secondary-color: var(--sd-text-muted);
+    --bs-tertiary-color: var(--sd-text-subtle);
+    --bs-secondary-bg: var(--sd-surface-2);
+    --bs-tertiary-bg: var(--sd-surface-2);
+    --bs-border-color: var(--sd-border);
+    --bs-border-color-translucent: var(--sd-border);
+    --bs-link-color: var(--sd-link);
+    --bs-link-color-rgb: var(--sd-link-rgb);
+    --bs-link-hover-color: var(--sd-link-hover);
+    --bs-focus-ring-color: var(--sd-accent-ring);
     margin: 0 !important;
     padding: 0 !important;
     overflow-x: hidden;
+    background: var(--sd-bg) !important;
+    color: var(--sd-text);
 }
 
-#page-course-view-streamdeck.format-streamdeck:not(.editing) #page.drawers,
-#page-course-view-streamdeck.format-streamdeck:not(.editing) #page.drawers .main-inner,
-#page-course-view-streamdeck.format-streamdeck:not(.editing) #topofscroll,
-#page-course-view-streamdeck.format-streamdeck:not(.editing) #page-header,
-#page-course-view-streamdeck.format-streamdeck:not(.editing) #page-content,
-#page-course-view-streamdeck.format-streamdeck:not(.editing) #region-main-box,
-#page-course-view-streamdeck.format-streamdeck:not(.editing) #region-main {
+[data-streamdeck-mode] body.format-streamdeck #page,
+[data-streamdeck-mode] body.format-streamdeck #page-wrapper,
+[data-streamdeck-mode] body.format-streamdeck #page.drawers .main-inner,
+[data-streamdeck-mode] body.format-streamdeck #topofscroll,
+[data-streamdeck-mode] body.format-streamdeck #page-content,
+[data-streamdeck-mode] body.format-streamdeck #region-main-box,
+[data-streamdeck-mode] body.format-streamdeck #page-header {
+    background: transparent !important;
+}
+
+/* The navbar auto-hides, so pages do not reserve space for it. */
+[data-streamdeck-mode] body.format-streamdeck #page {
+    margin-top: 0 !important;
+}
+
+/* Learners move with the hero, the episode pages and the activity toolbar. */
+[data-streamdeck-mode] body.format-streamdeck .course-hint-hidden,
+[data-streamdeck-mode] body.format-streamdeck #page-navbar,
+[data-streamdeck-mode] body.format-streamdeck .secondary-navigation {
+    display: none !important;
+}
+
+/* Previous / next activity links under the content. */
+[data-streamdeck-mode] body.format-streamdeck .activity-navigation.container-fluid {
+    max-width: var(--sd-content-width);
+    margin: 0 auto 16px;
+    padding-top: 10px;
+    border-top: 1px solid var(--sd-border);
+    font-size: 0.92rem;
+}
+
+[data-streamdeck-mode] body.format-streamdeck #prev-activity-link,
+[data-streamdeck-mode] body.format-streamdeck #next-activity-link {
+    color: var(--sd-text-muted);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+[data-streamdeck-mode] body.format-streamdeck #prev-activity-link:hover,
+[data-streamdeck-mode] body.format-streamdeck #next-activity-link:hover {
+    color: var(--sd-text);
+    text-decoration: underline;
+}
+
+[data-streamdeck-mode] body.format-streamdeck .urlselect .form-select {
+    max-width: 260px;
+    border-radius: var(--sd-radius-pill);
+    font-size: 0.9rem;
+}
+
+/* The format offers no course index outside editing; this only guards
+   against a theme reserving its space anyway. */
+[data-streamdeck-mode] body.format-streamdeck #page.drawers.show-drawer-left {
+    margin-left: 0 !important;
+}
+
+/* Course page: full bleed, no Moodle header. */
+[data-streamdeck-mode] #page-course-view-streamdeck #page.drawers,
+[data-streamdeck-mode] #page-course-view-streamdeck #page.drawers .main-inner,
+[data-streamdeck-mode] #page-course-view-streamdeck #topofscroll,
+[data-streamdeck-mode] #page-course-view-streamdeck #page-content,
+[data-streamdeck-mode] #page-course-view-streamdeck #region-main-box,
+[data-streamdeck-mode] #page-course-view-streamdeck #region-main {
     max-width: 100% !important;
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
     border: none !important;
+    background: transparent !important;
 }
 
-/* Hide course hint in view mode */
-.format-streamdeck:not(.editing) .course-hint-hidden,
-#page-mod-lti-view.format-streamdeck:not(.editing) .navbar,
-#page-mod-lti-view.format-streamdeck:not(.editing) #page-header,
-#page-mod-lti-view.format-streamdeck:not(.editing) .content-actions-lti,
-#page-mod-lti-view.format-streamdeck:not(.editing) .activity-header,
-#page-mod-lti-view.format-streamdeck:not(.editing) .activity-navigation,
-#page-mod-lti-view.format-streamdeck:not(.editing) #footnote,
-#page-mod-lti-view.format-streamdeck:not(.editing) #page-footer {
+[data-streamdeck-mode] #page-course-view-streamdeck #page-header {
     display: none !important;
 }
 
-/* Global page header adjustments */
-.format-streamdeck #page-header.header-maxwidth {
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
+[data-streamdeck-mode] body.format-streamdeck div[role="main"],
+[data-streamdeck-mode] body.format-streamdeck span.notifications {
     padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* Every other page: content sits on one elevated card. */
+[data-streamdeck-mode] body.format-streamdeck:not(#page-course-view-streamdeck) #region-main {
+    max-width: var(--sd-content-width);
+    margin: 24px auto 40px;
+    padding: 40px;
+    background: var(--sd-surface-1) !important;
+    color: var(--sd-text);
+    border: 1px solid var(--sd-border);
+    border-radius: var(--sd-radius-lg);
+    box-shadow: var(--sd-shadow-2);
+}
+
+@media (max-width: 768px) {
+    [data-streamdeck-mode] body.format-streamdeck:not(#page-course-view-streamdeck) #region-main {
+        margin: 16px 8px 24px;
+        padding: 18px 16px;
+        border-radius: var(--sd-radius-md);
+    }
+}
+
+[data-streamdeck-mode] body.format-streamdeck:not(#page-course-view-streamdeck) #page-header.header-maxwidth {
+    max-width: var(--sd-content-width);
+    padding: 24px 0 0 !important;
+}
+
+[data-streamdeck-mode] body.format-streamdeck .activity-header {
     background: transparent !important;
+    border-bottom: 1px solid var(--sd-border);
+    padding-bottom: 16px;
+    margin-bottom: 20px;
 }
 
-/* Ensure course index & drawer toggles are visible in editing mode */
-.format-streamdeck.editing .drawer-toggles,
-.format-streamdeck.editing [data-region="course-index"],
-.format-streamdeck.editing .drawer-left,
-.format-streamdeck.editing .drawer {
-    display: block !important;
-    visibility: visible !important;
+[data-streamdeck-mode] body.format-streamdeck .activity-dates {
+    color: var(--sd-text-muted);
 }
 
-.format-streamdeck.editing #page-header.header-maxwidth {
-    padding-top: 60px !important;
-    padding-bottom: 0 !important;
-    padding-left: 10px !important;
+/* Bootstrap components. */
+[data-streamdeck-mode] body.format-streamdeck .card {
+    --bs-card-bg: var(--sd-surface-2);
+    --bs-card-color: var(--sd-text);
+    --bs-card-border-color: var(--sd-border);
+    --bs-card-cap-bg: var(--sd-overlay-1);
+    --bs-card-title-color: var(--sd-text);
+}
+
+[data-streamdeck-mode] body.format-streamdeck .table,
+[data-streamdeck-mode] body.format-streamdeck .generaltable {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--sd-text);
+    --bs-table-border-color: var(--sd-border);
+    --bs-table-striped-bg: var(--sd-overlay-1);
+    --bs-table-striped-color: var(--sd-text);
+    --bs-table-hover-bg: var(--sd-overlay-2);
+    --bs-table-hover-color: var(--sd-text);
+    --bs-table-active-bg: var(--sd-overlay-2);
+    color: var(--sd-text);
+}
+
+[data-streamdeck-mode] body.format-streamdeck .table thead th,
+[data-streamdeck-mode] body.format-streamdeck .generaltable thead th {
+    background: var(--sd-overlay-2);
+    color: var(--sd-text);
+}
+
+[data-streamdeck-mode] body.format-streamdeck .form-control,
+[data-streamdeck-mode] body.format-streamdeck .form-select,
+[data-streamdeck-mode] body.format-streamdeck .custom-select {
+    background-color: var(--sd-surface-2);
+    color: var(--sd-text);
+    border-color: var(--sd-border-strong);
+}
+
+[data-streamdeck-mode] body.format-streamdeck .form-select,
+[data-streamdeck-mode] body.format-streamdeck .custom-select {
+    --bs-form-select-bg-img: var(--sd-select-arrow);
+}
+
+[data-streamdeck-mode] body.format-streamdeck .form-control:focus,
+[data-streamdeck-mode] body.format-streamdeck .form-select:focus {
+    border-color: var(--sd-accent);
+    box-shadow: 0 0 0 0.2rem var(--sd-accent-ring);
+}
+
+[data-streamdeck-mode] body.format-streamdeck .form-control::placeholder {
+    color: var(--sd-text-subtle);
+}
+
+[data-streamdeck-mode] body.format-streamdeck .dropdown-menu {
+    --bs-dropdown-bg: var(--sd-surface-2);
+    --bs-dropdown-color: var(--sd-text);
+    --bs-dropdown-border-color: var(--sd-border);
+    --bs-dropdown-link-color: var(--sd-text);
+    --bs-dropdown-link-hover-color: var(--sd-text);
+    --bs-dropdown-link-hover-bg: var(--sd-overlay-2);
+    --bs-dropdown-link-active-color: var(--sd-on-accent);
+    --bs-dropdown-link-active-bg: var(--sd-accent);
+    --bs-dropdown-divider-bg: var(--sd-border);
+    --bs-dropdown-header-color: var(--sd-text-muted);
+}
+
+[data-streamdeck-mode] body.format-streamdeck .modal {
+    --bs-modal-bg: var(--sd-surface-1);
+    --bs-modal-color: var(--sd-text);
+    --bs-modal-border-color: var(--sd-border);
+    --bs-modal-header-border-color: var(--sd-border);
+    --bs-modal-footer-border-color: var(--sd-border);
+}
+
+[data-streamdeck-mode] body.format-streamdeck .modal-backdrop.show {
+    --bs-backdrop-opacity: 0.75;
+    background-color: #000;
+}
+
+/* Legacy YUI dialogues (quiz start confirmation, some pickers). */
+[data-streamdeck-mode] body.format-streamdeck .moodle-dialogue-lightbox {
+    background-color: #000 !important;
+    opacity: 0.75 !important;
+}
+
+[data-streamdeck-mode] body.format-streamdeck .moodle-dialogue-base .moodle-dialogue-wrap {
+    background-color: var(--sd-surface-1);
+    color: var(--sd-text);
+    border-color: var(--sd-border);
+    border-radius: var(--sd-radius-lg);
+}
+
+[data-streamdeck-mode] body.format-streamdeck .moodle-dialogue-base .moodle-dialogue-hd {
+    background: transparent;
+    color: var(--sd-text);
+    border-color: var(--sd-border);
+}
+
+[data-streamdeck-mode] body.format-streamdeck .list-group {
+    --bs-list-group-bg: transparent;
+    --bs-list-group-color: var(--sd-text);
+    --bs-list-group-border-color: var(--sd-border);
+    --bs-list-group-action-color: var(--sd-text);
+    --bs-list-group-action-hover-color: var(--sd-text);
+    --bs-list-group-action-hover-bg: var(--sd-overlay-2);
+}
+
+[data-streamdeck-mode] body.format-streamdeck .nav-tabs {
+    --bs-nav-tabs-border-color: var(--sd-border);
+    --bs-nav-tabs-link-hover-border-color: var(--sd-border);
+    --bs-nav-tabs-link-active-color: var(--sd-text);
+    --bs-nav-tabs-link-active-bg: var(--sd-surface-1);
+    --bs-nav-tabs-link-active-border-color: var(--sd-border) var(--sd-border) var(--sd-surface-1);
+    --bs-nav-link-color: var(--sd-text-muted);
+    --bs-nav-link-hover-color: var(--sd-text);
+}
+
+[data-streamdeck-mode] body.format-streamdeck .pagination {
+    --bs-pagination-bg: var(--sd-surface-2);
+    --bs-pagination-color: var(--sd-text);
+    --bs-pagination-border-color: var(--sd-border);
+    --bs-pagination-hover-bg: var(--sd-overlay-2);
+    --bs-pagination-hover-color: var(--sd-text);
+    --bs-pagination-active-bg: var(--sd-accent);
+    --bs-pagination-active-border-color: var(--sd-accent);
+    --bs-pagination-disabled-bg: var(--sd-surface-1);
+    --bs-pagination-disabled-color: var(--sd-text-subtle);
+}
+
+/* One button language: red for the main action, quiet pills for the rest. */
+[data-streamdeck-mode] body.format-streamdeck .btn-primary {
+    --bs-btn-color: var(--sd-on-accent);
+    --bs-btn-bg: var(--sd-accent);
+    --bs-btn-border-color: var(--sd-accent);
+    --bs-btn-hover-color: var(--sd-on-accent);
+    --bs-btn-hover-bg: var(--sd-accent-hover);
+    --bs-btn-hover-border-color: var(--sd-accent-hover);
+    --bs-btn-active-color: var(--sd-on-accent);
+    --bs-btn-active-bg: var(--sd-accent-hover);
+    --bs-btn-active-border-color: var(--sd-accent-hover);
+    --bs-btn-disabled-color: var(--sd-on-accent);
+    --bs-btn-disabled-bg: var(--sd-accent);
+    --bs-btn-disabled-border-color: var(--sd-accent);
+    --bs-btn-focus-shadow-rgb: var(--sd-accent-rgb);
+}
+
+[data-streamdeck-mode] body.format-streamdeck .btn-secondary,
+[data-streamdeck-mode] body.format-streamdeck .btn-outline-secondary {
+    --bs-btn-color: var(--sd-text);
+    --bs-btn-bg: var(--sd-overlay-2);
+    --bs-btn-border-color: var(--sd-border-strong);
+    --bs-btn-hover-color: var(--sd-text);
+    --bs-btn-hover-bg: var(--sd-overlay-3);
+    --bs-btn-hover-border-color: var(--sd-border-strong);
+    --bs-btn-active-color: var(--sd-text);
+    --bs-btn-active-bg: var(--sd-overlay-3);
+    --bs-btn-active-border-color: var(--sd-border-strong);
+    --bs-btn-disabled-color: var(--sd-text-subtle);
+    --bs-btn-disabled-bg: var(--sd-overlay-1);
+    --bs-btn-disabled-border-color: var(--sd-border);
+}
+
+[data-streamdeck-mode] body.format-streamdeck .btn-primary,
+[data-streamdeck-mode] body.format-streamdeck .btn-secondary,
+[data-streamdeck-mode] body.format-streamdeck .btn-outline-secondary {
+    border-radius: var(--sd-radius-pill);
+    padding-inline: 1.1rem;
+    font-weight: 600;
+}
+
+[data-streamdeck-mode] body.format-streamdeck .btn-link {
+    --bs-btn-color: var(--sd-link);
+    --bs-btn-hover-color: var(--sd-link-hover);
+}
+
+/* Completion and date badges: Moodle draws these with mix-blend-mode on light backgrounds. */
+[data-streamdeck-mode] body.format-streamdeck .automatic-completion-conditions .badge,
+[data-streamdeck-mode] body.format-streamdeck .completion-info .badge {
+    mix-blend-mode: normal !important;
+    border-radius: var(--sd-radius-pill);
+    padding: 6px 12px;
+    background-color: var(--sd-overlay-2) !important;
+    color: var(--sd-text) !important;
+    border: 1px solid var(--sd-border);
+}
+
+[data-streamdeck-mode] body.format-streamdeck .automatic-completion-conditions .badge.alert-success,
+[data-streamdeck-mode] body.format-streamdeck .completion-info .badge.alert-success {
+    background-color: var(--sd-success-soft) !important;
+    color: var(--sd-success-text) !important;
+    border-color: transparent;
+}
+
+/* Dark mode: map light utility classes and alerts that hard-code light colours. */
+[data-bs-theme="dark"][data-streamdeck-mode] body.format-streamdeck .bg-white,
+[data-bs-theme="dark"][data-streamdeck-mode] body.format-streamdeck .bg-light {
+    background-color: var(--sd-surface-2) !important;
+}
+
+[data-bs-theme="dark"][data-streamdeck-mode] body.format-streamdeck .text-dark {
+    color: var(--sd-text) !important;
+}
+
+/* Plagiarism notices (Copyleaks) bring a light grey bar that dark text cannot be read on in dark mode. */
+[data-bs-theme="dark"][data-streamdeck-mode] body.format-streamdeck .copyleaks-student-disclosure {
     background: transparent !important;
+    color: var(--sd-text);
 }
 
-/* Region main in editing (course view) */
-.format-streamdeck.editing #region-main,
-#page-course-format-streamdeck-syllabus,
-#page-course-format-streamdeck-syllabus h3 {
-    padding: 20px !important;
-    border: none !important;
-    background-color: #fff !important;
-    color: #000 !important;
+[data-bs-theme="dark"][data-streamdeck-mode] body.format-streamdeck .alert {
+    background-color: var(--sd-overlay-2);
+    border-color: var(--sd-border);
+    color: var(--sd-text);
 }
 
-/* Main container when using streamdeck format */
-.format-streamdeck {
-    min-height: 78vh;
-    background: #000;
+[data-bs-theme="dark"][data-streamdeck-mode] body.format-streamdeck .alert-success {
+    border-left: 4px solid var(--sd-success);
 }
 
-/* White text for course page, episodes, forums, assignments, quizzes */
-#page-course-view-streamdeck.format-streamdeck:not(.editing),
-.format-streamdeck:not(.editing) .hero,
-.format-streamdeck:not(.editing) .streamdeck-main-strip,
-.format-streamdeck:not(.editing) .streamdeck-episode-page,
-#page-mod-forum-view.format-streamdeck:not(.editing),
-#page-mod-forum-discuss.format-streamdeck:not(.editing),
-#page-mod-assign-view.format-streamdeck:not(.editing),
-#page-mod-quiz-view.format-streamdeck:not(.editing),
-#page-mod-quiz-attempt.format-streamdeck:not(.editing),
-#page-mod-quiz-summary.format-streamdeck:not(.editing),
-#page-mod-quiz-review.format-streamdeck:not(.editing) {
+[data-bs-theme="dark"][data-streamdeck-mode] body.format-streamdeck .alert-warning {
+    border-left: 4px solid var(--sd-warning);
+}
+
+[data-bs-theme="dark"][data-streamdeck-mode] body.format-streamdeck .alert-danger {
+    border-left: 4px solid var(--sd-accent);
+}
+
+[data-bs-theme="dark"][data-streamdeck-mode] body.format-streamdeck .alert-info {
+    border-left: 4px solid var(--sd-link);
+}
+
+/* External tools fill the page without Moodle chrome. */
+[data-streamdeck-mode] #page-mod-lti-view .navbar,
+[data-streamdeck-mode] #page-mod-lti-view #page-header,
+[data-streamdeck-mode] #page-mod-lti-view .content-actions-lti,
+[data-streamdeck-mode] #page-mod-lti-view .activity-header,
+[data-streamdeck-mode] #page-mod-lti-view #footnote,
+[data-streamdeck-mode] #page-mod-lti-view #page-footer {
+    display: none !important;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SHARED COMPONENTS
+   ────────────────────────────────────────────────────────────── */
+.sd-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.55rem 1.25rem;
+    border: 1px solid transparent;
+    border-radius: var(--sd-radius-pill);
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition:
+        background-color var(--sd-speed-fast) ease,
+        border-color var(--sd-speed-fast) ease,
+        color var(--sd-speed-fast) ease,
+        box-shadow var(--sd-speed-fast) ease,
+        transform var(--sd-speed-fast) ease;
+}
+
+/* One focus ring for everything a keyboard or remote can reach. */
+.sd-btn:focus-visible,
+.sd-icon-btn:focus-visible,
+.streamdeck-related-episode-link:focus-visible,
+.streamdeck-hero-icon-btn:focus-visible,
+.streamdeck-hero-grades-btn:focus-visible,
+.streamdeck-pill:focus-visible,
+.streamdeck-season-tab:focus-visible,
+.streamdeck-about-summary:focus-visible,
+.hero-instructor-link:focus-visible,
+.hero-instructor-chip-inline:focus-visible,
+.streamdeck-assign-view-btn:focus-visible,
+.streamdeck-episode-video:focus-visible,
+.streamdeck-navbar-toggle:focus-visible,
+[data-streamdeck-mode] body.format-streamdeck .drawer-right-toggle .btn:focus-visible,
+[data-streamdeck-mode] body.format-streamdeck #prev-activity-link:focus-visible,
+[data-streamdeck-mode] body.format-streamdeck #next-activity-link:focus-visible {
+    outline: var(--sd-focus-width) solid var(--sd-link);
+    outline-offset: var(--sd-focus-offset);
+}
+
+/* Over hero imagery the ring stays light in both modes. */
+.hero :focus-visible {
+    outline-color: #b3d7ff !important;
+}
+
+/* A focused card lifts like a hovered one, and carries the ring itself: the lifted card would cover a ring
+   drawn on the link around it. */
+.streamdeck-card-link:focus-visible {
+    outline: none;
+}
+
+.streamdeck-card-link:focus-visible .streamdeck-card {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: var(--sd-shadow-2);
+    outline: var(--sd-focus-width) solid var(--sd-link);
+    outline-offset: var(--sd-focus-offset);
+}
+
+.streamdeck-hero-icon-btn:hover,
+.streamdeck-hero-icon-btn:focus-visible {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-radius: 50%;
+}
+
+.sd-btn--primary {
+    background: var(--sd-accent);
+    color: var(--sd-on-accent) !important;
+    box-shadow: 0 8px 18px var(--sd-accent-ring);
+}
+
+.sd-btn--primary:hover,
+.sd-btn--primary:focus-visible {
+    background: var(--sd-accent-hover);
+    transform: translateY(-1px);
+}
+
+.sd-btn--ghost {
+    background: transparent;
+    color: var(--sd-text) !important;
+    border-color: var(--sd-border-strong);
+}
+
+.sd-btn--ghost:hover,
+.sd-btn--ghost:focus-visible {
+    background: var(--sd-overlay-2);
+    border-color: var(--sd-text-subtle);
+}
+
+/* Over hero imagery, which stays dark in both modes. */
+.sd-btn--glass {
+    background: rgba(255, 255, 255, 0.12);
     color: #fff !important;
+    border-color: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(6px);
 }
 
-/* Main role content padding */
-body.format-streamdeck div[role="main"] {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+.sd-btn--glass:hover,
+.sd-btn--glass:focus-visible {
+    background: rgba(255, 255, 255, 0.22);
 }
 
-body.format-streamdeck.editing div[role="main"] {
-    padding-left: 20px !important;
-    padding-right: 20px !important;
+.sd-btn--lg {
+    padding: 0.85rem 2rem;
+    font-size: 1.05rem;
 }
 
-/* Optional – notifications span padding */
-.format-streamdeck span.notifications {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+.sd-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border: 1px solid var(--sd-border-strong);
+    border-radius: 50%;
+    background: var(--sd-overlay-1);
+    color: var(--sd-text);
+    cursor: pointer;
+    transition: background-color var(--sd-speed-fast) ease;
 }
 
-/* Hide default Moodle chrome in non-editing mode */
-#page-course-view-streamdeck.format-streamdeck:not(.editing) #page-header {
+.sd-icon-btn:hover {
+    background: var(--sd-overlay-3);
+}
+
+.sd-icon-btn.dropdown-toggle::after {
+    display: none;
+}
+
+.hero .sd-icon-btn {
+    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(0, 0, 0, 0.25);
+    color: #fff;
+}
+
+/* Colour mode menu. */
+.streamdeck-colourmode .dropdown-item[aria-checked="true"] {
+    font-weight: 600;
+    color: var(--sd-accent);
+}
+
+/* Top bar on activity pages. */
+.streamdeck-activity-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: var(--sd-content-width);
+    margin: 0 auto;
+    padding: 1rem 16px 0;
+}
+
+/* Boost narrows the content on most activity pages; line the toolbar up with it. */
+body.limitedwidth .streamdeck-activity-toolbar {
+    max-width: 862px;
+}
+
+.streamdeck-activity-toolbar-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   RIGHT DRAWER (blocks) – off unless the course enables it
+   ────────────────────────────────────────────────────────────── */
+[data-streamdeck-mode] body.format-streamdeck:not([id^="page-mod-quiz"]) .drawer.drawer-right,
+[data-streamdeck-mode] body.format-streamdeck:not([id^="page-mod-quiz"]) [data-region="blocks-column"],
+[data-streamdeck-mode] body.format-streamdeck:not([id^="page-mod-quiz"]) .drawer-toggles {
     display: none !important;
 }
 
-.format-streamdeck:not(.editing) #page-navbar,
-.format-streamdeck:not(.editing):not([id^="page-mod-quiz"]) .drawer-toggles,
-.format-streamdeck:not(.editing) .drawer-left,
-.format-streamdeck:not(.editing) .drawer.drawer-left,
-.format-streamdeck:not(.editing) [data-region="course-index"],
-.format-streamdeck:not(.editing) .secondary-navigation {
-    display: none !important;
-}
-
-/* Quiz pages: completely remove left drawer and reclaim its space */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .drawer-left-toggle {
-    display: none !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .drawer.drawer-left {
-    display: none !important;
-    width: 0 !important;
-    min-width: 0 !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) #page.drawers {
-    margin-left: 0 !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) #page.drawers.show-drawer-left {
-    margin-left: 0 !important;
-}
-
-/* Right drawer: hidden by default, enabled per-course via body class.
-   Exclude quiz pages so the quiz navigation panel remains visible. */
-.format-streamdeck:not(.editing):not([id^="page-mod-quiz"]) .drawer.drawer-right,
-.format-streamdeck:not(.editing):not([id^="page-mod-quiz"]) [data-region="blocks-column"] {
-    display: none !important;
-}
-
-/* When drawer toggle setting is enabled, restore Boost's native right drawer.
-   Must match or exceed specificity of the hide rules above. */
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing):not([id^="page-mod-quiz"]) .drawer-toggles {
+[data-streamdeck-mode] body.streamdeck-show-drawer-toggle:not([id^="page-mod-quiz"]) .drawer-toggles {
     display: flex !important;
-    visibility: visible !important;
     height: 0 !important;
     overflow: visible !important;
 }
 
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing) .drawer-left-toggle {
+[data-streamdeck-mode] body.streamdeck-show-drawer-toggle .drawer-left-toggle {
     display: none !important;
 }
 
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing):not([id^="page-mod-quiz"]) .drawer-right-toggle {
-    display: flex !important;
-    visibility: visible !important;
+[data-streamdeck-mode] body.streamdeck-show-drawer-toggle:not([id^="page-mod-quiz"]) .drawer-right-toggle {
     position: fixed !important;
     top: 50% !important;
     right: 0 !important;
-    z-index: 1035 !important;
-    transform: translateY(-50%) !important;
-    pointer-events: auto !important;
+    z-index: var(--sd-z-drawer-toggle) !important;
+    display: flex !important;
     align-items: center;
     justify-content: center;
     width: 24px;
     height: 80px;
+    padding: 0 !important;
     border: none !important;
-    border-radius: 12px 0 0 12px;
+    border-radius: var(--sd-radius-md) 0 0 var(--sd-radius-md);
     background: rgba(0, 0, 0, 0.45) !important;
     backdrop-filter: blur(8px);
+    transform: translateY(-50%) !important;
     cursor: pointer;
-    transition: background 0.2s ease;
-    padding: 0 !important;
+    transition: background var(--sd-speed-fast) ease;
 }
 
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing):not([id^="page-mod-quiz"]) .drawer-right-toggle:hover {
+[data-streamdeck-mode] body.streamdeck-show-drawer-toggle:not([id^="page-mod-quiz"]) .drawer-right-toggle:hover {
     background: rgba(0, 0, 0, 0.7) !important;
 }
 
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing):not([id^="page-mod-quiz"]) .drawer-right-toggle .btn,
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing):not([id^="page-mod-quiz"]) .drawer-right-toggle button {
-    background: transparent !important;
-    border: none !important;
-    color: rgba(255, 255, 255, 0.7) !important;
-    padding: 0 !important;
-    width: 100%;
-    height: 100%;
+[data-streamdeck-mode] body.streamdeck-show-drawer-toggle:not([id^="page-mod-quiz"]) .drawer-right-toggle .btn {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.7) !important;
 }
 
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing):not([id^="page-mod-quiz"]) .drawer-right-toggle .btn:hover,
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing):not([id^="page-mod-quiz"]) .drawer-right-toggle button:hover {
+[data-streamdeck-mode] body.streamdeck-show-drawer-toggle:not([id^="page-mod-quiz"]) .drawer-right-toggle .btn:hover {
     color: #fff !important;
 }
 
-/* Right drawer: always off-screen by default. Ignore Boost's .show class.
-   Only our own .streamdeck-drawer-open class (toggled by JS) reveals it. */
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing):not([id^="page-mod-quiz"]) .drawer.drawer-right {
-    display: block !important;
-    right: -325px !important;
+/* A full-height panel that slides in from the right edge. Boost's own .show is ignored (main.js toggles
+   .streamdeck-drawer-open), and so is Boost 5.3's anchored layout, which positions the drawer with left
+   and hides it with clip-path on limited-width pages. */
+[data-streamdeck-mode] body.streamdeck-show-drawer-toggle:not([id^="page-mod-quiz"]) .drawer.drawer-right {
+    display: flex !important;
+    top: 0 !important;
+    right: -340px !important;
+    left: auto !important;
+    z-index: var(--sd-z-drawer-toggle) !important;
+    width: 315px !important;
+    height: 100vh !important;
+    max-height: none !important;
+    clip-path: none !important;
     visibility: hidden !important;
-    transition: right 0.3s ease, visibility 0.3s ease;
+    box-shadow: var(--sd-shadow-3);
+    transition: right var(--sd-speed) ease, visibility var(--sd-speed) ease;
 }
 
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing):not([id^="page-mod-quiz"])
-.drawer.drawer-right.streamdeck-drawer-open {
+/* The drawer has its own close button, so the edge tab steps aside while it is open. */
+[data-streamdeck-mode] body.streamdeck-blocks-open .drawer-right-toggle {
+    visibility: hidden !important;
+}
+
+[data-streamdeck-mode] body.streamdeck-show-drawer-toggle:not([id^="page-mod-quiz"]) .drawer.drawer-right.streamdeck-drawer-open {
     right: 0 !important;
     visibility: visible !important;
 }
 
-/* Prevent page margin/layout shift from Boost's drawer state */
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing):not([id^="page-mod-quiz"]) #page.drawers {
-    margin-right: 0 !important;
-}
-
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing).drawer-open-right {
-    margin-right: 0 !important;
-}
-
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing):not([id^="page-mod-quiz"]) [data-region="blocks-column"] {
+[data-streamdeck-mode] body.streamdeck-show-drawer-toggle:not([id^="page-mod-quiz"]) [data-region="blocks-column"] {
     display: block !important;
-    visibility: visible !important;
 }
 
-/* Course page right drawer – dark theme matching related-sidebar */
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing) .drawer.drawer-right {
-    background: #222 !important;
+[data-streamdeck-mode] body.streamdeck-show-drawer-toggle #page.drawers,
+[data-streamdeck-mode] body.streamdeck-show-drawer-toggle.drawer-open-right {
+    margin-right: 0 !important;
+}
+
+/* The blocks drawer and the quiz navigation drawer share one look. */
+[data-streamdeck-mode] body.format-streamdeck .drawer.drawer-right {
+    background: var(--sd-surface-2) !important;
     border-left: none !important;
-    border-radius: 0.5rem 0 0 0.5rem;
-    color: #eee !important;
+    border-radius: var(--sd-radius-sm) 0 0 var(--sd-radius-sm);
+    color: var(--sd-text) !important;
 }
 
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing) .drawer.drawer-right .drawercontent {
-    color: #eee !important;
+[data-streamdeck-mode] body.format-streamdeck .drawer.drawer-right .drawercontent {
+    color: var(--sd-text) !important;
+    padding: 1rem !important;
 }
 
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing) .drawer.drawer-right .card {
-    background: #222 !important;
+[data-streamdeck-mode] body.format-streamdeck .drawer.drawer-right .card {
+    background: transparent !important;
     border: none !important;
-    color: #eee !important;
     box-shadow: none !important;
 }
 
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing) .drawer.drawer-right .card-body {
-    background: transparent !important;
-    color: #eee !important;
-}
-
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing) .drawer.drawer-right .card-title,
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing) .drawer.drawer-right .card-header {
+[data-streamdeck-mode] body.format-streamdeck .drawer.drawer-right .card-title,
+[data-streamdeck-mode] body.format-streamdeck .drawer.drawer-right .card-header {
     background: transparent !important;
     border-bottom: none !important;
-    color: #fff !important;
+    color: var(--sd-text) !important;
     font-weight: 600 !important;
 }
 
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing) .drawer.drawer-right a:not(.btn) {
-    color: #adf !important;
+[data-streamdeck-mode] body.format-streamdeck .drawer.drawer-right a:not(.btn) {
+    color: var(--sd-link) !important;
 }
 
-.streamdeck-show-drawer-toggle.format-streamdeck:not(.editing) .drawer.drawer-right a:not(.btn):hover {
-    text-decoration: underline;
-}
-
-/* Auto-hide navbar: slide up after 1s, reveal via toggle */
-.format-streamdeck:not(.editing) .navbar {
+/* ──────────────────────────────────────────────────────────────
+   NAVBAR – slides away after a second; main.js adds a pull tab.
+   Acceptance test sites keep it in place, so steps can reach it.
+   ────────────────────────────────────────────────────────────── */
+[data-streamdeck-mode] body.format-streamdeck:not(.behat-site) .navbar.fixed-top {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
-    z-index: 1040;
-    transition: transform 0.4s ease;
-    animation: streamdeck-navbar-slide-up 0.4s ease 1s forwards;
+    z-index: var(--sd-z-navbar);
+    transition: transform var(--sd-speed-slow) ease;
+    animation: streamdeck-navbar-slide-up var(--sd-speed-slow) ease 1s forwards;
 }
 
-.format-streamdeck:not(.editing) .navbar.streamdeck-navbar-visible {
+/* Where the navbar stays put, leave room for it. */
+[data-streamdeck-mode] body.format-streamdeck.behat-site {
+    padding-top: 60px !important;
+}
+
+[data-streamdeck-mode] body.format-streamdeck .navbar.streamdeck-navbar-visible {
     animation: none;
     transform: translateY(0) !important;
 }
 
-.format-streamdeck:not(.editing) .navbar.streamdeck-navbar-hidden {
+[data-streamdeck-mode] body.format-streamdeck .navbar.streamdeck-navbar-hidden {
     animation: none;
     transform: translateY(-100%) !important;
 }
 
-/* Toggle tab pinned to top edge */
 .streamdeck-navbar-toggle {
     position: fixed;
     top: 0;
     left: 50%;
-    transform: translateX(-50%);
-    z-index: 1041;
-    width: 80px;
-    height: 24px;
-    border: none !important;
-    border-radius: 0 0 12px 12px;
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(8px);
-    cursor: pointer;
+    z-index: var(--sd-z-navbar-toggle);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s ease, transform 0.2s ease;
+    width: 80px;
+    height: 24px;
     padding: 0 !important;
+    border: none !important;
+    border-radius: 0 0 var(--sd-radius-md) var(--sd-radius-md);
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(8px);
+    color: rgba(255, 255, 255, 0.7);
+    transform: translateX(-50%);
+    cursor: pointer;
     opacity: 0;
     animation: streamdeck-toggle-fade-in 0.3s ease 1.6s forwards;
+    transition: background var(--sd-speed-fast) ease;
 }
 
 .streamdeck-navbar-toggle::after {
     content: "\25BC";
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.7);
     line-height: 1;
 }
 
-.streamdeck-navbar-toggle:hover {
-    background: rgba(0, 0, 0, 0.7);
+.streamdeck-navbar-toggle[aria-expanded="true"]::after {
+    content: "\25B2";
 }
 
-.streamdeck-navbar-toggle:hover::after {
+.streamdeck-navbar-toggle:hover,
+.streamdeck-navbar-toggle:focus-visible {
+    background: rgba(0, 0, 0, 0.7);
     color: #fff;
 }
 
-/* In editing mode, hide custom Streamdeck hero/episode chrome, but keep page/drawers alive */
-body.editing .streamdeck-main-strip,
-body.editing .hero,
-body.editing .streamdeck-episode-page {
-    display: none !important;
-}
-
 /* ──────────────────────────────────────────────────────────────
-   EDITING MODE – TEXT & BACKGROUND OVERRIDES
+   MODALS
    ────────────────────────────────────────────────────────────── */
-
-.format-streamdeck.editing {
-    background-color: #fff !important;
-    color: #222 !important;
-}
-
-/* Headings in editing mode */
-.format-streamdeck.editing h1,
-.format-streamdeck.editing h2,
-.format-streamdeck.editing h3,
-.format-streamdeck.editing h4,
-.format-streamdeck.editing h5,
-.format-streamdeck.editing h6,
-/* Other important text in editing mode */
-.format-streamdeck.editing .streamdeck-episode-title,
-.format-streamdeck.editing .streamdeck-related-heading,
-.format-streamdeck.editing .streamdeck-episode-pill,
-.format-streamdeck.editing .streamdeck-episode-sectionname,
-.format-streamdeck.editing p,
-.format-streamdeck.editing span,
-.format-streamdeck.editing a,
-.format-streamdeck.editing li:not(.nav-item),
-.format-streamdeck.editing label,
-.format-streamdeck.editing .streamdeck-episode-intro {
-    color: #000 !important;
-}
-
-.format-streamdeck.editing .btn-primary,
-.format-streamdeck.editing .bg-dark a {
-    color: #fff !important;
-}
-
-/* Assignment editing mode backgrounds */
-#page-mod-assign-view.format-streamdeck.editing #region-main,
-.format-streamdeck.editing .generaltable,
-.format-streamdeck.editing .table,
-#page-mod-assign.format-streamdeck.editing .path-mod .activity-information .activity-dates {
-    background-color: #fff !important;
-    color: #000 !important;
-}
-
-/* SCORM editing mode background */
-#page-mod-scorm-view.format-streamdeck.editing #region-main {
-    background-color: #fff !important;
-}
-
-.format-streamdeck.editing .activity-header {
-    background-color: #f8f9fa !important;
-    color: #000 !important;
-}
-
-/* ──────────────────────────────────────────────────────────────
-   SHARED UI COMPONENTS – MODALS & CLOSE BUTTONS
-   ────────────────────────────────────────────────────────────── */
-
-/* Hero icon modals – widen beyond Bootstrap's default .modal-lg (800px) */
-#page-course-view-streamdeck.format-streamdeck:not(.editing) .modal.show:has(.streamdeck-hero-iframe-wrapper) .modal-dialog,
-#page-course-view-streamdeck.format-streamdeck:not(.editing) .modal-lg,
-#page-course-view-streamdeck.format-streamdeck:not(.editing) .modal-xl,
-#page-course-view-streamdeck.format-streamdeck:not(.editing) .modal-dialog {
+/* Hero icon modals are wider than Bootstrap's .modal-lg. */
+[data-streamdeck-mode] #page-course-view-streamdeck .modal-lg,
+[data-streamdeck-mode] #page-course-view-streamdeck .modal-xl {
     max-width: 1200px;
 }
 
-/* Soften backdrop */
-.modal-backdrop.show {
-    background-color: rgba(0, 0, 0, 0.75);
-}
-
-
-/* Generic close button styling for all modals in Streamdeck */
-.format-streamdeck .modal .btn-close {
-    width: 32px;
-    height: 32px;
-    border-radius: 999px;
-    background-color: rgba(0, 0, 0, 0.85);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
-    opacity: 1;
-    padding: 0 !important;
+[data-streamdeck-mode] body.format-streamdeck .modal .btn-close {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-
-    /* Reset any icon-font assumptions */
+    width: 32px;
+    height: 32px;
+    padding: 0 !important;
+    border: 1px solid var(--sd-border);
+    border-radius: 50%;
+    background: var(--sd-surface-3);
+    box-shadow: var(--sd-shadow-1);
+    opacity: 1;
     font-family: inherit;
+    transition: transform var(--sd-speed-fast) ease;
 }
 
-/* Show a simple x icon */
-.format-streamdeck .modal .btn-close::before {
+[data-streamdeck-mode] body.format-streamdeck .modal .btn-close::before {
     content: "\00d7";
     font-size: 20px;
     line-height: 1;
-    color: #f5f5f7;
-    font-weight: 400;
+    color: var(--sd-text);
 }
 
-/* Hide any built-in SVG/icon if present */
-.format-streamdeck .modal .btn-close svg,
-.format-streamdeck .modal .btn-close span,
-.format-streamdeck .modal .btn-close img {
+[data-streamdeck-mode] body.format-streamdeck .modal .btn-close svg,
+[data-streamdeck-mode] body.format-streamdeck .modal .btn-close span,
+[data-streamdeck-mode] body.format-streamdeck .modal .btn-close img {
     display: none !important;
 }
 
-.format-streamdeck .modal .btn-close:hover,
-.format-streamdeck .modal .btn-close:focus-visible {
-    background-color: rgba(0, 0, 0, 0.98);
+[data-streamdeck-mode] body.format-streamdeck .modal .btn-close:hover,
+[data-streamdeck-mode] body.format-streamdeck .modal .btn-close:focus-visible {
     transform: scale(1.05);
-    transition: all 150ms ease;
 }
 
-/* Moodle-specific modal overrides */
-#page-course-view-streamdeck > div:nth-child(5) > div.modal.moodle-has-zindex.show > div > div > div.modal-header > button {
-    background-color: #fff !important;
-    color: #000 !important;
-    border-radius: 10px;
+/* Floating close button injected by main.js into the chromeless modals. */
+.streamdeck-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: var(--sd-z-raised);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 50%;
+    background: var(--sd-overlay-2);
+    color: var(--sd-text-muted);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background var(--sd-speed-fast) ease, color var(--sd-speed-fast) ease;
 }
 
-#page-course-view-streamdeck .modal-title {
+.streamdeck-modal-close:hover,
+.streamdeck-modal-close:focus-visible {
+    background: var(--sd-overlay-3);
+    color: var(--sd-text);
+}
+
+/* Iframe modals (announcements, forum, participants, live class, grades). */
+.streamdeck-iframe-modal .modal-content {
+    overflow: hidden;
+    border-radius: var(--sd-radius-xl) !important;
+    border: 1px solid var(--sd-border) !important;
+    background: var(--sd-surface-1) !important;
+    box-shadow: var(--sd-shadow-3) !important;
+}
+
+.streamdeck-iframe-modal .modal-header {
+    padding: 1rem 1.5rem !important;
+    border-bottom: 1px solid var(--sd-border) !important;
+    background: transparent !important;
+}
+
+.streamdeck-iframe-modal .modal-title {
+    color: var(--sd-text) !important;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.streamdeck-iframe-modal .modal-body {
+    padding: 0 !important;
+    background: var(--sd-surface-1);
+}
+
+.streamdeck-hero-iframe-wrapper {
+    position: relative;
+    width: 100% !important;
+    padding-bottom: 56.25%;
+    overflow: hidden;
+}
+
+.streamdeck-hero-iframe-wrapper--tall {
+    height: 70vh;
+    padding-bottom: 0;
+}
+
+.streamdeck-hero-iframe-wrapper iframe.streamdeck-hero-iframe {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100%;
+    border: none !important;
+}
+
+/* Course pages loaded in a frame (episode stage, hero modals, inline frames) drop the
+   chrome the surrounding page already shows, floating widgets included (Boost's footer
+   buttons, the Ezra chat button). The class is set in the head by hook_listener. */
+html.streamdeck-in-frame #page-header,
+html.streamdeck-in-frame #page-footer,
+html.streamdeck-in-frame #page-navbar,
+html.streamdeck-in-frame .navbar,
+html.streamdeck-in-frame .streamdeck-navbar-toggle,
+html.streamdeck-in-frame .streamdeck-activity-toolbar,
+html.streamdeck-in-frame .secondary-navigation,
+html.streamdeck-in-frame .activity-header,
+html.streamdeck-in-frame .drawer-toggles,
+html.streamdeck-in-frame #footnote,
+html.streamdeck-in-frame .breadcrumb,
+html.streamdeck-in-frame .drawer,
+html.streamdeck-in-frame .activity-navigation,
+html.streamdeck-in-frame body:not(.streamdeck-grades-embedded) .page-context-header,
+html.streamdeck-in-frame ul.content-actions-lti,
+html.streamdeck-in-frame #scorm_toc_toggle,
+html.streamdeck-in-frame [data-region="footer-container-popover"],
+html.streamdeck-in-frame #local-ezra-widget-mount,
+html.streamdeck-in-frame #local-ezra-fab,
+html.streamdeck-in-frame body.streamdeck-scorm-embedded #region-main > div > .d-flex {
     display: none !important;
 }
 
-#sd-pill-schedule > div {
-    border-radius: 10px;
+/* The frame scrolls without showing scrollbars; Boost scrolls #page.drawers rather than the page. */
+html.streamdeck-in-frame,
+html.streamdeck-in-frame body,
+html.streamdeck-in-frame #page.drawers {
+    scrollbar-width: none;
+}
+
+html.streamdeck-in-frame::-webkit-scrollbar,
+html.streamdeck-in-frame body::-webkit-scrollbar,
+html.streamdeck-in-frame #page.drawers::-webkit-scrollbar {
+    display: none;
+}
+
+/* The reply form opened from an episode's discussion: the post is already shown above the frame. */
+html.streamdeck-in-frame #page-mod-forum-post #region-main .forum-post-container,
+html.streamdeck-in-frame #page-mod-forum-post #region-main h2:not(.accesshide) {
+    display: none !important;
+}
+
+/* One scroll for an episode's discussion: the modal. The card is up to 80vw wide with no height limit, and the
+   composer frame grows to fit its form (main.js) instead of scrolling inside it. */
+.modal.streamdeck-forum-styled .modal-dialog {
+    --bs-modal-width: 80vw;
+    height: auto;
+    max-height: 80vh;
+    margin-top: 10vh;
+    margin-bottom: 10vh;
+}
+
+/* As tall as the thread and composer need, up to 80vh; only then does the body scroll. Theme styles load after
+   plugin styles, so this outranks Bootstrap's .modal-dialog-scrollable .modal-content { max-height: 100% }. */
+.modal.streamdeck-forum-styled .modal-dialog .modal-content {
+    max-height: 80vh;
+}
+
+[data-streamdeck-mode].streamdeck-in-frame body.format-streamdeck {
+    padding-top: 0 !important;
+    background: transparent !important;
+}
+
+[data-streamdeck-mode].streamdeck-in-frame #page.drawers,
+[data-streamdeck-mode].streamdeck-in-frame #page.drawers .main-inner,
+[data-streamdeck-mode].streamdeck-in-frame #topofscroll {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Boost scrolls #page inside a fixed-height box; in a frame the page grows with its content instead, so a frame
+   can be sized to fit (the reply form) and only one scrollbar is ever in play. */
+[data-streamdeck-mode].streamdeck-in-frame #page.drawers {
+    height: auto !important;
+    overflow: visible !important;
+}
+
+/* Boost and Boost Union stretch the page wrappers to fill the window (flex: 1 0 auto); in a frame that would keep
+   a frame from ever shrinking to its content. */
+[data-streamdeck-mode].streamdeck-in-frame #page-wrapper,
+[data-streamdeck-mode].streamdeck-in-frame #page-wrapper #page,
+[data-streamdeck-mode].streamdeck-in-frame .main-inner-wrapper,
+[data-streamdeck-mode].streamdeck-in-frame #page.drawers .main-inner {
+    flex: 0 0 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+}
+
+[data-streamdeck-mode].streamdeck-in-frame body.format-streamdeck:not(#page-course-view-streamdeck) #region-main {
+    max-width: none;
+    margin: 0 !important;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 0;
+    background: transparent !important;
+    box-shadow: none;
 }
 
 /* ──────────────────────────────────────────────────────────────
-   SHARED MODULE DARK THEME – REGION-MAIN, DRAWERS, TABLES
+   EPISODE PAGE – header, stage panel, empty state, navigation
    ────────────────────────────────────────────────────────────── */
-
-/* Dark backgrounds for module drawer containers */
-/* Some Moodle-specific modal overrides */
-#page-course-view-streamdeck > div:nth-child(5) > div.modal.moodle-has-zindex.show > div > div,
-#page-mod-assign-view.format-streamdeck:not(.editing) #page.drawers .main-inner,
-#page-mod-bigbluebuttonbn-view.format-streamdeck:not(.editing) #page.drawers .main-inner,
-#page-mod-forum-view.format-streamdeck:not(.editing) #page.drawers .main-inner,
-#page-mod-forum-discuss.format-streamdeck:not(.editing) #page.drawers .main-inner,
-#page-mod-scorm-view.format-streamdeck:not(.editing) #page.drawers .main-inner,
-#page-mod-scorm-player.format-streamdeck:not(.editing) #page.drawers .main-inner,
-#page-mod-forum-discuss.format-streamdeck:not(.editing) .bg-light {
-    background-color: #000 !important;
+div.format-streamdeck {
+    min-height: 78vh;
 }
 
-/* Dark backgrounds for module region-main (view mode) */
-#page-mod-forum-view.format-streamdeck #region-main,
-#page-mod-forum-discuss.format-streamdeck #region-main,
-#page-mod-scorm-view.format-streamdeck #region-main,
-#page-mod-scorm-player.format-streamdeck #region-main,
-#page-mod-bigbluebuttonbn-view.format-streamdeck #region-main,
-#page-course-view-streamdeck .modal-dialog-scrollable .modal-content,
-body.format-streamdeck:not(.editing):not(#page-local-unifiedgrader-grade):not(#page-local-unifiedgrader-overrides_extensions)
-.modal-dialog-scrollable .modal-content {
-    background-color: #151515;
-    color: #f0f0f0 !important;
+.streamdeck-episode-header-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
 }
 
-/* Unified grader modals – white background, legible dark text */
-#page-local-unifiedgrader-grade.format-streamdeck .modal-dialog-scrollable .modal-content,
-#page-local-unifiedgrader-overrides_extensions.format-streamdeck .modal-dialog-scrollable .modal-content {
-    background-color: #fff !important;
-    color: #1d2125 !important;
+.streamdeck-episode-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-#page-mod-forum-view.format-streamdeck.editing #region-main,
-#page-mod-forum-discuss.format-streamdeck.editing #region-main,
-#page-mod-scorm-view.format-streamdeck.editing #region-main,
-#page-mod-scorm-player.format-streamdeck.editing #region-main,
-.format-streamdeck.editing .modal-dialog-scrollable .modal-content,
-#page-mod-bigbluebuttonbn-view.format-streamdeck.editing #region-main {
-    background-color: #fff !important;
-    color: #000 !important;
+/* Launch panel for activities that cannot play in the page (quizzes, assignments...). */
+.streamdeck-stage {
+    position: relative;
+    margin: 1.2rem 0 1rem;
+    border-radius: var(--sd-radius-lg);
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 15% 20%, var(--sd-accent-soft), transparent 55%),
+        var(--sd-surface-2);
+    border: 1px solid var(--sd-border);
+    box-shadow: var(--sd-shadow-2);
 }
 
-/* Assignment region-main dark background (view mode) */
-#page-mod-assign-view.format-streamdeck:not(.editing) #region-main,
-#page-mod-assign-view.format-streamdeck:not(.editing) table.generaltable,
-#page-mod-assign-view.format-streamdeck:not(.editing) .table,
-#page-mod-assign.format-streamdeck:not(.editing) .path-mod .activity-information .activity-dates {
-    background-color: #000 !important;
-    color: #fff !important;
+.streamdeck-stage-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-height: 320px;
+    justify-content: center;
+    padding: 3.5rem;
 }
 
-/* Forum/assign pages: remove left drawer space when hidden */
-#page-mod-forum-view.format-streamdeck:not(.editing) .drawer.drawer-left,
-#page-mod-forum-discuss.format-streamdeck:not(.editing) .drawer.drawer-left,
-#page-mod-assign-view.format-streamdeck:not(.editing) .drawer.drawer-left {
-    display: none !important;
-    width: 0 !important;
-    min-width: 0 !important;
+@media (max-width: 768px) {
+    .streamdeck-stage-inner {
+        min-height: 220px;
+        padding: 1.5rem;
+    }
 }
 
-#page-mod-forum-view.format-streamdeck:not(.editing) #page.drawers,
-#page-mod-forum-view.format-streamdeck:not(.editing) #page.drawers.show-drawer-left,
-#page-mod-forum-discuss.format-streamdeck:not(.editing) #page.drawers,
-#page-mod-forum-discuss.format-streamdeck:not(.editing) #page.drawers.show-drawer-left,
-#page-mod-assign-view.format-streamdeck:not(.editing) #page.drawers,
-#page-mod-assign-view.format-streamdeck:not(.editing) #page.drawers.show-drawer-left {
-    margin-left: 0 !important;
-    padding-left: 0 !important;
+.streamdeck-stage-kicker {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sd-text-muted);
 }
 
-/* Shared activity-header background for assign/scorm/forum */
-#page-mod-assign-view.format-streamdeck:not(.editing) #page.drawers .activity-header,
-#page-mod-scorm-view.format-streamdeck:not(.editing) #page.drawers .activity-header,
-#page-mod-forum-view.format-streamdeck:not(.editing) #page.drawers .activity-header {
-    background-color: #3a3a3a;
+.streamdeck-stage-icon {
+    width: 28px;
+    height: 28px;
+    filter: var(--sd-icon-filter);
 }
 
-#page-mod-assign-view.streamdeck-assign-embedded .path-mod .automatic-completion-conditions div[class~="badge"],
-#page-mod-scorm-view.streamdeck-assign-embedded .path-mod .automatic-completion-conditions .badge {
-    mix-blend-mode: unset !important;
-    background-color: #ae132a !important;
+.streamdeck-stage-badge {
+    padding: 0.15rem 0.7rem;
+    border-radius: var(--sd-radius-pill);
+    background: var(--sd-accent);
+    color: var(--sd-on-accent);
+    letter-spacing: 0.08em;
 }
 
-/* Shared dark table styling across modules */
-#page-mod-course-view.format-streamdeck:not(.editing) table.generaltable thead,
-#page-mod-assign-view.format-streamdeck:not(.editing) table.generaltable thead,
-#page-mod-bigbluebuttonbn-view.format-streamdeck:not(.editing) table.generaltable thead,
-#page-mod-forum-view.format-streamdeck:not(.editing) table.generaltable thead,
-#page-mod-forum-view.format-streamdeck:not(.editing) .generaltable thead th {
-    background-color: #3a3a3a;
-    color: #f3f3f3 !important;
+.streamdeck-stage-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem 2rem;
+    margin: 0;
 }
 
-#page-mod-lti-view.format-streamdeck:not(.editing) tr,
-#page-mod-forum-view.format-streamdeck:not(.editing) tr,
-#page-mod-bigbluebuttonbn-view.format-streamdeck:not(.editing) tr,
-#page-mod-scorm-view.format-streamdeck:not(.editing) tr,
-#page-mod-forum-discuss.format-streamdeck:not(.editing) tr,
-#page-mod-bigbluebuttonbn-view.format-streamdeck:not(.editing) div[class$="datatable-paginator"] {
-    background: #000;
-    color: #f3f3f3 !important;
+.streamdeck-stage-fact dt {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--sd-text-subtle);
 }
 
-#page-mod-lti-view.format-streamdeck:not(.editing) tbody,
-#page-mod-forum-view.format-streamdeck:not(.editing) tbody,
-#page-mod-bigbluebuttonbn-view.format-streamdeck:not(.editing) tbody,
-#page-mod-scorm-view.format-streamdeck:not(.editing) tbody,
-#page-mod-forum-discuss.format-streamdeck:not(.editing) tbody,
-#page-mod-assign-view.format-streamdeck:not(.editing) tbody {
-    background: #3a3a3a;
-    color: #f3f3f3 !important;
+.streamdeck-stage-fact dd {
+    margin: 0.2rem 0 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--sd-text);
 }
 
-#page-mod-lti-view.format-streamdeck:not(.editing) #page,
-#page-mod-forum-view.format-streamdeck:not(.editing) #page,
-#page-mod-bigbluebuttonbn-view.format-streamdeck:not(.editing) #page,
-#page-mod-scorm-view.format-streamdeck:not(.editing) #page {
-    margin-top: 0 !important;
+.streamdeck-stage-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+}
+
+.streamdeck-episode-empty {
+    margin: 1.2rem 0;
+    padding: 3rem 1.5rem;
+    border: 1px dashed var(--sd-border-strong);
+    border-radius: var(--sd-radius-lg);
+    text-align: center;
+    color: var(--sd-text-muted);
+}
+
+.streamdeck-episode-nav-hint {
+    font-size: 0.9rem;
+    color: var(--sd-text-muted);
+}
+
+/* Light mode: the related sidebar is a white block, lifted off the off-white page. */
+[data-bs-theme="light"] .related-sidebar,
+[data-bs-theme="light"] .streamdeck-about-card,
+[data-bs-theme="light"] .related-activities .streamdeck-related-episodes {
+    background: var(--sd-surface-1);
+}
+
+[data-bs-theme="light"] .related-sidebar,
+[data-bs-theme="light"] .streamdeck-about-card {
+    border: 1px solid var(--sd-border);
+    box-shadow: var(--sd-shadow-1);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SEASONS AND EPISODE METADATA
+   ────────────────────────────────────────────────────────────── */
+.streamdeck-season-tabs {
+    display: none;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.streamdeck-seasons.is-enhanced .streamdeck-season-tabs {
+    display: flex;
+}
+
+.streamdeck-season-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+    padding: 0.55rem 1.1rem;
+    border: 1px solid var(--sd-border);
+    border-radius: var(--sd-radius-md);
+    background: var(--sd-overlay-1);
+    color: var(--sd-text-muted);
+    text-align: left;
+    cursor: pointer;
+    transition:
+        background-color var(--sd-speed-fast) ease,
+        border-color var(--sd-speed-fast) ease,
+        color var(--sd-speed-fast) ease;
+}
+
+.streamdeck-season-tab:hover {
+    background: var(--sd-overlay-2);
+    color: var(--sd-text);
+}
+
+.streamdeck-season-tab:focus-visible {
+    outline: 2px solid var(--sd-link);
+    outline-offset: 2px;
+}
+
+.streamdeck-season-tab.is-active {
+    border-color: var(--sd-accent);
+    background: var(--sd-accent-soft);
+    color: var(--sd-text);
+}
+
+.streamdeck-season-tab-kicker {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sd-text-subtle);
+}
+
+.streamdeck-season-tab-name {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* Without JavaScript every season is listed under its heading; with it, one season shows at a time. */
+.streamdeck-season-panel + .streamdeck-season-panel {
+    margin-top: 2.5rem;
+}
+
+.streamdeck-season-heading {
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.streamdeck-seasons.is-enhanced .streamdeck-season-heading,
+.streamdeck-seasons.is-enhanced .streamdeck-season-panel:not(.is-active) {
+    display: none;
+}
+
+.streamdeck-seasons.is-enhanced .streamdeck-season-panel + .streamdeck-season-panel {
+    margin-top: 0;
+}
+
+.streamdeck-card__badge-new {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 3;
+    padding: 0.15rem 0.55rem;
+    border-radius: var(--sd-radius-sm);
+    background: var(--sd-accent);
+    color: var(--sd-on-accent);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    box-shadow: var(--sd-shadow-1);
+}
+
+.streamdeck-card__meta-chip--due {
+    background: var(--sd-warning-soft);
+    color: var(--sd-warning-text);
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.streamdeck-card__lockedinfo {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: var(--sd-text-muted);
+}
+
+.streamdeck-card__lockedinfo ul {
+    margin: 0;
+    padding-left: 1rem;
+}
+
+/* "About this episode": learning objectives under the related card; learners can fold it away. */
+.streamdeck-about-card {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: var(--sd-radius-sm);
+    background: var(--sd-surface-2);
+    color: var(--sd-text);
+}
+
+/* Same entrance as the related card, arriving just after it. */
+.streamdeck-about-card {
+    opacity: 0;
+    animation: slideInResources 0.5s ease forwards;
+    animation-delay: 0.95s;
+}
+
+.streamdeck-related-block > .streamdeck-about-card:first-child {
+    margin-top: 0;
+    animation-delay: 0.7s;
+}
+
+.streamdeck-about-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    list-style: none;
+    cursor: pointer;
+}
+
+.streamdeck-about-summary::-webkit-details-marker {
+    display: none;
+}
+
+.streamdeck-about-summary h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--sd-text);
+}
+
+.streamdeck-about-icon {
+    margin-right: 0.4rem;
+    color: var(--sd-accent);
+}
+
+.streamdeck-about-summary:focus-visible {
+    outline: 2px solid var(--sd-link);
+    outline-offset: 4px;
+    border-radius: var(--sd-radius-sm);
+}
+
+.streamdeck-about-chevron {
+    color: var(--sd-text-muted);
+    transition: transform var(--sd-speed-fast) ease;
+}
+
+.streamdeck-about-card:not([open]) .streamdeck-about-chevron {
+    transform: rotate(-90deg);
+}
+
+.streamdeck-about-body {
+    margin-top: 0.75rem;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--sd-text-muted);
+}
+
+.streamdeck-about-body ul,
+.streamdeck-about-body ol {
+    padding-left: 1.25rem;
+}
+
+.streamdeck-about-body > :last-child {
+    margin-bottom: 0;
+}
+
+.streamdeck-season-tab-count {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--sd-text-subtle);
+}
+
+.streamdeck-season-heading .streamdeck-season-tab-count {
+    display: inline;
+    margin-left: 0.5rem;
+    font-weight: 400;
+}
+
+/* Locked cards stay on the shelf but are not links; keyboard and remote users can still reach them. */
+.streamdeck-card-link[aria-disabled="true"] {
+    cursor: not-allowed;
+}
+
+/* Wide screens: the episode comes first in the page, the related column shows on its left. */
+@media (min-width: 993px) {
+    .streamdeck-related-block {
+        order: -1;
+    }
+}
+
+/* The related column and About card fade in; keep them out of reach until they are visible. The rules that
+   set their timing come later in the file, so these are more specific to keep the name and fill mode. */
+.streamdeck-related-block .related-sidebar,
+.streamdeck-related-block .streamdeck-about-card {
+    visibility: hidden;
+    animation-name: streamdeck-reveal;
+    animation-fill-mode: both;
+}
+
+@keyframes streamdeck-reveal {
+    0% {
+        visibility: hidden;
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+
+    1% {
+        visibility: visible;
+    }
+
+    100% {
+        visibility: visible;
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.streamdeck-card--locked {
+    opacity: 0.7;
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -620,6 +1473,7 @@ body.format-streamdeck:not(.editing):not(#page-local-unifiedgrader-grade):not(#p
 /* Base hero container */
 .format-streamdeck .hero {
     position: relative;
+    color: #fff;
     min-height: 100vh;
     margin: 0 !important;
     padding: 0 !important;
@@ -650,24 +1504,44 @@ body.format-streamdeck:not(.editing):not(#page-local-unifiedgrader-grade):not(#p
     background: linear-gradient(135deg, #0f0f0f 0%, #000 100%);
 }
 
-/* Page header visible top-left over hero */
-.format-streamdeck .hero #page-header {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    z-index: 20;
-    background: transparent !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
 /* Hero content spacing */
 .format-streamdeck .hero-content {
+    position: relative;
+    z-index: 5;
     padding-top: 8vh;
 }
 
+/* Text box with dark scrim + blur */
+.streamdeck-hero-scrim {
+    padding: 3rem;
+    border-radius: var(--sd-radius-lg);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+}
+
+.streamdeck-hero-title {
+    color: #fff;
+    font-family: var(--sd-hero-font, inherit);
+    text-shadow: 3px 3px 12px rgba(0, 0, 0, 0.9);
+}
+
+.streamdeck-hero-summary {
+    max-width: 680px;
+    color: #fff;
+}
+
+.hero .completion-badge-text {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 576px) {
+    .streamdeck-hero-scrim {
+        padding: 1.5rem;
+    }
+}
+
 /* Only brighten and shadow the description – clean and minimal */
-.p-5.rounded-3 .p1 {
+.streamdeck-hero-scrim .p1 {
     color: #fff !important;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95) !important;
     font-weight: 400;
@@ -700,9 +1574,9 @@ body.format-streamdeck:not(.editing):not(#page-local-unifiedgrader-grade):not(#p
     right: 0.1rem;
     min-width: 1.1rem;
     height: 1.1rem;
-    border-radius: 999px;
-    background: #e50914;
-    color: #fff !important;
+    border-radius: var(--sd-radius-pill);
+    background: var(--sd-accent);
+    color: var(--sd-on-accent) !important;
     font-size: 0.7rem;
     line-height: 1.1rem;
     text-align: center;
@@ -716,23 +1590,6 @@ body.format-streamdeck:not(.editing):not(#page-local-unifiedgrader-grade):not(#p
 }
 
 
-/* Hero icon modal iframe wrapper */
-.streamdeck-hero-iframe-wrapper {
-    position: relative;
-    width: 100% !important;
-    padding-bottom: 56.25%;
-    overflow: hidden;
-}
-
-.streamdeck-hero-iframe-wrapper iframe.streamdeck-hero-iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100% !important;
-    height: 100%;
-    border: none !important;
-}
-
 /* Completion badge in hero */
 body.format-streamdeck .completion-badge {
     margin-left: auto;
@@ -740,6 +1597,7 @@ body.format-streamdeck .completion-badge {
 
 /* Badge circle */
 body.format-streamdeck .badge-circle {
+    background: conic-gradient(var(--sd-accent) var(--sd-progress, 0%), #333 var(--sd-progress, 0%) 100%);
     width: 75px;
     height: 75px;
     border-radius: 50%;
@@ -820,23 +1678,6 @@ body.format-streamdeck .badge-text {
 
 .format-streamdeck .hero-instructor-name {
     font-size: 0.95em;
-}
-
-.format-streamdeck .hero-instructor-contact-btn {
-    border-radius: 999px;
-    padding-inline: 1.1rem;
-    padding-block: 0.25rem;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    border-color: rgba(255, 255, 255, 0.6);
-    color: #fff !important;
-    background: rgba(20, 20, 20, 0.6);
-}
-
-.format-streamdeck .hero-instructor-contact-btn:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: #fff;
 }
 
 .format-streamdeck .hero-instructor-link:hover .hero-instructor-avatar-wrapper {
@@ -943,7 +1784,7 @@ body.format-streamdeck .badge-text {
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #e5a50a;
+    color: #f5c85a;
 }
 
 /* Show popout on hover/focus */
@@ -963,13 +1804,7 @@ body.format-streamdeck .badge-text {
     position: relative;
     margin-top: -40px;
     padding: 56px 0 64px;
-    background:
-        linear-gradient(
-            to bottom,
-            rgba(0, 0, 0, 0.85) 0%,
-            rgba(8, 8, 8, 0.98) 40%,
-            #050505 100%
-        );
+    background: linear-gradient(to bottom, rgba(var(--sd-bg-rgb), 0.85) 0%, var(--sd-bg) 40%);
     border-top-left-radius: 24px;
     border-top-right-radius: 24px;
     box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.6);
@@ -977,7 +1812,7 @@ body.format-streamdeck .badge-text {
 }
 
 /* Prevent overlap issues on very small screens */
-@media (max-width: 767.98px) {
+@media (max-width: 768px) {
     .streamdeck-main-strip {
         margin-top: -24px;
         padding-top: 40px;
@@ -986,24 +1821,6 @@ body.format-streamdeck .badge-text {
     }
 }
 
-/* Big cinematic "Sections" heading */
-.streamdeck-row-title-main {
-    margin: 0 0 32px;
-    color: #fff !important;
-    font-size: 1.75rem;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-}
-
-/* Tighten vertical spacing between heading and cards row */
-.streamdeck-section-row {
-    margin-top: 0 !important;
-}
-
-.streamdeck-sections-row {
-    margin-top: 20px;
-    margin-left: 20px;
-}
 
 .streamdeck-card-link {
     text-decoration: none !important;
@@ -1017,18 +1834,18 @@ body.format-streamdeck .badge-text {
     position: relative;
     display: flex;
     flex-direction: column;
-    background: #151515;
+    background: var(--sd-surface-1);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    box-shadow: var(--sd-shadow-1);
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     height: 100%;
 }
 
 .streamdeck-card:hover {
     transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.65);
-    background: #181818;
+    box-shadow: var(--sd-shadow-2);
+    background: var(--sd-surface-2);
 }
 
 /* Image area */
@@ -1036,7 +1853,7 @@ body.format-streamdeck .badge-text {
     position: relative;
     width: 100% !important;
     padding-top: 56.25%;
-    background: #262626;
+    background: var(--sd-surface-3);
     overflow: hidden;
 }
 
@@ -1060,8 +1877,8 @@ body.format-streamdeck .badge-text {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at top left, #3a3a3a, #1e1e1e);
-    color: #8f8f8f;
+    background: radial-gradient(circle at top left, var(--sd-surface-3), var(--sd-surface-2));
+    color: var(--sd-text-muted);
 }
 
 .streamdeck-card__placeholder-icon {
@@ -1076,12 +1893,12 @@ body.format-streamdeck .badge-text {
     right: 8px;
     width: 30px;
     height: 30px;
-    border-radius: 999px;
-    background: #27c24a;
+    border-radius: var(--sd-radius-pill);
+    background: var(--sd-success);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: #fff !important;
+    color: var(--sd-on-accent) !important;
     font-weight: 700;
     font-size: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
@@ -1099,13 +1916,13 @@ body.format-streamdeck .badge-text {
     right: 0;
     bottom: 0;
     height: 4px;
-    background: rgba(255, 255, 255, 0.18);
+    background: var(--sd-overlay-3);
     overflow: hidden;
 }
 
 .streamdeck-card__progress-fill {
     height: 100%;
-    background: #e50914;
+    background: var(--sd-accent);
     transition: width 0.25s ease;
 }
 
@@ -1122,7 +1939,7 @@ body.format-streamdeck .badge-text {
     font-size: 1rem;
     line-height: 1.3;
     font-weight: 600;
-    color: #fff !important;
+    color: var(--sd-text) !important;
     max-height: 2.6em;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1154,24 +1971,24 @@ body.format-streamdeck .badge-text {
     font-size: 0.74rem;
     line-height: 1.4;
     padding: 2px 8px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.08);
-    color: #e0e0e0;
+    border-radius: var(--sd-radius-pill);
+    background: var(--sd-overlay-2);
+    color: var(--sd-text);
 }
 
 .streamdeck-card__meta-chip--locked {
-    background: rgba(244, 67, 54, 0.15);
-    color: #ff867c;
+    background: var(--sd-accent-soft);
+    color: var(--sd-danger-text);
 }
 
 /* Completed / locked states */
 .streamdeck-card--done .streamdeck-card__progress-fill {
-    background: #27c24a;
+    background: var(--sd-success);
 }
 
 .streamdeck-card--done .streamdeck-card__meta-chip {
-    background: rgba(39, 194, 74, 0.18);
-    color: #b9f6ca;
+    background: var(--sd-success-soft);
+    color: var(--sd-success-text);
 }
 
 .streamdeck-card--locked .streamdeck-card__image {
@@ -1179,7 +1996,7 @@ body.format-streamdeck .badge-text {
 }
 
 /* Card responsive tweaks */
-@media (max-width: 767.98px) {
+@media (max-width: 768px) {
     .streamdeck-card {
         border-radius: 10px;
     }
@@ -1207,10 +2024,6 @@ body.format-streamdeck .badge-text {
     display: none !important;
 }
 
-/* Soften backdrop */
-.modal-backdrop.show {
-    background-color: rgba(0, 0, 0, 0.75);
-}
 
 /* Ensure syllabus container is visible */
 .modal.show #streamdeck-syllabus {
@@ -1225,15 +2038,15 @@ body.format-streamdeck .badge-text {
     z-index: 1061;
     width: 36px;
     height: 36px;
-    border-radius: 999px;
-    background-color: rgba(0, 0, 0, 0.85);
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.85);
+    border-radius: var(--sd-radius-pill);
+    background-color: var(--sd-surface-3);
+    box-shadow: var(--sd-shadow-2);
     opacity: 1;
     padding: 0 !important;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--sd-border);
 }
 
 /* Replace default glyph */
@@ -1241,7 +2054,7 @@ body.format-streamdeck .badge-text {
     content: "\00d7";
     font-size: 22px;
     line-height: 1;
-    color: #f5f5f7;
+    color: var(--sd-text);
     font-weight: 300;
 }
 
@@ -1253,7 +2066,7 @@ body.format-streamdeck .badge-text {
 
 .modal.show:has(#streamdeck-syllabus) .btn-close:hover,
 .modal.show:has(#streamdeck-syllabus) .btn-close:focus-visible {
-    background-color: rgba(0, 0, 0, 0.98);
+    background-color: var(--sd-surface-2);
     transform: scale(1.05);
     transition: all 150ms ease;
 }
@@ -1273,51 +2086,17 @@ body.format-streamdeck .badge-text {
     padding: 0 !important;
 }
 
-/* Floating close button injected by JS */
-.streamdeck-syllabus-close {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    z-index: 10;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.4rem;
-    line-height: 1;
-    color: rgba(255, 255, 255, 0.6);
-    background: rgba(255, 255, 255, 0.08);
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-}
-
-.streamdeck-syllabus-close:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.18);
-}
-
 /* Floating Streamdeck card */
 .streamdeck-syllabus-modal {
     position: relative;
-    background: #05060a;
-    color: #f5f5f7;
+    background: var(--sd-surface-1);
+    color: var(--sd-text);
     padding: 28px 32px 32px;
     border-radius: 24px;
-    box-shadow:
-        0 28px 80px rgba(0, 0, 0, 0.8),
-        0 0 0 1px rgba(255, 255, 255, 0.06);
+    box-shadow: var(--sd-shadow-3), 0 0 0 1px var(--sd-border);
     max-width: 960px;
     margin: 0 auto 24px;
-    font-family:
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "SF Pro Text",
-        "Segoe UI",
-        sans-serif;
+    font-family: var(--sd-font);
 }
 
 /* Header: title + Edit button */
@@ -1333,16 +2112,16 @@ body.format-streamdeck .badge-text {
     font-size: 1.7rem;
     font-weight: 650;
     letter-spacing: 0.02em;
-    color: #fff !important;
+    color: var(--sd-text) !important;
 }
 
 /* Edit syllabus button */
 .streamdeck-syllabus-editbtn {
-    border-radius: 999px;
+    border-radius: var(--sd-radius-pill);
     padding: 7px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background: rgba(255, 255, 255, 0.04);
-    color: #f5f5f7;
+    border: 1px solid var(--sd-border-strong);
+    background: var(--sd-overlay-1);
+    color: var(--sd-text);
     font-size: 0.78rem;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -1356,9 +2135,9 @@ body.format-streamdeck .badge-text {
 
 .streamdeck-syllabus-editbtn:hover,
 .streamdeck-syllabus-editbtn:focus-visible {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.5);
-    color: #fff !important;
+    background: var(--sd-overlay-2);
+    border-color: var(--sd-border-strong);
+    color: var(--sd-text) !important;
     text-decoration: none !important;
     transform: translateY(-1px);
 }
@@ -1369,20 +2148,20 @@ body.format-streamdeck .badge-text {
     flex-wrap: wrap;
     gap: 6px;
     padding: 4px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.02);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    border-radius: var(--sd-radius-pill);
+    background: var(--sd-overlay-1);
+    box-shadow: inset 0 0 0 1px var(--sd-border);
     margin-bottom: 16px;
 }
 
 .streamdeck-pill {
     position: relative;
     border: none !important;
-    border-radius: 999px;
+    border-radius: var(--sd-radius-pill);
     padding: 7px 16px 8px;
     font-size: 0.87rem;
     font-weight: 500;
-    color: rgba(245, 245, 247, 0.7);
+    color: var(--sd-text-muted);
     background: transparent !important;
     cursor: pointer;
     transition:
@@ -1394,8 +2173,8 @@ body.format-streamdeck .badge-text {
 }
 
 .streamdeck-pill:hover {
-    color: #fff !important;
-    background: rgba(255, 255, 255, 0.1);
+    color: var(--sd-text) !important;
+    background: var(--sd-overlay-2);
 }
 
 .streamdeck-pill.is-active {
@@ -1414,7 +2193,7 @@ body.format-streamdeck .badge-text {
     max-height: 55vh;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+    scrollbar-color: var(--sd-border-strong) transparent;
 }
 
 .streamdeck-syllabus-panels::-webkit-scrollbar {
@@ -1426,8 +2205,8 @@ body.format-streamdeck .badge-text {
 }
 
 .streamdeck-syllabus-panels::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.35);
-    border-radius: 999px;
+    background: var(--sd-border-strong);
+    border-radius: var(--sd-radius-pill);
 }
 
 /* Individual panels */
@@ -1436,7 +2215,7 @@ body.format-streamdeck .badge-text {
     animation: streamdeck-fade-in 160ms ease-out;
     line-height: 1.65;
     font-size: 0.96rem;
-    color: rgba(245, 245, 247, 0.88);
+    color: var(--sd-text);
 }
 
 .streamdeck-syllabus-panel.is-active {
@@ -1455,7 +2234,7 @@ body.format-streamdeck .badge-text {
     margin-bottom: 0.6em;
     font-weight: 600;
     letter-spacing: 0.02em;
-    color: #fff !important;
+    color: var(--sd-text) !important;
 }
 
 .streamdeck-syllabus-panel ul,
@@ -1469,8 +2248,8 @@ body.format-streamdeck .badge-text {
     margin-top: 12px;
     border-radius: 16px;
     background:
-        radial-gradient(circle at top left, rgba(255, 255, 255, 0.34), transparent 55%),
-        rgba(255, 255, 255, 0.12);
+        radial-gradient(circle at top left, var(--sd-overlay-3), transparent 55%),
+        var(--sd-overlay-2);
     padding: 16px 16px 14px;
 }
 
@@ -1478,106 +2257,34 @@ body.format-streamdeck .badge-text {
     border-radius: 12px;
     padding: 10px 12px;
     margin-bottom: 6px;
-    background: rgba(0, 0, 0, 0.32);
-    color: #f0f0f0 !important;
+    background: var(--sd-overlay-2);
+    color: var(--sd-text) !important;
     transition: background 120ms ease;
 }
 
 #sd-pill-schedule .courseschedule-playlist .schedule-item:hover {
-    background: rgba(0, 0, 0, 0.45);
+    background: var(--sd-overlay-3);
 }
 
 #sd-pill-schedule .courseschedule-playlist .item-date,
 #sd-pill-schedule .courseschedule-playlist .item-title,
 #sd-pill-schedule .courseschedule-playlist .item-time {
-    color: #f0f0f0 !important;
+    color: var(--sd-text) !important;
 }
 
 #sd-pill-schedule .courseschedule-playlist .badge {
-    color: #fff !important;
+    color: var(--sd-text) !important;
 }
 
 .courseschedule-wrapper .generaltable.courseschedule-table {
-    background-color: rgba(255, 255, 255, 0.6);
-    color: #111 !important;
+    background-color: var(--sd-surface-2);
+    color: var(--sd-text) !important;
 }
 
 .courseschedule-wrapper .generaltable.courseschedule-table th,
 .courseschedule-wrapper .generaltable.courseschedule-table td {
-    color: #111 !important;
+    color: var(--sd-text) !important;
 }
-
-/* ──────────────────────────────────────────────────────────────
-   SYLLABUS – LIGHT MODE VARIANT
-   ────────────────────────────────────────────────────────────── */
-
-.streamdeck-syllabus-modal.streamdeck-syllabus-light {
-    background: #f7f7f9;
-    color: #111827;
-}
-
-.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-syllabus-title {
-    color: #111827;
-}
-
-.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-syllabus-editbtn {
-    border-color: rgba(15, 23, 42, 0.12);
-    background: rgba(15, 23, 42, 0.02);
-    color: #111827;
-}
-
-.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-syllabus-editbtn:hover,
-.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-syllabus-editbtn:focus-visible {
-    background: rgba(15, 23, 42, 0.06);
-    color: #020617;
-}
-
-.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-syllabus-pills {
-    background: rgba(15, 23, 42, 0.03);
-    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06);
-}
-
-.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-pill {
-    color: rgba(15, 23, 42, 0.7);
-}
-
-.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-pill:hover {
-    background: rgba(15, 23, 42, 0.08);
-    color: #111827;
-}
-
-.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-pill.is-active {
-    color: #111827;
-    background: linear-gradient(135deg, #facc15, #f97316);
-    box-shadow:
-        0 0 0 1px rgba(15, 23, 42, 0.12),
-        0 14px 30px rgba(15, 23, 42, 0.35);
-}
-
-.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-syllabus-panel {
-    color: #111827;
-}
-
-.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-syllabus-panel h2,
-.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-syllabus-panel h3,
-.streamdeck-syllabus-modal.streamdeck-syllabus-light .streamdeck-syllabus-panel h4 {
-    color: #020617;
-}
-
-.streamdeck-syllabus-modal.streamdeck-syllabus-light #sd-pill-schedule .courseschedule-playlist {
-    background:
-        radial-gradient(circle at top left, rgba(249, 115, 22, 0.16), transparent 55%),
-        rgba(255, 255, 255, 0.8);
-}
-
-.streamdeck-syllabus-modal.streamdeck-syllabus-light #sd-pill-schedule .schedule-item {
-    background: rgba(15, 23, 42, 0.04);
-}
-
-.streamdeck-syllabus-modal.streamdeck-syllabus-light #sd-pill-schedule .schedule-item:hover {
-    background: rgba(15, 23, 42, 0.08);
-}
-
 
 /* Syllabus responsive adjustments */
 @media (max-width: 768px) {
@@ -1612,18 +2319,12 @@ body.format-streamdeck .badge-text {
    GRADES MODAL – PLAYLIST STREAMING LOOK
    ──── */
 
-body.streamdeck-grades-embedded #page.drawers,
-body.streamdeck-announcements-embedded #page.drawers {
-    margin-top: 0 !important;
-}
 
 /* Streamdeck Grades Modal – full UI reskin */
 body.streamdeck-grades-embedded {
-    background: #111 !important;
     padding: 0 !important;
     margin: 0 !important;
-    color: #e5e5e5 !important;
-    font-family: var(--font-sans, "Inter", sans-serif);
+    font-family: var(--sd-font);
 }
 
 body.streamdeck-grades-embedded p,
@@ -1637,18 +2338,7 @@ body.streamdeck-grades-embedded .h2,
 body.streamdeck-grades-embedded .h3,
 body.streamdeck-grades-embedded .h4,
 body.streamdeck-grades-embedded .h5 {
-    color: #919191;
-}
-
-/* Remove Moodle page chrome */
-body.streamdeck-grades-embedded #page-header,
-body.streamdeck-grades-embedded #page-footer,
-body.streamdeck-grades-embedded #nav-drawer,
-body.streamdeck-grades-embedded .navbar,
-body.streamdeck-grades-embedded .secondary-navigation,
-body.streamdeck-grades-embedded header,
-body.streamdeck-grades-embedded footer {
-    display: none !important;
+    color: var(--sd-text-muted);
 }
 
 /* Center content, remove Moodle margins */
@@ -1661,10 +2351,10 @@ body.streamdeck-grades-embedded #region-main {
 
 /* Wrap the table like a Streamdeck card */
 body.streamdeck-grades-embedded .user-grade {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--sd-overlay-1);
     border-radius: 12px;
     padding: 1rem 1rem 2rem;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--sd-shadow-1);
     backdrop-filter: blur(6px);
 }
 
@@ -1672,23 +2362,23 @@ body.streamdeck-grades-embedded .user-grade {
 body.streamdeck-grades-embedded table {
     width: 100% !important;
     border-collapse: collapse;
-    color: #e5e5e5 !important;
+    color: var(--sd-text) !important;
 }
 
 /* Dark rows with hover highlight */
 body.streamdeck-grades-embedded table tr {
-    background: rgba(255, 255, 255, 0.02);
+    background: var(--sd-overlay-1);
     transition: background 0.15s ease;
 }
 
 body.streamdeck-grades-embedded table tr:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--sd-overlay-2);
 }
 
 /* Table borders */
 body.streamdeck-grades-embedded table th,
 body.streamdeck-grades-embedded table td {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid var(--sd-border);
     padding: 0.8rem 0.5rem;
 }
 
@@ -1697,54 +2387,36 @@ body.streamdeck-grades-embedded table th {
     text-transform: uppercase;
     font-size: 0.75rem;
     letter-spacing: 0.04em;
-    color: #bbb;
+    color: var(--sd-text-muted);
 }
 
 body.streamdeck-grades-embedded .generaltable tbody td {
-    color: #919191;
+    color: var(--sd-text-muted);
 }
 
 /* Activity title links – Netflix blue */
 body.streamdeck-grades-embedded a {
-    color: #63a4ff;
+    color: var(--sd-link);
     text-decoration: none !important;
 }
 
 body.streamdeck-grades-embedded a:hover {
-    color: #8bc3ff;
+    color: var(--sd-link-hover);
     text-decoration: underline;
 }
 
 /* The big top header (Test Student) */
 body.streamdeck-grades-embedded .page-context-header {
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05), transparent);
+    background: linear-gradient(90deg, var(--sd-overlay-1), transparent);
     padding: 1rem !important;
     border-radius: 10px;
     margin-bottom: 1rem;
 }
 
 body.streamdeck-grades-embedded .page-context-header .page-header-headings h1 {
-    color: #e5e5e5 !important;
+    color: var(--sd-text) !important;
     font-size: 1.4rem;
     font-weight: 500;
-}
-
-/* --------------
-Participant List Styling
----------------*/
-#page-course-view-participants.format-streamdeck:not(.editing) #region-main,
-#page-course-view-participants.format-streamdeck:not(.editing) #region-main .bg-light,
-#page-course-view-participants.format-streamdeck:not(.editing) #region-main .bg-white,
-#page-course-view-participants.format-streamdeck:not(.editing) #region-main .card,
-#page-course-view-participants.format-streamdeck:not(.editing) #region-main .dropdown-toggle,
-#page-course-view-participants.format-streamdeck:not(.editing) #page.drawers .main-inner {
-    background: #000;
-    background-color: #000 !important;
-    color: #fff !important;
-}
-
-#page-course-view-participants.format-streamdeck:not(.editing) #page.drawers {
-    margin-top: 0 !important;
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -1763,8 +2435,8 @@ Participant List Styling
     margin-bottom: 1rem;
     border-radius: 16px;
     overflow: hidden;
-    background: #000;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+    background: var(--sd-bg);
+    box-shadow: var(--sd-shadow-2);
 }
 
 /* Make the iframe fill the wrapper instead of having its own fixed height */
@@ -1791,62 +2463,6 @@ Participant List Styling
     flex: 1 1 auto;
 }
 
-.streamdeck-episode-nav-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.6rem 1.4rem;
-    border-radius: 999px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    text-decoration: none !important;
-    border: 1px solid transparent;
-    transition:
-        background-color 0.15s ease,
-        color 0.15s ease,
-        border-color 0.15s ease,
-        box-shadow 0.15s ease;
-    white-space: nowrap;
-}
-
-.streamdeck-episode-nav-btn--ghost {
-    border: 1px solid #fff;
-    color: #fff !important;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    font-weight: 600;
-    background: transparent !important;
-    transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.streamdeck-episode-nav-btn--ghost:hover {
-    background-color: #fff !important;
-    color: #000 !important;
-    text-decoration: none !important;
-}
-
-/* Primary nav button */
-.streamdeck-episode-nav-btn--primary {
-    background: #e50914;
-    color: #fff !important;
-    border-color: #e50914;
-    box-shadow: 0 8px 18px rgba(229, 9, 20, 0.45);
-}
-
-.streamdeck-episode-nav-btn--primary:hover {
-    background: #f6121d;
-    border-color: #f6121d;
-}
-
-/* Episode container/card */
-.streamdeck-episode {
-    max-width: 960px;
-    margin: 0 auto 2rem;
-    padding: 1.5rem;
-    background: var(--card-bg, #111);
-    border-radius: 12px;
-}
-
 .streamdeck-episode-page {
     max-width: 1600px;
     margin: 0 auto 3rem;
@@ -1858,8 +2474,9 @@ Participant List Styling
     margin-bottom: 1.5rem;
     padding: 1.5rem 2rem 1rem;
     border-radius: 20px;
-    background: linear-gradient(135deg, #111 0%, #050505 40%, #111 100%);
-    box-shadow: 0 22px 55px rgba(0, 0, 0, 0.75);
+    background: var(--sd-surface-1);
+    border: 1px solid var(--sd-border);
+    box-shadow: var(--sd-shadow-3);
 }
 
 .streamdeck-episode-header {
@@ -1878,7 +2495,7 @@ Participant List Styling
     margin: 0 !important;
     font-size: 1.75rem;
     font-weight: 700;
-    color: #fff !important;
+    color: var(--sd-text) !important;
     margin-bottom: 0;
 }
 
@@ -1893,7 +2510,7 @@ Participant List Styling
 
 .streamdeck-episode-pill,
 .streamdeck-episode-sectionname {
-    color: #fff !important;
+    color: var(--sd-text) !important;
 }
 
 .streamdeck-episode-pill {
@@ -1901,8 +2518,8 @@ Participant List Styling
     text-transform: uppercase;
     letter-spacing: 0.14em;
     padding: 0.15rem 0.7rem;
-    border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: var(--sd-radius-pill);
+    border: 1px solid var(--sd-border-strong);
     opacity: 0.9;
 }
 
@@ -1932,27 +2549,6 @@ Participant List Styling
     text-decoration: none !important;
 }
 
-.streamdeck-episode-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    padding: 0.85rem 1.9rem;
-    border-radius: 999px;
-    background: #0d553f;
-    color: #fff !important;
-    text-decoration: none !important;
-    font-weight: 600;
-    font-size: 1rem;
-}
-
-.streamdeck-episode-primary:hover {
-    background: #bc8d16;
-}
-
-.streamdeck-episode-primary-icon {
-    font-size: 1rem;
-}
-
 /* Episode status */
 .streamdeck-episode-status {
     font-size: 0.9rem;
@@ -1967,14 +2563,14 @@ Participant List Styling
 
 .streamdeck-episode-status:not(.is-complete),
 .streamdeck-related-episode-status:not(.is-complete) {
-    background-color: #ae132a !important;
-    color: #fff !important;
+    background-color: var(--sd-accent) !important;
+    color: var(--sd-on-accent) !important;
 }
 
 .streamdeck-episode-status.is-complete,
 .streamdeck-related-episode-status.is-complete {
-    background-color: #46d369;
-    color: #fff !important;
+    background-color: var(--sd-success);
+    color: var(--sd-on-accent) !important;
 }
 
 /* Episode video */
@@ -1991,8 +2587,8 @@ Participant List Styling
     aspect-ratio: 16 / 9.5;
     border-radius: 16px;
     overflow: hidden;
-    background: #000;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7);
+    background: var(--sd-bg);
+    box-shadow: var(--sd-shadow-2);
 }
 
 .streamdeck-episode-video-iframe {
@@ -2014,37 +2610,7 @@ Participant List Styling
     padding: 1rem 1.5rem;
     border-radius: 8px;
     max-width: 22vw;
-    min-width: 360px;
-}
-
-.streamdeck-related-heading {
-    margin: 0 0 0.6rem;
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #fff !important;
-}
-
-.streamdeck-related-list {
-    list-style: none;
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
-.streamdeck-related-item {
-    margin-bottom: 0.75rem;
-}
-
-.streamdeck-related-link,
-.streamdeck-forum-preview-link {
-    color: #adf;
-    text-decoration: none !important;
-    font-weight: 600;
-}
-
-.streamdeck-related-link:hover,
-.streamdeck-related-link:focus,
-.streamdeck-forum-preview-link:hover {
-    text-decoration: underline;
+    min-width: 320px;
 }
 
 /* Related episodes list */
@@ -2055,7 +2621,7 @@ Participant List Styling
 }
 
 .related-activities .streamdeck-related-episodes {
-    background: #222;
+    background: var(--sd-surface-2);
     border-radius: 0.5rem;
     padding: 1px 0.5rem;
     margin: 0 !important;
@@ -2077,7 +2643,7 @@ Participant List Styling
 }
 
 .streamdeck-related-episode-link:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--sd-overlay-2);
     transform: translateY(-1px);
 }
 
@@ -2085,7 +2651,7 @@ Participant List Styling
     width: 35px;
     height: 35px;
     opacity: 0.9;
-    filter: contrast(0.5) brightness(2.3);
+    filter: var(--sd-icon-filter);
 }
 
 .streamdeck-related-episode-main {
@@ -2100,7 +2666,7 @@ Participant List Styling
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    color: #fff !important;
+    color: var(--sd-text) !important;
 }
 
 /* Episode + sidebar container */
@@ -2123,10 +2689,10 @@ Participant List Styling
 /* Sidebar with related resources */
 .related-sidebar {
     flex: 0 0 250px;
-    background: #222;
+    background: var(--sd-surface-2);
     padding: 1rem !important;
     border-radius: 0.5rem;
-    color: #eee;
+    color: var(--sd-text);
     display: flex;
     flex-direction: column;
     gap: 2rem;
@@ -2144,20 +2710,20 @@ Participant List Styling
 .related-activities h2 {
     font-size: 1.25rem;
     margin-bottom: 0.2rem;
-    color: #f0f0f0 !important;
+    color: var(--sd-text) !important;
 }
 
 /* Episode card takes remaining space (override) */
 .streamdeck-episode-card {
     flex: 1 1 auto;
-    max-width: 1069px;
+    max-width: 70vw;
     animation: fadeIn 0.5s ease forwards;
     animation-delay: 0.3s;
 }
 
 /* When no related resources, expand episode card to full width */
 .streamdeck-episode-page:not(.has-related-resources) .streamdeck-episode-card {
-    max-width: 1200px;
+    max-width: 70vw;
     width: 100% !important;
     margin: 0 auto;
 }
@@ -2181,7 +2747,7 @@ Participant List Styling
 }
 
 /* Below 1000px: stack episode + related, full-width */
-@media (max-width: 1000px) {
+@media (max-width: 992px) {
     .episode-container {
         flex-direction: column;
         align-items: stretch;
@@ -2190,14 +2756,12 @@ Participant List Styling
     }
 
     .streamdeck-episode-card {
-        order: 1;
         max-width: 100%;
         width: 100% !important;
         margin-bottom: 0.2rem;
     }
 
     .streamdeck-related-block {
-        order: 2;
         width: 100% !important;
         margin-top: -0.5rem;
         min-width: 100%;
@@ -2209,7 +2773,7 @@ Participant List Styling
    MOBILE RESPONSIVE REFINEMENTS (600px and below)
    ──── */
 
-@media (max-width: 600px) {
+@media (max-width: 576px) {
     /* Episode page adjustments */
     .streamdeck-episode-page {
         margin-top: 1.5rem;
@@ -2238,51 +2802,6 @@ Participant List Styling
     .streamdeck-episode-intro,
     .streamdeck-episode-actions {
         padding: 0 1rem;
-    }
-
-    /* Replace "Learning Episodes" button text with back icon only */
-    .streamdeck-episode-nav-btn--ghost {
-        padding: 0.6rem;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        font-size: 0;
-        position: relative;
-    }
-
-    .streamdeck-episode-nav-btn--ghost::before {
-        content: "\2190";
-        font-size: 1.5rem;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        line-height: 1;
-    }
-
-    /* Replace "Fullscreen" button text with icon only */
-    .streamdeck-episode-primary {
-        padding: 0.6rem;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        font-size: 0;
-        position: relative;
-    }
-
-    .streamdeck-episode-primary::before {
-        content: "\26F6";
-        font-size: 1.3rem;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        line-height: 1;
-    }
-
-    /* Hide text content in these buttons */
-    .streamdeck-episode-primary-icon {
-        display: none !important;
     }
 
     /* Ensure episode frame fills available space without padding */
@@ -2338,289 +2857,19 @@ Participant List Styling
 .streamdeck-forum-styled .modal-body > .streamdeck-forum-preview,
 .streamdeck-forum-styled .modal-body > .streamdeck-forum-single {
     position: relative;
-    background: #05060a;
-    color: #f5f5f7;
+    background: var(--sd-surface-1);
+    color: var(--sd-text);
     padding: 28px 32px 32px;
     border-radius: 24px;
-    box-shadow:
-        0 28px 80px rgba(0, 0, 0, 0.8),
-        0 0 0 1px rgba(255, 255, 255, 0.06);
-    max-width: 960px;
+    box-shadow: var(--sd-shadow-3), 0 0 0 1px var(--sd-border);
+    max-width: 80vw;
     margin: 0 auto;
-    font-family:
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "SF Pro Text",
-        "Segoe UI",
-        sans-serif;
-}
-
-/* Floating close button for forum modals */
-.streamdeck-forum-close {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    z-index: 10;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.4rem;
-    line-height: 1;
-    color: rgba(255, 255, 255, 0.6);
-    background: rgba(255, 255, 255, 0.08);
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-}
-
-.streamdeck-forum-close:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.18);
-}
-
-/* Section label above title */
-.streamdeck-forum-section-label {
-    display: block;
-    text-transform: uppercase;
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    color: rgba(255, 255, 255, 0.4);
-    font-weight: 500;
-    margin-bottom: 0.25rem;
-}
-
-/* Forum preview title */
-.streamdeck-forum-preview-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    margin-bottom: 1rem;
-    color: #f5f5f7 !important;
-}
-
-/* ── Multi-discussion list — "Trending Discussions" ── */
-.streamdeck-forum-preview-list {
-    list-style: none;
-    margin: 0 0 1rem;
-    padding: 0 !important;
-}
-
-.streamdeck-forum-preview-item {
-    padding: 0.75rem 1rem;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    transition: background 0.2s, border-color 0.2s;
-}
-
-.streamdeck-forum-preview-item + .streamdeck-forum-preview-item {
-    margin-top: 0.5rem;
-}
-
-.streamdeck-forum-preview-item:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.08);
-}
-
-.streamdeck-forum-preview-link {
-    color: #adf !important;
-    text-decoration: none !important;
-    font-weight: 500;
-    font-size: 0.9rem;
-}
-
-.streamdeck-forum-preview-link:hover {
-    text-decoration: underline !important;
-}
-
-.streamdeck-forum-preview-all {
-    display: inline-block;
-    margin-top: 0.5rem;
-    font-size: 0.8rem;
-    color: #adf;
-    opacity: 0.7;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    font-weight: 500;
-    text-decoration: none !important;
-    transition: opacity 0.2s;
-}
-
-.streamdeck-forum-preview-all:hover {
-    opacity: 1;
+    font-family: var(--sd-font);
 }
 
 /* ── Single discussion — comment thread ── */
 .streamdeck-forum-single {
-    max-height: 600px;
-    overflow-y: auto;
     padding: 0 0.5rem;
-}
-
-.streamdeck-forum-single::-webkit-scrollbar {
-    width: 6px;
-}
-
-.streamdeck-forum-single::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.streamdeck-forum-single::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.12);
-    border-radius: 3px;
-}
-
-.streamdeck-forum-posts {
-    margin: 0.5rem 0 1rem;
-}
-
-/* Post — thread style with divider, not cards */
-.streamdeck-forum-post {
-    background: transparent;
-    border-radius: 0;
-    padding: 1rem 0 !important;
-    margin-bottom: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.streamdeck-forum-post:last-child {
-    border-bottom: none;
-}
-
-.streamdeck-forum-post-header {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 0.5rem;
-}
-
-.streamdeck-forum-post-avatar img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.1);
-    object-fit: cover;
-}
-
-.streamdeck-forum-post-meta {
-    display: flex;
-    flex-direction: row;
-    align-items: baseline;
-    gap: 0.5rem;
-}
-
-.streamdeck-forum-post-author {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #f5f5f7 !important;
-}
-
-.streamdeck-forum-post-time {
-    font-size: 0.78rem;
-    color: rgba(255, 255, 255, 0.35);
-}
-
-.streamdeck-forum-post-message {
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 0.9rem;
-    line-height: 1.65;
-    margin-top: 0.15rem;
-}
-
-/* Reply — ghost button */
-.streamdeck-forum-reply-btn {
-    margin-top: 1rem;
-    display: inline-block;
-    background: transparent !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    color: #f5f5f7 !important;
-    border-radius: 8px;
-    padding: 0.5rem 1.25rem;
-    font-size: 0.85rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.streamdeck-forum-reply-btn:hover {
-    border-color: rgba(255, 255, 255, 0.3) !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    box-shadow: 0 0 12px rgba(170, 221, 255, 0.08);
-}
-
-.streamdeck-forum-reply-btn.is-active {
-    border-color: #adf !important;
-    color: #adf !important;
-}
-
-/* Reply iframe wrapper */
-.streamdeck-forum-reply-frame-wrapper {
-    margin-top: 1rem;
-    border-radius: 16px;
-    overflow: hidden;
-    background: #111;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-    max-height: 600px;
-    position: relative;
-}
-
-.streamdeck-forum-reply-frame {
-    width: 100% !important;
-    height: 550px;
-    border: 0;
-}
-
-.streamdeck-forum-reply-frame-wrapper[hidden] {
-    display: none !important;
-}
-
-.streamdeck-forum-reply-frame-loading {
-    position: absolute;
-    inset: 0;
-    display: none !important;
-    align-items: center;
-    justify-content: center;
-    color: rgba(170, 221, 255, 0.7);
-    font-size: 0.9rem;
-}
-
-.streamdeck-forum-reply-frame-wrapper.is-loading .streamdeck-forum-reply-frame-loading {
-    display: flex;
-}
-
-/* ── Announcements / general forum iframe modals ── */
-.streamdeck-announcements-modal .modal-content,
-.streamdeck-generalforum-modal .modal-content {
-    background: #05060a !important;
-    border-radius: 20px !important;
-    border: 1px solid rgba(255, 255, 255, 0.06) !important;
-    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.8) !important;
-    overflow: hidden;
-}
-
-.streamdeck-announcements-modal .modal-header,
-.streamdeck-generalforum-modal .modal-header {
-    background: transparent !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
-    padding: 1rem 1.5rem !important;
-}
-
-.streamdeck-announcements-modal .modal-title,
-.streamdeck-generalforum-modal .modal-title {
-    color: #f5f5f7 !important;
-    font-size: 1.1rem;
-    font-weight: 600;
-}
-
-.streamdeck-announcements-modal .modal-body,
-.streamdeck-generalforum-modal .modal-body {
-    padding: 0 !important;
-    background: #111;
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -2635,19 +2884,19 @@ Participant List Styling
 .streamdeck-assign-preview-title {
     font-size: 1.5rem;
     margin-bottom: 1rem;
-    color: #fff !important;
+    color: var(--sd-text) !important;
 }
 
 .streamdeck-assign-preview-intro {
     margin-bottom: 1.5rem;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--sd-text);
     line-height: 1.6;
 }
 
 .streamdeck-assign-preview-meta {
     margin-bottom: 1.5rem;
     padding: 1rem !important;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--sd-overlay-1);
     border-radius: 8px;
 }
 
@@ -2661,20 +2910,20 @@ Participant List Styling
 
 /* Assignment status colours */
 .streamdeck-assign-overdue {
-    color: #ff6b6b;
+    color: var(--sd-danger-text);
 }
 
 .streamdeck-assign-due,
 .streamdeck-assign-submitted {
-    color: #51cf66;
+    color: var(--sd-success-text);
 }
 
 .streamdeck-assign-notsubmitted {
-    color: #ffd43b;
+    color: var(--sd-warning-text);
 }
 
 .streamdeck-assign-grade {
-    color: #74c0fc;
+    color: var(--sd-info-text);
 }
 
 .streamdeck-assign-view-btn {
@@ -2687,10 +2936,10 @@ Participant List Styling
     width: 100% !important;
     min-height: 600px;
     margin-top: 1.5rem;
-    background: rgba(0, 0, 0, 0.95);
+    background: var(--sd-surface-1);
     border-radius: 12px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--sd-border);
     max-height: 600px;
 }
 
@@ -2698,22 +2947,12 @@ Participant List Styling
     display: none !important;
 }
 
-.streamdeck-assign-frame-wrapper.is-loading::before {
-    content: "Loading assignment...";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #999;
-    font-size: 0.9rem;
-}
-
 .streamdeck-assign-frame {
     width: 100% !important;
     height: 600px;
     border: none !important;
     display: block !important;
-    background: #000;
+    background: var(--sd-bg);
 }
 
 /* Loading overlay */
@@ -2723,7 +2962,7 @@ Participant List Styling
     display: none !important;
     align-items: center;
     justify-content: center;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--sd-text-muted);
     font-size: 0.9rem;
 }
 
@@ -2737,970 +2976,1261 @@ Participant List Styling
     pointer-events: none;
 }
 
-/* Related activity styling for assignments */
-.streamdeck-related-assign .streamdeck-activity-link {
+/* ──────────────────────────────────────────────────────────────
+   EPISODE DISCUSSION – thread, composer and discussion list
+   templates/local/discussion*.mustache; amd/src/main.js opens the composer and refreshes the thread,
+   amd/src/forum_composer.js reshapes mod_forum's form inside it.
+   ────────────────────────────────────────────────────────────── */
+.sd-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.sd-thread-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding-right: 2.75rem;
+}
+
+.sd-thread-heading {
+    flex: 1;
+    min-width: 0;
+}
+
+.sd-thread-kicker {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sd-text-subtle);
+}
+
+.sd-thread-title {
+    margin: 0.15rem 0 0.1rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--sd-text);
+}
+
+.sd-thread-meta {
+    font-size: 0.85rem;
+    color: var(--sd-text-muted);
+}
+
+.sd-thread-back,
+.sd-thread-open {
+    flex: none;
+}
+
+/* Posts. */
+.sd-post {
+    display: flex;
+    gap: 0.85rem;
+    border-radius: var(--sd-radius-md);
+}
+
+.sd-avatar {
+    flex: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.sd-post--opening {
+    padding: 1.25rem;
+    border: 1px solid var(--sd-border);
+    border-radius: var(--sd-radius-lg);
+    background: var(--sd-overlay-1);
+}
+
+.sd-post--opening .sd-avatar {
+    width: 48px;
+    height: 48px;
+}
+
+.sd-post--opening .sd-post-message {
+    font-size: 1.05rem;
+}
+
+.sd-post-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.sd-post-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.sd-post-author {
+    font-weight: 600;
+    color: var(--sd-text);
+}
+
+.sd-post-tag {
+    padding: 0.05rem 0.5rem;
+    border-radius: var(--sd-radius-pill);
+    background: var(--sd-overlay-2);
+    color: var(--sd-text-muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.sd-post-tag--private {
+    background: var(--sd-warning-soft);
+    color: var(--sd-warning-text);
+}
+
+.sd-post-time {
+    font-size: 0.8rem;
+    color: var(--sd-text-subtle);
+}
+
+.sd-post-message {
+    margin-top: 0.25rem;
+    line-height: 1.6;
+    color: var(--sd-text);
+    overflow-wrap: anywhere;
+}
+
+.sd-post-message > :last-child {
+    margin-bottom: 0;
+}
+
+.sd-post-message img {
+    max-width: 100%;
+    height: auto;
+}
+
+.sd-post-attachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0.6rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sd-attachment {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.75rem;
+    border-radius: var(--sd-radius-pill);
+    background: var(--sd-overlay-2);
+    color: var(--sd-text);
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+
+.sd-attachment:hover,
+.sd-attachment:focus-visible {
+    background: var(--sd-overlay-3);
+    color: var(--sd-text);
+}
+
+.sd-post-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin: 0.35rem 0 0 -0.5rem;
+}
+
+.sd-post-action {
+    padding: 0.25rem 0.55rem;
+    border: 0;
+    border-radius: var(--sd-radius-pill);
+    background: transparent;
+    color: var(--sd-text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.sd-post-action:hover,
+.sd-post-action:focus-visible {
+    background: var(--sd-overlay-2);
+    color: var(--sd-text);
+}
+
+.sd-post-action:focus-visible,
+.sd-reply-bar-button:focus-visible,
+.sd-discussion-item:focus-visible,
+.sd-composer-toggle:focus-visible,
+.sd-attachment:focus-visible {
+    outline: var(--sd-focus-width) solid var(--sd-link);
+    outline-offset: var(--sd-focus-offset);
+}
+
+/* A post just written or edited glows briefly. */
+.sd-post--new {
+    animation: sd-post-new 2.4s ease;
+}
+
+@keyframes sd-post-new {
+    0%,
+    40% {
+        background: var(--sd-accent-soft);
+    }
+
+    100% {
+        background: transparent;
+    }
+}
+
+/* Replies, threaded under what they answer. */
+.sd-replies {
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sd-replies--nested {
+    margin-top: 1rem;
+    padding-left: 1.25rem;
+    border-left: 2px solid var(--sd-border);
+}
+
+/* Reply bar: looks like the box it becomes. */
+.sd-reply-bar {
     display: flex;
     align-items: center;
     gap: 0.75rem;
 }
 
+.sd-reply-bar-button {
+    flex: 1;
+    padding: 0.7rem 1.1rem;
+    border: 1px solid var(--sd-border-strong);
+    border-radius: var(--sd-radius-pill);
+    background: var(--sd-surface-2);
+    color: var(--sd-text-muted);
+    text-align: left;
+    cursor: text;
+    transition: border-color var(--sd-speed-fast) ease;
+}
+
+.sd-reply-bar-button:hover {
+    border-color: var(--sd-text-subtle);
+}
+
+/* The composer: mod_forum's form in a frame that grows to fit it. */
+.sd-composer {
+    margin-top: 0.75rem;
+    overflow: hidden;
+    border: 1px solid var(--sd-border);
+    border-radius: var(--sd-radius-lg);
+    background: var(--sd-surface-2);
+}
+
+.sd-composer-frame {
+    display: block;
+    width: 100%;
+    height: 280px;
+    border: 0;
+}
+
+.sd-composer.is-loading .sd-composer-frame {
+    opacity: 0.4;
+}
+
+/* The list of discussions in a forum. */
+/* Starting a discussion or posting an announcement: the bar is a button, not a text box. */
+[data-region="sd-discussion-list"] .sd-reply-bar-button,
+[data-region="sd-news"] .sd-reply-bar-button {
+    cursor: pointer;
+}
+
+.sd-discussion-empty {
+    margin: 0;
+    padding: 1.5rem 0;
+    color: var(--sd-text-muted);
+    text-align: center;
+}
+
+.sd-discussion-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sd-discussion-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+    width: 100%;
+    padding: 0.9rem 1.1rem;
+    border: 1px solid var(--sd-border);
+    border-radius: var(--sd-radius-md);
+    background: var(--sd-overlay-1);
+    color: var(--sd-text);
+    text-align: left;
+    cursor: pointer;
+    transition: background-color var(--sd-speed-fast) ease, border-color var(--sd-speed-fast) ease;
+}
+
+.sd-discussion-item:hover {
+    background: var(--sd-overlay-2);
+    border-color: var(--sd-border-strong);
+}
+
+.sd-discussion-name {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.sd-discussion-meta {
+    font-size: 0.8rem;
+    color: var(--sd-text-muted);
+}
+
+@media (max-width: 576px) {
+    .sd-replies--nested {
+        padding-left: 0.75rem;
+    }
+
+    .sd-post--opening {
+        padding: 1rem;
+    }
+}
+
+/* Inside the composer frame: the message box above one action bar of chips, Cancel and Post. */
+html.sd-composer-page body {
+    background: transparent !important;
+}
+
+html.sd-composer-page[data-streamdeck-mode] body.format-streamdeck:not(#page-course-view-streamdeck) #region-main {
+    padding: 0.75rem !important;
+}
+
+html.sd-composer-page .collapsible-actions,
+html.sd-composer-page fieldset.collapsible > div.d-flex.align-items-center,
+html.sd-composer-page .fdescription.required,
+html.sd-composer-page .sd-composer-moved,
+html.sd-composer-reply #fitem_id_subject {
+    display: none !important;
+}
+
+html.sd-composer-page form.mform .fitem {
+    margin-bottom: 0 !important;
+}
+
+html.sd-composer-page form.mform fieldset.collapsible {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+}
+
+/* The subject and message take the full width, their labels read by screen readers only. */
+html.sd-composer-page #fitem_id_subject > .col-md-3,
+html.sd-composer-page #fitem_id_message > .col-md-3,
+html.sd-composer-page #fitem_id_attachments > .col-md-3 {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+}
+
+html.sd-composer-page #fitem_id_subject > .col-md-9,
+html.sd-composer-page #fitem_id_message > .col-md-9,
+html.sd-composer-page #fitem_id_attachments > .col-md-9 {
+    flex: 0 0 100%;
+    max-width: 100%;
+}
+
+/* A new discussion's subject reads as its title. */
+html.sd-composer-page #fitem_id_subject {
+    margin-bottom: 0.5rem !important;
+}
+
+html.sd-composer-page #id_subject {
+    width: 100%;
+    padding: 0.35rem 0;
+    border: 0;
+    border-bottom: 1px solid var(--sd-border);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    color: var(--sd-text);
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+html.sd-composer-page #id_subject:focus {
+    border-bottom-color: var(--sd-link);
+}
+
+html.sd-composer-page #id_subject::placeholder {
+    color: var(--sd-text-subtle);
+    font-weight: 600;
+}
+
+html.sd-composer-page .tox.tox-tinymce {
+    height: 160px !important;
+    border-radius: var(--sd-radius-md);
+}
+
+html.sd-composer-page .tox .tox-menubar,
+html.sd-composer-page .tox .tox-statusbar,
+html.sd-composer-page:not(.sd-composer-show-toolbar) .tox .tox-editor-header {
+    display: none !important;
+}
+
+/* A plain text box until the formatting toolbar is asked for. */
+html.sd-composer-page:not(.sd-composer-show-toolbar) .tox.tox-tinymce {
+    height: 120px !important;
+}
+
+/* The action bar. */
+.sd-composer-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+}
+
+.sd-composer-chips {
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.sd-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.8rem;
+    border: 1px solid var(--sd-border);
+    border-radius: var(--sd-radius-pill);
+    background: var(--sd-overlay-1);
+    color: var(--sd-text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    transition:
+        background-color var(--sd-speed-fast) ease,
+        border-color var(--sd-speed-fast) ease,
+        color var(--sd-speed-fast) ease;
+}
+
+.sd-chip:hover {
+    color: var(--sd-text);
+    border-color: var(--sd-border-strong);
+}
+
+.sd-chip:focus-visible {
+    outline: var(--sd-focus-width) solid var(--sd-link);
+    outline-offset: var(--sd-focus-offset);
+}
+
+.sd-chip[aria-pressed="true"],
+.sd-chip[aria-expanded="true"] {
+    border-color: var(--sd-accent);
+    background: var(--sd-accent-soft);
+    color: var(--sd-text);
+}
+
+.sd-chip:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.sd-composer-submit {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.sd-composer-submit .btn {
+    margin: 0 !important;
+}
+
+/* Drawers under the bar: attachments, tags, and the rest. */
+html.sd-composer-page:not(.sd-composer-open-attach) .sd-composer-drawer--attach,
+html.sd-composer-page:not(.sd-composer-open-tags) .sd-composer-drawer--tags,
+html.sd-composer-page:not(.sd-composer-open-more) .sd-composer-drawer--more {
+    display: none !important;
+}
+
+html.sd-composer-page .sd-composer-drawer {
+    margin-top: 0.6rem !important;
+    padding: 0.75rem;
+    border: 1px dashed var(--sd-border-strong);
+    border-radius: var(--sd-radius-md);
+}
 
 /* ──────────────────────────────────────────────────────────────
-   QUIZ – DARK "INTERACTIVE SPECIAL" THEME (Bandersnatch-inspired)
+   ANNOUNCEMENTS – the "What's new" feed
+   templates/local/announcements.mustache. A date tile and a title per announcement, like a streaming service's
+   new-releases list; the newest is open, the rest open in place. amd/src/main.js toggles them.
    ────────────────────────────────────────────────────────────── */
-/* Root scope: dark cinematic background for all quiz pages */
-#page-mod-quiz-view.format-streamdeck:not(.editing),
-#page-mod-quiz-attempt.format-streamdeck:not(.editing),
-#page-mod-quiz-summary.format-streamdeck:not(.editing),
-#page-mod-quiz-review.format-streamdeck:not(.editing) {
-    background: #0a0a0f !important;
-    color: #f0f0f5 !important;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+.sd-news-count {
+    font-weight: 600;
+    color: var(--sd-accent);
 }
 
-/* Main content card – dark elevated surface */
-#page-mod-quiz-view.format-streamdeck:not(.editing) #region-main,
-#page-mod-quiz-summary.format-streamdeck:not(.editing) #region-main,
-#page-mod-quiz-review.format-streamdeck:not(.editing) #region-main {
-    max-width: 1000px;
-    margin: 32px auto 40px;
-    padding: 50px;
-    background: #111118;
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.5);
+.sd-news-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
-/* Override Moodle core's white backgrounds on quiz pages */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) #page.drawers .main-inner {
-    background-color: transparent !important;
+.sd-news-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 3.25rem minmax(0, 1fr);
+    gap: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: var(--sd-radius-lg);
+    transition: background-color var(--sd-speed-fast) ease;
 }
 
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) #region-main {
-    background-color: #111118 !important;
+.sd-news-item:hover {
+    background: var(--sd-overlay-1);
 }
 
-/* Cards, alerts, and other containers that may have light backgrounds */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) #region-main .card {
-    background-color: #161620 !important;
-    border-color: rgba(255, 255, 255, 0.08) !important;
-    color: #f0f0f5 !important;
+.sd-news-item.is-expanded {
+    background: var(--sd-surface-2);
 }
 
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .alert {
-    background-color: rgba(255, 255, 255, 0.06) !important;
-    border-color: rgba(255, 255, 255, 0.1) !important;
-    color: #f0f0f5 !important;
+.sd-news-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 0.1rem;
+    line-height: 1;
 }
 
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .breadcrumb {
-    background-color: transparent !important;
+.sd-news-day {
+    font-size: 1.75rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--sd-text);
 }
 
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .breadcrumb-item a,
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .breadcrumb-item.active {
-    color: rgba(240, 240, 245, 0.7) !important;
+.sd-news-month {
+    margin-top: 0.3rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--sd-text-subtle);
 }
 
-#page-mod-quiz-attempt.format-streamdeck:not(.editing) #page.drawers .main-inner,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing) .header-maxwidth,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing) #region-main {
+.sd-news-item.is-new .sd-news-month {
+    color: var(--sd-accent);
+}
+
+.sd-news-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+/* The newest announcement leads, a little larger. */
+.sd-news-item:first-child .sd-news-title {
+    font-size: 1.3rem;
+}
+
+.sd-news-toggle {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--sd-text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+/* Closed, the whole row opens it. */
+.sd-news-item:not(.is-expanded) .sd-news-toggle::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+}
+
+.sd-news-toggle .fa-thumbtack {
+    margin-right: 0.35rem;
+    font-size: 0.8em;
+    color: var(--sd-text-subtle);
+}
+
+.sd-news-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--sd-text-muted);
+}
+
+.sd-news-meta .sd-avatar {
+    width: 22px;
+    height: 22px;
+}
+
+.sd-news-author {
+    font-weight: 600;
+    color: var(--sd-text);
+}
+
+.sd-news-time::before {
+    content: "·";
+    margin-right: 0.5rem;
+}
+
+.sd-news-badge {
+    padding: 0.1rem 0.45rem;
+    border-radius: var(--sd-radius-sm);
+    background: var(--sd-accent);
+    color: var(--sd-on-accent);
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.sd-news-excerpt {
+    display: -webkit-box;
+    margin: 0.45rem 0 0;
+    overflow: hidden;
+    font-size: 0.9rem;
+    color: var(--sd-text-muted);
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.sd-news-item.is-expanded .sd-news-excerpt {
+    display: none;
+}
+
+.sd-news-body {
+    margin-top: 0.75rem;
+    animation: sd-news-open var(--sd-speed) ease;
+}
+
+.sd-news-body .sd-post-actions {
+    margin-top: 0.75rem;
+}
+
+@keyframes sd-news-open {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.sd-news-all {
+    align-self: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--sd-link);
+}
+
+.sd-news-toggle:focus-visible,
+.sd-news-all:focus-visible {
+    outline: var(--sd-focus-width) solid var(--sd-link);
+    outline-offset: var(--sd-focus-offset);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   QUIZ
+   The page shell already themes the content card, tables, forms,
+   buttons and badges; these rules cover the question engine, whose
+   core styles hard-code light colours.
+   ────────────────────────────────────────────────────────────── */
+[data-streamdeck-mode] #page-mod-quiz-attempt #page.drawers .main-inner,
+[data-streamdeck-mode] #page-mod-quiz-attempt .header-maxwidth,
+[data-streamdeck-mode] #page-mod-quiz-attempt #region-main {
     max-width: 95vw;
 }
 
-/* Notifications spacing */
-#page-mod-quiz-view.format-streamdeck:not(.editing) #user-notifications,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing) #user-notifications {
+[data-streamdeck-mode] body[id^="page-mod-quiz"] #user-notifications {
     display: block !important;
     margin-bottom: 12px;
 }
 
-/* Activity header */
-#page-mod-quiz-view.format-streamdeck:not(.editing)
-.activity-header[data-for="page-activity-header"],
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.activity-header[data-for="page-activity-header"] {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 16px;
-    background-color: transparent;
-}
-
-/* Activity information wrapper */
-#page-mod-quiz-view.format-streamdeck:not(.editing) .activity-information,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing) .activity-information {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-/* Completion info */
-#page-mod-quiz-view.format-streamdeck:not(.editing)
-.completion-info[data-region="completion-info"],
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.completion-info[data-region="completion-info"] {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-}
-
-/* Completion badges – dark pill style */
-#page-mod-quiz-view.format-streamdeck:not(.editing)
-.completion-info .badge,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.completion-info .badge {
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.08);
-    color: #e0e0e0;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    font-size: 0.85rem;
-    padding: 6px 12px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-
-#page-mod-quiz-view.format-streamdeck:not(.editing)
-.completion-info .badge strong,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.completion-info .badge strong {
-    font-weight: 600;
-    color: #f0f0f5;
-}
-
-#page-mod-quiz-view.format-streamdeck:not(.editing)
-.completion-info .badge .fw-normal,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.completion-info .badge .fw-normal {
-    font-weight: 400;
-}
-
-/* Activity dates */
-#page-mod-quiz-view.format-streamdeck:not(.editing) .activity-dates,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing) .activity-dates {
-    text-align: right;
-    font-size: 0.95rem;
-    color: rgba(240, 240, 245, 0.7);
-}
-
-#page-mod-quiz-view.format-streamdeck:not(.editing) .activity-dates strong,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing) .activity-dates strong {
-    font-weight: 600;
-    color: #f0f0f5;
-}
-
-/* Tertiary nav */
-#page-mod-quiz-view.format-streamdeck:not(.editing) .tertiary-navigation,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing) .tertiary-navigation {
-    margin-top: 12px;
-    margin-bottom: 16px;
-}
-
-#page-mod-quiz-view.format-streamdeck:not(.editing) .tertiary-navigation .d-flex,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing) .tertiary-navigation .d-flex,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing) .tertiary-navigation .row {
-    justify-content: flex-start;
-}
-
-/* Primary CTA – Netflix red for quiz start only */
-#page-mod-quiz-view.format-streamdeck:not(.editing)
-.quizstartbuttondiv button.btn.btn-primary {
+[data-streamdeck-mode] #page-mod-quiz-view .quizstartbuttondiv .btn-primary,
+[data-streamdeck-mode] #page-mod-quiz-summary .btn-primary {
     min-width: 190px;
     padding: 10px 20px;
-    border-radius: 999px;
-    border: none !important;
-    background: #e50914 !important;
-    color: #fff !important;
-    box-shadow: 0 12px 30px rgba(229, 9, 20, 0.35);
-    font-weight: 600;
-    font-size: 0.98rem;
-    letter-spacing: 0.01em;
-    transition:
-        transform 0.1s ease-out,
-        box-shadow 0.1s ease-out,
-        background 0.18s ease-out;
+    box-shadow: 0 12px 30px var(--sd-accent-ring);
 }
 
-#page-mod-quiz-view.format-streamdeck:not(.editing)
-.quizstartbuttondiv button.btn.btn-primary:hover,
-#page-mod-quiz-view.format-streamdeck:not(.editing)
-.quizstartbuttondiv button.btn.btn-primary:focus {
-    background: #f6121d !important;
-    transform: translateY(-1px);
-    box-shadow: 0 16px 35px rgba(229, 9, 20, 0.45);
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .quizinfo,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .quizattemptcounts {
+    color: var(--sd-text-muted);
 }
 
-#page-mod-quiz-view.format-streamdeck:not(.editing)
-.quizstartbuttondiv button.btn.btn-primary:active {
-    transform: translateY(0);
-    box-shadow: 0 8px 24px rgba(229, 9, 20, 0.35);
-}
-
-/* Next page button – quiet ghost style matching prev button */
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.submitbtns .btn.btn-primary,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.mod_quiz-next-nav.btn.btn-primary {
-    border-radius: 999px;
-    padding: 8px 18px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    background: rgba(255, 255, 255, 0.08) !important;
-    border: 1px solid rgba(255, 255, 255, 0.22) !important;
-    color: #f0f0f5 !important;
-    box-shadow: none;
-    transition:
-        transform 0.1s ease-out,
-        background 0.12s ease-out;
-}
-
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.submitbtns .btn.btn-primary:hover,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.submitbtns .btn.btn-primary:focus,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.mod_quiz-next-nav.btn.btn-primary:hover,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.mod_quiz-next-nav.btn.btn-primary:focus {
-    background: rgba(255, 255, 255, 0.14) !important;
-    transform: translateY(-1px);
-    box-shadow: none;
-}
-
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.submitbtns .btn.btn-primary:active,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.mod_quiz-next-nav.btn.btn-primary:active {
-    transform: translateY(0);
-}
-
-/* Bottom activity navigation */
-#quiz-view.format-streamdeck:not(.editing)
-.activity-navigation.container-fluid,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.activity-navigation.container-fluid {
-    max-width: 900px;
-    margin: 0 auto 8px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    font-size: 0.92rem;
-}
-
-/* Prev/next nav links */
-#page-mod-quiz-view.format-streamdeck:not(.editing) #prev-activity-link,
-#page-mod-quiz-view.format-streamdeck:not(.editing) #next-activity-link,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing) #prev-activity-link,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing) #next-activity-link {
-    color: rgba(240, 240, 245, 0.7);
-    font-weight: 500;
-    text-decoration: none !important;
-    padding: 2px 0;
-}
-
-#page-mod-quiz-view.format-streamdeck:not(.editing) #prev-activity-link:hover,
-#page-mod-quiz-view.format-streamdeck:not(.editing) #next-activity-link:hover,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing) #prev-activity-link:hover,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing) #next-activity-link:hover {
-    color: #fff;
-    text-decoration: underline;
-}
-
-/* "Jump to..." select – dark styled */
-#page-mod-quiz-view.format-streamdeck:not(.editing)
-.urlselect .form-select.urlselect,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.urlselect .form-select.urlselect {
-    max-width: 260px;
-    font-size: 0.9rem;
-    padding: 6px 32px 6px 10px;
-    border-radius: 999px;
-    border-color: rgba(255, 255, 255, 0.15);
-    background-color: #1a1a26 !important;
-    color: #f0f0f5 !important;
-    box-shadow: none !important;
-}
-
-#page-mod-quiz-view.format-streamdeck:not(.editing)
-.urlselect .form-select.urlselect:focus,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.urlselect .form-select.urlselect:focus {
-    border-color: #e50914;
-    box-shadow: 0 0 0 1px rgba(229, 9, 20, 0.3) !important;
-}
-
-/* Quiet nav buttons */
-#page-mod-quiz-view.format-streamdeck:not(.editing)
-.activity-navigation .btn.btn-link,
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.activity-navigation .btn.btn-link {
-    padding: 0 !important;
-    border-radius: 999px;
-    color: rgba(240, 240, 245, 0.7) !important;
-}
-
-/* Mobile tweaks */
-@media (max-width: 768px) {
-    #page-mod-quiz-view.format-streamdeck:not(.editing) #region-main,
-    #page-mod-quiz-attempt.format-streamdeck:not(.editing) #region-main {
-        margin: 16px auto 24px;
-        padding: 18px 16px;
-        border-radius: 12px;
-    }
-
-    #page-mod-quiz-view.format-streamdeck:not(.editing)
-    .activity-header[data-for="page-activity-header"],
-    #page-mod-quiz-attempt.format-streamdeck:not(.editing)
-    .activity-header[data-for="page-activity-header"] {
-        flex-direction: column;
-        gap: 6px;
-        align-items: flex-start;
-        text-align: left;
-    }
-
-    #page-mod-quiz-view.format-streamdeck:not(.editing) .activity-dates,
-    #page-mod-quiz-attempt.format-streamdeck:not(.editing) .activity-dates {
-        text-align: left;
-    }
-
-    #page-mod-quiz-view.format-streamdeck:not(.editing)
-    .activity-navigation.container-fluid,
-    #page-mod-quiz-attempt.format-streamdeck:not(.editing)
-    .activity-navigation.container-fluid {
-        margin-bottom: 12px;
-    }
-
-    #page-mod-quiz-view.format-streamdeck:not(.editing)
-    .urlselect .form-select.urlselect,
-    #page-mod-quiz-attempt.format-streamdeck:not(.editing)
-    .urlselect .form-select.urlselect {
-        max-width: 100%;
-        width: 100% !important;
-        margin-top: 6px;
-    }
-
-    #page-mod-quiz-view.format-streamdeck:not(.editing)
-    .activity-navigation .row > [class^="col-md-"],
-    #page-mod-quiz-attempt.format-streamdeck:not(.editing)
-    .activity-navigation .row > [class^="col-md-"] {
-        margin-bottom: 6px;
-        text-align: center;
-    }
-
-    #page-mod-quiz-view.format-streamdeck:not(.editing)
-    .activity-navigation .float-start,
-    #page-mod-quiz-view.format-streamdeck:not(.editing)
-    .activity-navigation .float-end,
-    #page-mod-quiz-attempt.format-streamdeck:not(.editing)
-    .activity-navigation .float-start,
-    #page-mod-quiz-attempt.format-streamdeck:not(.editing)
-    .activity-navigation .float-end {
-        float: none;
-    }
-}
-
-/* QUIZ ATTEMPT – QUESTION CARDS (dark Bandersnatch-style)
-   All question types (.que) – not just multichoice */
-
-/* Override Moodle core's light backgrounds on question elements.
-   Core question.scss sets:
-   - .que .formulation: gradient-bg(shift-color($info, ...)) → light blue
-   - .que .info: background-color: $gray-100 → light gray
-   - .que .outcome, .que .comment: light backgrounds
-   These MUST be overridden for dark theme legibility. */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .formulation,
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .content .que .formulation {
-    background: #161620 !important;
-    background-color: #161620 !important;
-    border-color: rgba(255, 255, 255, 0.08) !important;
-    color: #f0f0f5 !important;
-}
-
-/* Ensure all text inside .formulation inherits light color
-   (core sets color: #001a1e on .formulation which children inherit) */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .formulation * {
-    color: inherit;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .info,
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que > .info {
-    background: #161620 !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    border-radius: 10px !important;
-    color: #f0f0f5 !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .outcome {
-    background: rgba(39, 194, 74, 0.08) !important;
-    border-color: rgba(39, 194, 74, 0.2) !important;
-    color: #f0f0f5 !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .comment {
-    background: rgba(255, 255, 255, 0.04) !important;
-    border-color: rgba(255, 255, 255, 0.08) !important;
-    color: #f0f0f5 !important;
-}
-
-/* Overall question card – dark elevated surface */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que {
-    margin-top: 12px;
-    margin-bottom: 16px;
-    padding: 18px 18px 16px;
-    border-radius: 14px;
-    background: #161620 !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
-    color: #f0f0f5 !important;
-}
-
-/* Question header (info row) */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que > .info {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 8px 16px;
-    margin-bottom: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-    padding-bottom: 8px;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .info h3.no {
-    margin: 0 !important;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #f0f0f5 !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .info .state,
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .info .grade {
-    font-size: 0.86rem;
-    color: rgba(240, 240, 245, 0.5) !important;
-}
-
-/* Version badge – dark pill */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .info .badge.bg-primary {
-    border-radius: 999px;
-    padding: 2px 10px;
-    font-size: 0.72rem;
-    background: rgba(255, 255, 255, 0.08) !important;
-    color: #e0e0e0 !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-}
-
-/* Flag button – dark pill, red when flagged */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .questionflag.editable .aabtn {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 8px;
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.06);
-    color: rgba(240, 240, 245, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    font-size: 0.78rem;
-    text-decoration: none !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .questionflag.editable .aabtn:hover {
-    background: rgba(229, 9, 20, 0.15);
-    color: #ff6b6b;
-    border-color: rgba(229, 9, 20, 0.3);
-}
-
-/* Question text */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .qtext {
-    margin-bottom: 12px;
-    color: #f0f0f5 !important;
-}
-
-/* Fieldset cleanup */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que fieldset.ablock.no-overflow.visual-scroll-x {
-    border: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-/* Prompt text above answers */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que fieldset.ablock .prompt {
-    margin-bottom: 8px;
-    font-size: 0.9rem;
-    color: rgba(240, 240, 245, 0.5);
-}
-
-/* Answer list layout */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .answer {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-/* Base row container */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .answer .r0,
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .answer .r1 {
-    padding: 0 !important;
-    margin: 0 !important;
-}
-
-/* Radio/checkbox inputs */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .answer input[type="radio"],
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .answer input[type="checkbox"] {
-    margin-right: 10px;
-    margin-top: 0.4rem;
-    accent-color: #e50914;
-}
-
-/* Answer label card – dark interactive tile */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que [data-region="answer-label"] {
-    display: flex;
-    align-items: center;
-    width: 100% !important;
-    padding: 8px 10px;
-    margin: 2px 0 0;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    background-color: #1a1a26 !important;
-    color: #f0f0f5;
-    cursor: pointer;
-    transition:
-        background 0.12s ease-out,
-        border-color 0.12s ease-out,
-        box-shadow 0.12s ease-out,
-        transform 0.1s ease-out;
-}
-
-/* Hover – lift and brighten like a streaming card */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .answer .r0:hover [data-region="answer-label"],
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .answer .r1:hover [data-region="answer-label"] {
-    background-color: #222230 !important;
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    transform: translateY(-1px);
-}
-
-/* Selected state – red accent ring (Bandersnatch choice highlight) */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing)
-.que .answer input[type="radio"]:checked + [data-region="answer-label"],
-[id^="page-mod-quiz"].format-streamdeck:not(.editing)
-.que .answer input[type="checkbox"]:checked + [data-region="answer-label"] {
-    background: rgba(229, 9, 20, 0.08) !important;
-    border-color: #e50914;
-    box-shadow: 0 0 0 1px rgba(229, 9, 20, 0.3);
-}
-
-/* Answer number */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .answernumber {
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: rgba(240, 240, 245, 0.5);
-}
-
-/* Answer text area */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que [data-region="answer-label"] .flex-fill {
-    display: flex;
-    align-items: center;
-}
-
-/* Large content in answer labels (e.g. Hebrew characters) */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que [data-region="answer-label"] h1 {
-    font-size: 1.6rem;
-    margin: 0 !important;
-    line-height: 1.2;
-    color: #f0f0f5;
-}
-
-/* "Clear my choice" link */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .qtype_multichoice_clearchoice label a.btn.btn-link {
-    font-size: 0.82rem;
-    padding: 0 !important;
-    color: rgba(240, 240, 245, 0.5) !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .qtype_multichoice_clearchoice label a.btn.btn-link:hover {
-    color: #fff !important;
-}
-
-/* "Check" button – dark ghost style */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .im-controls .submit.btn.btn-secondary {
-    border-radius: 999px;
-    padding: 6px 14px;
-    font-size: 0.86rem;
-    background-color: rgba(255, 255, 255, 0.06) !important;
-    border-color: rgba(255, 255, 255, 0.18) !important;
-    color: #f0f0f5 !important;
-    margin-top: 10px;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .im-controls .submit.btn.btn-secondary:hover {
-    background-color: rgba(255, 255, 255, 0.12) !important;
-}
-
-/* Text inputs (short answer, numerical, etc.) */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .answer input[type="text"],
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .answer textarea,
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .answer select,
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .formulation input[type="text"],
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .formulation textarea,
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .formulation select {
-    background-color: #1a1a26 !important;
-    color: #f0f0f5 !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    border-radius: 8px;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .formulation input[type="text"]:focus,
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .formulation textarea:focus,
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .formulation select:focus {
-    border-color: #e50914 !important;
-    box-shadow: 0 0 0 1px rgba(229, 9, 20, 0.3) !important;
-}
-
-/* Matching question drag-drop and table elements */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .formulation table {
-    color: #f0f0f5 !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .formulation table td,
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .formulation table th {
-    border-color: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* True/false and other secondary labels */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .answer label {
-    color: #f0f0f5 !important;
-}
-
-/* Correct/incorrect feedback styling */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .formulation .correctness {
-    color: #f0f0f5 !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .formulation .correctness.correct {
-    background: rgba(39, 194, 74, 0.15) !important;
-    border-color: rgba(39, 194, 74, 0.3) !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .formulation .correctness.incorrect {
-    background: rgba(229, 9, 20, 0.15) !important;
-    border-color: rgba(229, 9, 20, 0.3) !important;
-}
-
-/* Review page: right/wrong answer feedback */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .rightanswer {
-    color: rgba(240, 240, 245, 0.7) !important;
-}
-
-/* General feedback area */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .generalfeedback {
-    background: rgba(255, 255, 255, 0.04) !important;
-    border-color: rgba(255, 255, 255, 0.08) !important;
-    color: #f0f0f5 !important;
-}
-
-/* Specific feedback */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que .specificfeedback {
-    background: rgba(255, 255, 255, 0.04) !important;
-    color: #f0f0f5 !important;
-}
-
-/* Quiz summary table (end of quiz page) */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .quizsummaryofattempt {
-    color: #f0f0f5 !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .quizsummaryofattempt td,
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .quizsummaryofattempt th {
-    border-color: rgba(255, 255, 255, 0.1) !important;
-    background: transparent !important;
-    color: #f0f0f5 !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .quizsummaryofattempt tr:nth-child(even) {
-    background: rgba(255, 255, 255, 0.03) !important;
-}
-
-/* General table styling within quiz pages */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) table.generaltable {
-    background-color: #161620 !important;
-    color: #f0f0f5 !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) table.generaltable td,
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) table.generaltable th {
-    border-color: rgba(255, 255, 255, 0.1) !important;
-    background-color: #161620 !important;
-    color: #f0f0f5 !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) table.generaltable thead th {
-    background-color: #1a1a26 !important;
-}
-
-
-/* Links within quiz content */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que a:not(.btn) {
-    color: #ff6b6b !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .que a:not(.btn):hover {
-    color: #f99 !important;
-}
-
-/* Bottom nav (Previous / Next) */
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.submitbtns {
+/* Page buttons during an attempt stay quiet; the red is kept for start and submit. */
+[data-streamdeck-mode] #page-mod-quiz-attempt .submitbtns {
     display: flex;
     justify-content: space-between;
     gap: 8px;
     margin-top: 20px;
 }
 
-/* Previous page button – dark ghost style */
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.submitbtns .mod_quiz-prev-nav.btn.btn-secondary {
-    border-radius: 999px;
-    padding: 8px 16px;
-    font-size: 0.9rem;
-    background: rgba(255, 255, 255, 0.06) !important;
-    border: 1px solid rgba(255, 255, 255, 0.18) !important;
-    color: #f0f0f5 !important;
+[data-streamdeck-mode] #page-mod-quiz-attempt .submitbtns .btn-primary {
+    --bs-btn-color: var(--sd-text);
+    --bs-btn-bg: var(--sd-overlay-2);
+    --bs-btn-border-color: var(--sd-border-strong);
+    --bs-btn-hover-color: var(--sd-text);
+    --bs-btn-hover-bg: var(--sd-overlay-3);
+    --bs-btn-hover-border-color: var(--sd-border-strong);
+    --bs-btn-active-bg: var(--sd-overlay-3);
 }
 
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.submitbtns .mod_quiz-prev-nav.btn.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.12) !important;
+/* Question card. */
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que {
+    margin: 12px 0 16px;
+    padding: 18px 18px 16px;
+    border: 1px solid var(--sd-border) !important;
+    border-radius: var(--sd-radius-lg);
+    background: var(--sd-surface-2) !important;
+    color: var(--sd-text) !important;
 }
 
-/* Next page padding */
-#page-mod-quiz-attempt.format-streamdeck:not(.editing)
-.submitbtns .mod_quiz-next-nav.btn.btn-primary {
-    padding: 8px 18px;
-    font-size: 0.9rem;
-}
-
-/* Back-to-course button on quiz pages – top right, matching episode layout */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) #region-main,
-[id^="page-mod-assign"].format-streamdeck:not(.editing) #region-main {
-    position: relative;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .streamdeck-back-to-course,
-[id^="page-mod-assign"].format-streamdeck:not(.editing) .streamdeck-back-to-course {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    z-index: 10;
-}
-
-/* Completion conditions – override mix-blend-mode and Bootstrap utilities */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .automatic-completion-conditions .badge {
-    mix-blend-mode: normal !important;
-    background: rgba(255, 255, 255, 0.08) !important;
-    background-color: rgba(255, 255, 255, 0.08) !important;
-    color: #e0e0e0 !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .automatic-completion-conditions .badge strong {
-    color: #f0f0f5 !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .automatic-completion-conditions .badge span {
-    color: #e0e0e0 !important;
-}
-
-
-/* Quiz timer – circular countdown ring inside tertiary-navigation */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .tertiary-navigation {
-    display: flex !important;
-    align-items: center;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) #quiz-timer-wrapper {
-    margin: 0 0 0 auto !important;
-    display: flex !important;
-    align-items: center;
-    gap: 0;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) #quiz-timer-wrapper.streamdeck-timer-circular #quiz-timer {
-    position: relative;
-    width: 90px;
-    height: 90px;
-    background: rgba(0, 0, 0, 0.6) !important;
-    backdrop-filter: blur(10px);
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 16px;
+    margin-bottom: 12px;
+    padding: 0 0 8px;
     border: none !important;
-    border-radius: 50% !important;
+    border-bottom: 1px solid var(--sd-border) !important;
+    border-radius: 0;
+    background: transparent !important;
+    color: var(--sd-text) !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .info h3.no {
+    margin: 0 !important;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--sd-text) !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .info .state,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .info .grade {
+    font-size: 0.86rem;
+    color: var(--sd-text-muted) !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .info .badge {
+    border-radius: var(--sd-radius-pill);
+    padding: 2px 10px;
+    font-size: 0.72rem;
+    background: var(--sd-overlay-2) !important;
+    color: var(--sd-text) !important;
+    border: 1px solid var(--sd-border) !important;
+}
+
+/* Review: the whole question carries its outcome on the left edge. */
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que.correct {
+    border-left: 4px solid var(--sd-success) !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que.partiallycorrect {
+    border-left: 4px solid var(--sd-warning) !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que.incorrect,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que.notanswered {
+    border-left: 4px solid var(--sd-accent) !important;
+}
+
+/* Core gives these a light blue, grey or yellow background. */
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .formulation,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .comment,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .history {
+    background: transparent !important;
+    border-color: var(--sd-border) !important;
+    color: var(--sd-text) !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .formulation * {
+    color: inherit;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .outcome,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .im-feedback {
+    background: var(--sd-warning-soft) !important;
+    border-color: transparent !important;
+    border-radius: var(--sd-radius-md);
+    color: var(--sd-text) !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .feedback,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .generalfeedback,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .specificfeedback {
+    background: var(--sd-overlay-1) !important;
+    border-color: var(--sd-border) !important;
+    color: var(--sd-text) !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .rightanswer {
+    color: var(--sd-text-muted) !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .validationerror {
+    color: var(--sd-danger-text) !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .qtext {
+    margin-bottom: 12px;
+    color: var(--sd-text) !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que fieldset.ablock {
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .ablock .prompt,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .answernumber {
+    font-size: 0.9rem;
+    color: var(--sd-text-muted);
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que a:not(.btn) {
+    color: var(--sd-link) !important;
+}
+
+/* Flag. */
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .questionflag.editable .aabtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border: 1px solid var(--sd-border);
+    border-radius: var(--sd-radius-pill);
+    background: var(--sd-overlay-1);
+    color: var(--sd-text-muted);
+    font-size: 0.78rem;
+    text-decoration: none !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .questionflag.editable .aabtn:hover {
+    background: var(--sd-accent-soft);
+    border-color: var(--sd-accent-ring);
+    color: var(--sd-danger-text);
+}
+
+/* Answers: each choice is a tile. */
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .answer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .answer .r0,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .answer .r1 {
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: var(--sd-radius-md);
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .answer input[type="radio"],
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .answer input[type="checkbox"] {
+    margin: 0.4rem 10px 0 0;
+    accent-color: var(--sd-accent);
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que [data-region="answer-label"] {
     display: flex;
     align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    padding: 0 !important;
-    transition: box-shadow 0.3s ease;
+    width: 100% !important;
+    margin: 2px 0 0;
+    padding: 8px 10px;
+    border: 1px solid var(--sd-border);
+    border-radius: var(--sd-radius-md);
+    background-color: var(--sd-surface-1) !important;
+    color: var(--sd-text);
+    cursor: pointer;
+    transition:
+        background-color var(--sd-speed-fast) ease,
+        border-color var(--sd-speed-fast) ease,
+        box-shadow var(--sd-speed-fast) ease,
+        transform var(--sd-speed-fast) ease;
 }
 
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .streamdeck-timer-svg {
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .answer .r0:hover [data-region="answer-label"],
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .answer .r1:hover [data-region="answer-label"] {
+    background-color: var(--sd-surface-3) !important;
+    border-color: var(--sd-border-strong);
+    box-shadow: var(--sd-shadow-1);
+    transform: translateY(-1px);
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .answer input:checked + [data-region="answer-label"] {
+    background: var(--sd-accent-soft) !important;
+    border-color: var(--sd-accent);
+    box-shadow: 0 0 0 1px var(--sd-accent-ring);
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que [data-region="answer-label"] .flex-fill {
+    display: flex;
+    align-items: center;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que [data-region="answer-label"] h1 {
+    margin: 0 !important;
+    font-size: 1.6rem;
+    line-height: 1.2;
+    color: var(--sd-text);
+}
+
+/* Review: right and wrong choices. */
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .answer .correct [data-region="answer-label"],
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .answer .correct {
+    background: var(--sd-success-soft) !important;
+    border-color: var(--sd-success);
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .answer .incorrect [data-region="answer-label"],
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .answer .incorrect {
+    background: var(--sd-accent-soft) !important;
+    border-color: var(--sd-accent);
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .correctness.correct,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .correctness.badge.bg-success {
+    background: var(--sd-success-soft) !important;
+    color: var(--sd-success-text) !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .correctness.partiallycorrect,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .correctness.badge.bg-warning {
+    background: var(--sd-warning-soft) !important;
+    color: var(--sd-warning-text) !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .correctness.incorrect,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .correctness.badge.bg-danger {
+    background: var(--sd-accent-soft) !important;
+    color: var(--sd-danger-text) !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .qtype_multichoice_clearchoice .btn-link {
+    padding: 0 !important;
+    font-size: 0.82rem;
+    color: var(--sd-text-muted) !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .im-controls .submit {
+    margin-top: 10px;
+}
+
+/* Inputs inside questions, including inline gaps. */
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que input[type="text"],
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que textarea,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que select {
+    background-color: var(--sd-surface-1) !important;
+    color: var(--sd-text) !important;
+    border: 1px solid var(--sd-border-strong) !important;
+    border-radius: var(--sd-radius-sm);
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que input[type="text"]:focus,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que textarea:focus,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que select:focus {
+    border-color: var(--sd-accent) !important;
+    box-shadow: 0 0 0 1px var(--sd-accent-ring) !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .formulation table td,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .formulation table th {
+    border-color: var(--sd-border) !important;
+}
+
+/* Drag and drop: empty drop zones are white boxes in core. */
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que.ddwtos .drop,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que.gapselect select {
+    background-color: var(--sd-surface-1);
+    border-color: var(--sd-border-strong);
+    color: var(--sd-text);
+}
+
+/* The editor's content area is an iframe; only its frame can follow the mode. */
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .que .tox-tinymce {
+    border-color: var(--sd-border-strong);
+    border-radius: var(--sd-radius-sm);
+}
+
+/* Summary and review tables. */
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .quizreviewsummary th.cell {
+    background: var(--sd-overlay-2);
+    color: var(--sd-text);
+}
+
+/* Navigation drawer. */
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .block.block_quiznavigation {
+    background: transparent !important;
+    border: none !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .block.block_quiznavigation .card-title {
+    font-size: 1.1rem;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .qn_buttons .qnbutton {
+    border: 1px solid var(--sd-border) !important;
+    border-radius: var(--sd-radius-sm) !important;
+    background: var(--sd-surface-3);
+    color: var(--sd-text);
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .qn_buttons .qnbutton .thispageholder {
+    border: none !important;
+    border-radius: var(--sd-radius-sm) !important;
+    background: transparent !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .qn_buttons .qnbutton.answersaved,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .qn_buttons .qnbutton.correct {
+    background: var(--sd-success-soft);
+    color: var(--sd-success-text);
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .qn_buttons .qnbutton.partiallycorrect {
+    background: var(--sd-warning-soft);
+    color: var(--sd-warning-text);
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .qn_buttons .qnbutton.incorrect,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .qn_buttons .qnbutton.notanswered,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .qn_buttons .qnbutton.flagged {
+    background: var(--sd-accent-soft);
+    color: var(--sd-danger-text);
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .qn_buttons .qnbutton.thispage {
+    border-color: var(--sd-accent) !important;
+    box-shadow: 0 0 0 1px var(--sd-accent-ring);
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .othernav a,
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .endtestlink {
+    color: var(--sd-link) !important;
+}
+
+/* Circular timer (main.js moves it into the tertiary navigation). */
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .tertiary-navigation {
+    display: flex !important;
+    align-items: center;
+    margin: 12px 0 16px;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] #quiz-timer-wrapper {
+    display: flex !important;
+    align-items: center;
+    margin: 0 0 0 auto !important;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] #quiz-timer-wrapper.streamdeck-timer-circular #quiz-timer {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 90px;
+    height: 90px;
+    padding: 0 !important;
+    border: none !important;
+    border-radius: 50% !important;
+    background: var(--sd-surface-3) !important;
+    transition: box-shadow var(--sd-speed) ease;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .streamdeck-timer-svg {
     position: absolute;
     top: 0;
     left: 0;
     transform: rotate(-90deg);
 }
 
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .streamdeck-timer-ring {
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .streamdeck-timer-track {
+    stroke: var(--sd-border);
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .streamdeck-timer-ring {
+    stroke: var(--sd-success);
     transition: stroke-dashoffset 0.3s linear, stroke 0.5s ease;
 }
 
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .streamdeck-timer-text {
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .streamdeck-timer-warning .streamdeck-timer-ring {
+    stroke: var(--sd-warning);
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .streamdeck-timer-critical .streamdeck-timer-ring {
+    stroke: var(--sd-accent);
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .streamdeck-timer-text {
+    z-index: 1;
     font-size: 1.1rem;
     font-weight: 700;
-    color: #f0f0f5;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.02em;
-    z-index: 1;
     line-height: 1;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--sd-text);
 }
 
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .streamdeck-timer-label {
-    font-size: 0.6rem;
-    font-weight: 600;
-    color: rgba(240, 240, 245, 0.4);
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
+[data-streamdeck-mode] body[id^="page-mod-quiz"] .streamdeck-timer-label {
     z-index: 1;
     margin-top: 2px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sd-text-subtle);
 }
 
-/* Urgent state: pulse glow in final 60 seconds */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) #quiz-timer-wrapper.streamdeck-timer-urgent #quiz-timer {
-    box-shadow: 0 0 20px rgba(229, 9, 20, 0.4);
+[data-streamdeck-mode] body[id^="page-mod-quiz"] #quiz-timer-wrapper.streamdeck-timer-urgent #quiz-timer {
+    box-shadow: 0 0 20px var(--sd-accent-ring);
     animation: streamdeck-timer-pulse 1s ease-in-out infinite;
+}
+
+[data-streamdeck-mode] body[id^="page-mod-quiz"] #toggle-timer {
+    display: none !important;
 }
 
 @keyframes streamdeck-timer-pulse {
     0%,
     100% {
-        box-shadow: 0 0 20px rgba(229, 9, 20, 0.4);
+        box-shadow: 0 0 20px var(--sd-accent-ring);
     }
 
     50% {
-        box-shadow: 0 0 30px rgba(229, 9, 20, 0.7);
+        box-shadow: 0 0 30px var(--sd-accent);
     }
 }
 
-/* Hide the original toggle button — our circular timer replaces it */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) #toggle-timer {
+@media (max-width: 768px) {
+    [data-streamdeck-mode] body[id^="page-mod-quiz"] .que [data-region="answer-label"] h1 {
+        font-size: 1.4rem;
+    }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   TV DISPLAY ("10-foot")
+   html[data-streamdeck-display="tv"], set by hook_listener from the view menu, a ?display=tv link or a TV
+   browser. Larger type and targets, TV-safe margins, a navbar that stays put, and focus that can be seen
+   from the sofa. amd/src/spatial_nav.js moves focus with the remote's arrows.
+   ────────────────────────────────────────────────────────────── */
+html[data-streamdeck-display="tv"] {
+    font-size: 125%;
+    --sd-focus-width: 5px;
+    --sd-focus-offset: 4px;
+}
+
+/* Keep content inside the area every TV shows (about 5% in from each edge), below the fixed navbar. */
+[data-streamdeck-display="tv"][data-streamdeck-mode] body.format-streamdeck {
+    padding: calc(60px + 5vh) 5vw 5vh !important;
+}
+
+[data-streamdeck-display="tv"][data-streamdeck-mode] body.format-streamdeck .navbar.fixed-top {
+    animation: none !important;
+    transform: none !important;
+}
+
+[data-streamdeck-display="tv"] .streamdeck-navbar-toggle {
     display: none !important;
 }
 
-/* Quiz navigation drawer – styled like .related-sidebar */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .drawer.drawer-right {
-    background: #222 !important;
-    border-left: none !important;
-    border-radius: 0.5rem 0 0 0.5rem;
-    color: #eee !important;
+/* Course page: a shorter hero so the first row of episodes is on screen, and no more than four cards a row. */
+[data-streamdeck-display="tv"] .format-streamdeck .hero {
+    min-height: 70vh;
+    border-radius: var(--sd-radius-lg);
 }
 
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .drawer.drawer-right .drawercontent {
-    color: #eee !important;
-    padding: 1rem !important;
+[data-streamdeck-display="tv"] .streamdeck-main-strip [data-region="streamdeck-cards"] > .col {
+    flex: 0 0 auto;
+    width: 25%;
 }
 
-/* All cards inside the drawer – match related-sidebar look */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .drawer.drawer-right .card {
-    background: #222 !important;
-    border: none !important;
-    color: #eee !important;
-    box-shadow: none !important;
+[data-streamdeck-display="tv"] .sd-btn {
+    padding: 0.75rem 1.6rem;
 }
 
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .drawer.drawer-right .card-body {
-    background: transparent !important;
-    color: #eee !important;
+[data-streamdeck-display="tv"] .sd-icon-btn {
+    width: 3rem;
+    height: 3rem;
 }
 
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .drawer.drawer-right .card-title,
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .drawer.drawer-right .card-header {
-    background: transparent !important;
-    border-bottom: none !important;
-    color: #fff !important;
-    font-weight: 600 !important;
+/* Focus you can see across the room: a thick ring and a small lift. */
+[data-streamdeck-display="tv"] .streamdeck-card-link:focus-visible .streamdeck-card,
+[data-streamdeck-display="tv"] .sd-btn:focus-visible,
+[data-streamdeck-display="tv"] .streamdeck-season-tab:focus-visible {
+    transform: scale(1.05);
 }
 
-/* Quiz nav block – seamless within drawer */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .block.block_quiznavigation {
-    background: transparent !important;
-    border: none !important;
+[data-streamdeck-display="tv"] :focus-visible:not(.streamdeck-card-link) {
+    outline: var(--sd-focus-width) solid var(--sd-link) !important;
+    outline-offset: var(--sd-focus-offset) !important;
 }
 
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .block.block_quiznavigation .card-body {
-    background: transparent !important;
+/* The stage plays full screen: the wrapper takes focus, so the remote is never trapped inside the player. */
+[data-streamdeck-display="tv"] .streamdeck-episode-video,
+[data-streamdeck-display="tv"] .streamdeck-h5p-embed-wrapper,
+[data-streamdeck-display="tv"] .streamdeck-h5p-iframe-wrapper {
+    cursor: pointer;
+    border-radius: var(--sd-radius-lg);
 }
 
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .block.block_quiznavigation .card-title {
-    color: #fff !important;
-    font-size: 1.1rem;
-    font-weight: 600;
+.streamdeck-stage-hint {
+    display: none;
 }
 
-/* Links inside drawer */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .drawer.drawer-right a:not(.btn) {
-    color: #adf !important;
+[data-streamdeck-display="tv"] .streamdeck-stage-hint {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--sd-text-muted);
 }
 
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .drawer.drawer-right a:not(.btn):hover {
-    text-decoration: underline;
+.streamdeck-episode-video:fullscreen,
+.streamdeck-h5p-embed-wrapper:fullscreen,
+.streamdeck-h5p-iframe-wrapper:fullscreen {
+    padding: 0;
+    border-radius: 0;
+    background: #000;
 }
 
-/* Quiz nav question buttons */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .qn_buttons .qnbutton {
-    border-radius: 8px !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-}
-
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .qn_buttons .qnbutton .thispageholder {
-    background: rgba(255, 255, 255, 0.06) !important;
-    color: #e0e0e0 !important;
-    border-radius: 8px !important;
-    border: none !important;
-}
-
-/* Answered question – green tint */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .qn_buttons .qnbutton.answersaved .thispageholder {
-    background: rgba(39, 194, 74, 0.18) !important;
-    color: #b9f6ca !important;
-}
-
-/* Current question – red border */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .qn_buttons .qnbutton.thispage .thispageholder {
-    border: 1px solid #e50914 !important;
-    box-shadow: 0 0 0 1px rgba(229, 9, 20, 0.3);
-}
-
-/* Flagged question – red tint */
-[id^="page-mod-quiz"].format-streamdeck:not(.editing) .qn_buttons .qnbutton.flagged .thispageholder {
-    background: rgba(229, 9, 20, 0.15) !important;
-}
-
-/* Mobile tweaks for answers */
-@media (max-width: 768px) {
-    [id^="page-mod-quiz"].format-streamdeck:not(.editing)
-    .que [data-region="answer-label"] {
-        padding: 8px 10px;
-    }
-
-    [id^="page-mod-quiz"].format-streamdeck:not(.editing)
-    .que [data-region="answer-label"] h1 {
-        font-size: 1.4rem;
-    }
-
-    #page-mod-quiz-attempt.format-streamdeck:not(.editing)
-    .submitbtns {
-        flex-direction: row;
-        justify-content: space-between;
-    }
+.streamdeck-episode-video:fullscreen .streamdeck-episode-video-inner {
+    height: 100%;
+    aspect-ratio: auto;
+    border-radius: 0;
 }
 
 /* ──────────────────────────────────────────────────────────────
@@ -3749,23 +4279,6 @@ Participant List Styling
     }
 }
 
-@keyframes slideRightEpisode {
-    0% {
-        opacity: 0;
-        transform: translateX(0);
-    }
-
-    50% {
-        opacity: 1;
-        transform: translateX(0);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateX(40px);
-    }
-}
-
 @keyframes slideInResources {
     0% {
         opacity: 0;
@@ -3808,3 +4321,29 @@ Participant List Styling
     animation-play-state: paused;
 }
 
+/* Respect the device's reduced motion setting: no auto-hiding navbar, wiggles or slides. */
+@media (prefers-reduced-motion: reduce) {
+    .format-streamdeck *,
+    .format-streamdeck *::before,
+    .format-streamdeck *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .streamdeck-navbar-toggle {
+        display: none !important;
+    }
+
+    /* The navbar stays put, so leave room for it. */
+    [data-streamdeck-mode] body.format-streamdeck {
+        padding-top: 60px !important;
+    }
+
+    .streamdeck-related-block .related-sidebar,
+    .streamdeck-related-block .streamdeck-about-card,
+    .episode-container,
+    .streamdeck-episode-card {
+        opacity: 1;
+        visibility: visible;
+    }
+}

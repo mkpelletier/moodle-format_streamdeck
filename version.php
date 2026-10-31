@@ -19,14 +19,14 @@
  *
  * @package    format_streamdeck
  * @copyright  2025
- * @license    http://www.gnu.org/licenses/gpl-3.0.txt GNU GPL v3 or later
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2026040700;     // Add section thumbnail upload.
-$plugin->requires  = 2024110400;     // Moodle 5.0+.
+$plugin->version   = 2026110100;     // TV display and keyboard navigation.
+$plugin->requires  = 2025100600;     // Moodle 5.1+.
 $plugin->component = 'format_streamdeck';
 $plugin->maturity  = MATURITY_BETA;
-$plugin->release   = '1.0-beta10';
+$plugin->release   = '1.0-beta12';
 $plugin->dependencies = [];

@@ -19,21 +19,50 @@
  *
  * @package    format_streamdeck
  * @copyright  2025
- * @license    http://www.gnu.org/licenses/gpl-3.0.txt GNU GPL v3 or later
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace format_streamdeck\privacy;
 
+use core_privacy\local\metadata\collection;
+use core_privacy\local\request\writer;
+use format_streamdeck\local\colour_mode;
+
 /**
- * Privacy provider implementation – this plugin does not store personal data.
+ * Privacy provider: the colour mode preference, and what the course page sends elsewhere.
  */
-class provider implements \core_privacy\local\metadata\null_provider {
+class provider implements
+    \core_privacy\local\metadata\provider,
+    \core_privacy\local\request\user_preference_provider {
     /**
-     * Returns the reason this plugin collects no data.
+     * Describe the data this plugin stores or sends.
      *
-     * @return string The language string key for the privacy metadata.
+     * @param collection $collection
+     * @return collection
      */
-    public static function get_reason(): string {
-        return 'privacy:metadata';
+    public static function get_metadata(collection $collection): collection {
+        $collection->add_user_preference(colour_mode::PREFERENCE, 'privacy:metadata:preference:colourmode');
+        $collection->add_external_location_link('googlefonts', [
+            'ipaddress' => 'privacy:metadata:googlefonts:ipaddress',
+        ], 'privacy:metadata:googlefonts');
+        return $collection;
+    }
+
+    /**
+     * Export the user's colour mode preference.
+     *
+     * @param int $userid
+     */
+    public static function export_user_preferences(int $userid): void {
+        $mode = get_user_preferences(colour_mode::PREFERENCE, null, $userid);
+        if ($mode === null) {
+            return;
+        }
+        writer::export_user_preference(
+            'format_streamdeck',
+            colour_mode::PREFERENCE,
+            $mode,
+            get_string('colourmode:' . $mode, 'format_streamdeck')
+        );
     }
 }

@@ -19,7 +19,7 @@
  *
  * @package    format_streamdeck
  * @copyright  2025
- * @license    http://www.gnu.org/licenses/gpl-3.0.txt GNU GPL v3 or later
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
@@ -77,6 +77,19 @@ if ($hassiteconfig) {
             get_string('instructorlabelplural_desc', 'format_streamdeck'),
             get_string('instructorlabelplural_default', 'format_streamdeck'),
             PARAM_TEXT
+        ));
+
+        // Colour mode used until a learner picks one.
+        $modes = [];
+        foreach (\format_streamdeck\local\colour_mode::get_modes() as $mode) {
+            $modes[$mode] = get_string('colourmode:' . $mode, 'format_streamdeck');
+        }
+        $settings->add(new admin_setting_configselect(
+            'format_streamdeck/defaultcolourmode',
+            get_string('defaultcolourmode', 'format_streamdeck'),
+            get_string('defaultcolourmode_desc', 'format_streamdeck'),
+            \format_streamdeck\local\colour_mode::DARK,
+            $modes
         ));
     }
 }

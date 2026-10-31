@@ -1,0 +1,91 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template format_streamdeck/colour_mode_menu
+
+    The view menu: Appearance (light / dark / auto) and Display (standard / TV).
+
+    Context variables required for this template:
+    * canchoosecolour - bool - Whether to offer the Appearance group (not when Boost owns the colour mode)
+    * currentmode - string - The selected colour mode
+    * options - array - Colour modes, each with mode, label, icon and selected
+    * currentdisplay - string - The selected display
+    * displayoptions - array - Displays, each with mode, label, icon and selected
+    * cookieattributes - string - Attributes for the display cookie
+
+    Example context (json):
+    {
+        "canchoosecolour": true,
+        "currentmode": "dark",
+        "options": [
+            {"mode": "light", "label": "Light", "icon": "fa-sun", "selected": false},
+            {"mode": "dark", "label": "Dark", "icon": "fa-moon", "selected": true},
+            {"mode": "auto", "label": "Auto", "icon": "fa-circle-half-stroke", "selected": false}
+        ],
+        "currentdisplay": "standard",
+        "displayoptions": [
+            {"mode": "standard", "label": "Standard", "icon": "fa-laptop", "selected": true},
+            {"mode": "tv", "label": "TV", "icon": "fa-tv", "selected": false}
+        ],
+        "cookieattributes": "; Path=/; Max-Age=31536000; SameSite=Lax"
+    }
+}}
+<div class="dropdown streamdeck-colourmode" data-region="streamdeck-colourmode"
+     data-currentmode="{{currentmode}}" data-currentdisplay="{{currentdisplay}}"
+     data-cookieattributes="{{cookieattributes}}">
+    <button type="button"
+            class="sd-icon-btn dropdown-toggle"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            aria-label="{{#str}}viewmenu, format_streamdeck{{/str}}"
+            title="{{#str}}viewmenu, format_streamdeck{{/str}}">
+        <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+    </button>
+    <ul class="dropdown-menu dropdown-menu-end" role="menu">
+        {{#canchoosecolour}}
+            <li role="presentation"><h6 class="dropdown-header">{{#str}}appearance, format_streamdeck{{/str}}</h6></li>
+            {{#options}}
+                <li role="none">
+                    <button type="button"
+                            class="dropdown-item d-flex align-items-center gap-2"
+                            role="menuitemradio"
+                            aria-checked="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}"
+                            data-action="streamdeck-set-colourmode"
+                            data-mode="{{mode}}">
+                        <i class="fa-solid {{icon}} fa-fw" aria-hidden="true"></i>
+                        {{label}}
+                    </button>
+                </li>
+            {{/options}}
+            <li role="presentation"><hr class="dropdown-divider"></li>
+        {{/canchoosecolour}}
+        <li role="presentation"><h6 class="dropdown-header">{{#str}}display, format_streamdeck{{/str}}</h6></li>
+        {{#displayoptions}}
+            <li role="none">
+                <button type="button"
+                        class="dropdown-item d-flex align-items-center gap-2"
+                        role="menuitemradio"
+                        aria-checked="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}"
+                        data-action="streamdeck-set-display"
+                        data-mode="{{mode}}">
+                    <i class="fa-solid {{icon}} fa-fw" aria-hidden="true"></i>
+                    {{label}}
+                </button>
+            </li>
+        {{/displayoptions}}
+    </ul>
+</div>

@@ -1,0 +1,90 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template format_streamdeck/local/discussion
+
+    An episode's discussion as a thread: the opening post, a reply bar, and the replies nested under what they
+    answer. Reply, edit and delete open mod_forum's own form in a composer under the post (amd/src/main.js).
+
+    Context variables required for this template:
+    * discussionid - int - The discussion
+    * name - string - Discussion name
+    * forumname - string - Forum name
+    * discussionurl - string - The full discussion page
+    * replycount - string - "3 replies"
+    * opening - object - The opening post (see format_streamdeck/local/discussion_post)
+    * replies - array - Replies to the opening post
+    * hasreplies - bool - Whether there are replies
+    * canreply - bool - Whether the learner can reply to the opening post
+    * replyurl - string - Reply form for the opening post
+    * useravatar - string - The learner's picture
+    * backtolist - bool - Whether a list of discussions can be returned to
+
+    Example context (json):
+    {
+        "discussionid": 3, "name": "What is a noun?", "forumname": "Lecture questions",
+        "discussionurl": "#", "replycount": "1 reply", "hasreplies": true, "canreply": true,
+        "replyurl": "#", "useravatar": "", "backtolist": false,
+        "opening": {"id": 1, "author": "Sam Student", "avatar": "", "time": "2 hours ago", "datetime": "",
+            "message": "<p>Can someone explain nouns?</p>", "depth": 0, "children": []},
+        "replies": []
+    }
+}}
+<div class="sd-thread" data-region="sd-thread" data-discussionid="{{discussionid}}">
+    <header class="sd-thread-header">
+        {{#backtolist}}
+            <button type="button" class="sd-icon-btn sd-thread-back" data-action="sd-discussion-back"
+                    aria-label="{{#str}}alldiscussions, format_streamdeck{{/str}}"
+                    title="{{#str}}alldiscussions, format_streamdeck{{/str}}">
+                <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+            </button>
+        {{/backtolist}}
+        <div class="sd-thread-heading">
+            <span class="sd-thread-kicker">{{forumname}}</span>
+            <h3 class="sd-thread-title">{{name}}</h3>
+            <span class="sd-thread-meta">{{replycount}}</span>
+        </div>
+        <a class="sd-icon-btn sd-thread-open" href="{{discussionurl}}"
+           aria-label="{{#str}}openfulldiscussion, format_streamdeck{{/str}}"
+           title="{{#str}}openfulldiscussion, format_streamdeck{{/str}}">
+            <i class="fa-solid fa-up-right-from-square" aria-hidden="true"></i>
+        </a>
+    </header>
+
+    {{#opening}}
+        <article class="sd-post sd-post--opening" data-region="sd-post" data-postid="{{id}}" id="sd-post-{{id}}">
+            {{> format_streamdeck/local/discussion_post_body}}
+        </article>
+    {{/opening}}
+
+    {{#canreply}}
+        <div class="sd-reply-bar" data-region="sd-composer-slot" data-postid="{{opening.id}}">
+            {{#useravatar}}<img class="sd-avatar" src="{{useravatar}}" alt="">{{/useravatar}}
+            <button type="button" class="sd-reply-bar-button" data-action="sd-compose" data-url="{{replyurl}}">
+                {{#str}}addreply, format_streamdeck{{/str}}
+            </button>
+        </div>
+    {{/canreply}}
+
+    {{#hasreplies}}
+        <ol class="sd-replies" aria-label="{{replycount}}">
+            {{#replies}}
+                {{> format_streamdeck/local/discussion_post}}
+            {{/replies}}
+        </ol>
+    {{/hasreplies}}
+</div>
