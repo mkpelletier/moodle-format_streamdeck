@@ -17,7 +17,8 @@
 {{!
     @template format_streamdeck/local/discussion_post
 
-    A reply in an episode's discussion, with the replies to it nested beneath.
+    A reply in an episode's discussion, with the replies to it nested beneath. The caller wraps it in its list item
+    (<li class="sd-reply" data-depth="{{depth}}">).
 
     Context variables required for this template: see format_streamdeck/local/discussion_post_body, plus
     * children - array - Replies to this post
@@ -25,19 +26,19 @@
 
     Example context (json):
     {
-        "id": 2, "author": "Tia Teacher", "avatar": "", "time": "1 hour ago", "datetime": "",
+        "id": 2, "author": "Tia Teacher", "avatar": "", "time": "1 hour ago", "datetime": "", "isodate": "2026-10-31T21:00:00+00:00",
         "message": "<p>A noun names a person, place or thing.</p>", "depth": 1, "children": [], "haschildren": false
     }
 }}
-<li class="sd-reply" data-depth="{{depth}}">
-    <article class="sd-post" data-region="sd-post" data-postid="{{id}}" id="sd-post-{{id}}">
-        {{> format_streamdeck/local/discussion_post_body}}
-    </article>
-    {{#haschildren}}
-        <ol class="sd-replies sd-replies--nested">
-            {{#children}}
+<article class="sd-post" data-region="sd-post" data-postid="{{id}}" id="sd-post-{{id}}">
+    {{> format_streamdeck/local/discussion_post_body}}
+</article>
+{{#haschildren}}
+    <ol class="sd-replies sd-replies--nested">
+        {{#children}}
+            <li class="sd-reply" data-depth="{{depth}}">
                 {{> format_streamdeck/local/discussion_post}}
-            {{/children}}
-        </ol>
-    {{/haschildren}}
-</li>
+            </li>
+        {{/children}}
+    </ol>
+{{/haschildren}}

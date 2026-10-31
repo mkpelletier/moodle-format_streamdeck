@@ -21,6 +21,7 @@
 - Completion read once per page from core's cache.
 
 ### Fixed
+- Navbar links illegible in dark mode on Moodle 5.1 and 5.2; footer links now underlined.
 - Once announcements had been opened on a device, the badge stopped showing new ones; it now follows the forum's read tracking.
 - Copyleaks plagiarism notice illegible in dark mode.
 - Right drawer toggle did nothing on Moodle 5.3.

@@ -14,7 +14,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Moodle App: course data and helpers for templates/mobile_course.mustache.
+ * Moodle App: course data and helpers for mobile/course.html.
  *
  * Runs in the app with `this` bound to the plugin content component, each time the content loads or refreshes.
  *

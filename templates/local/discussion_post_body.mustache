@@ -37,7 +37,7 @@
     Example context (json):
     {
         "id": 1, "author": "Sam Student", "avatar": "", "isown": true, "time": "2 hours ago",
-        "datetime": "Saturday, 31 October 2026, 9:00 PM", "message": "<p>Can someone explain nouns?</p>",
+        "datetime": "Saturday, 31 October 2026, 9:00 PM", "isodate": "2026-10-31T21:00:00+00:00", "message": "<p>Can someone explain nouns?</p>",
         "attachments": [], "hasattachments": false, "isprivate": false,
         "canreply": true, "replyurl": "#", "canedit": true, "editurl": "#", "candelete": false, "deleteurl": "",
         "hasactions": true
@@ -55,7 +55,7 @@
                 <i class="fa-solid fa-lock" aria-hidden="true"></i> {{#str}}privatereply, forum{{/str}}
             </span>
         {{/isprivate}}
-        <time class="sd-post-time" title="{{datetime}}">{{time}}</time>
+        <time class="sd-post-time" datetime="{{isodate}}" title="{{datetime}}">{{time}}</time>
     </header>
     <div class="sd-post-message">{{{message}}}</div>
     {{#hasattachments}}

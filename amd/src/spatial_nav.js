@@ -382,7 +382,12 @@ const onKeyDown = (e) => {
     if ((direction === 'left' || direction === 'right') && active?.closest('[role="tablist"]')) {
         return;
     }
-    const moved = isTv() ? moveSpatially(active, direction) : (active ? moveInGrid(active, direction) : false);
+    let moved = false;
+    if (isTv()) {
+        moved = moveSpatially(active, direction);
+    } else if (active) {
+        moved = moveInGrid(active, direction);
+    }
     if (moved) {
         e.preventDefault();
     }

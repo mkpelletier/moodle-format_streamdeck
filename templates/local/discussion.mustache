@@ -40,6 +40,7 @@
         "discussionurl": "#", "replycount": "1 reply", "hasreplies": true, "canreply": true,
         "replyurl": "#", "useravatar": "", "backtolist": false,
         "opening": {"id": 1, "author": "Sam Student", "avatar": "", "time": "2 hours ago", "datetime": "",
+            "isodate": "2026-10-31T21:00:00+00:00",
             "message": "<p>Can someone explain nouns?</p>", "depth": 0, "children": []},
         "replies": []
     }
@@ -83,7 +84,9 @@
     {{#hasreplies}}
         <ol class="sd-replies" aria-label="{{replycount}}">
             {{#replies}}
-                {{> format_streamdeck/local/discussion_post}}
+                <li class="sd-reply" data-depth="{{depth}}">
+                    {{> format_streamdeck/local/discussion_post}}
+                </li>
             {{/replies}}
         </ol>
     {{/hasreplies}}

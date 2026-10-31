@@ -1444,6 +1444,14 @@ div.format-streamdeck {
     animation-fill-mode: both;
 }
 
+/* Behat does not wait for animations: show them straight away, as for the navbar. */
+body.behat-site .streamdeck-related-block .related-sidebar,
+body.behat-site .streamdeck-related-block .streamdeck-about-card {
+    visibility: visible;
+    opacity: 1;
+    animation: none;
+}
+
 @keyframes streamdeck-reveal {
     0% {
         visibility: hidden;
@@ -1464,6 +1472,16 @@ div.format-streamdeck {
 
 .streamdeck-card--locked {
     opacity: 0.7;
+}
+
+/* Boost 5.1 and 5.2 give the primary navigation fixed dark text; here the navbar follows the colour mode. */
+[data-streamdeck-mode] body.format-streamdeck .primary-navigation .navigation .nav-link {
+    color: var(--sd-text);
+}
+
+/* Footer links read as links without relying on colour. */
+[data-streamdeck-mode] body.format-streamdeck :is(#page-footer, .footer-content-popover) a:not(.btn) {
+    text-decoration: underline;
 }
 
 /* ──────────────────────────────────────────────────────────────

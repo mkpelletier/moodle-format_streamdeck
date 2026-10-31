@@ -397,26 +397,31 @@ const openForumPanel = (button, contextid, args) => {
     if (!contextid) {
         return Promise.resolve();
     }
+    let pendingJs = '';
     return new Promise((resolve, reject) => {
+        // The fragment resolves with two values, which a plain then() chain would drop.
         Fragment.loadFragment('format_streamdeck', 'forum', contextid, args).then((html, js) => {
-            const card = document.createElement('div');
-            card.className = 'streamdeck-forum-preview sd-discussion';
-            card.dataset.region = 'sd-discussion';
-            card.dataset.contextid = contextid;
-            Object.entries(args).forEach(([key, value]) => {
-                card.dataset[key] = value;
-            });
-            card.innerHTML = html;
-            return openContentModal({
-                title: button.getAttribute('aria-label'),
-                body: card.outerHTML,
-                chromeless: '.streamdeck-forum-preview',
-            }).then(() => {
-                Templates.runTemplateJS(js);
-                resolve();
-                return;
-            });
+            resolve([html, js]);
+            return;
         }).catch(reject);
+    }).then(([html, js]) => {
+        pendingJs = js;
+        const card = document.createElement('div');
+        card.className = 'streamdeck-forum-preview sd-discussion';
+        card.dataset.region = 'sd-discussion';
+        card.dataset.contextid = contextid;
+        Object.entries(args).forEach(([key, value]) => {
+            card.dataset[key] = value;
+        });
+        card.innerHTML = html;
+        return openContentModal({
+            title: button.getAttribute('aria-label'),
+            body: card.outerHTML,
+            chromeless: '.streamdeck-forum-preview',
+        });
+    }).then(() => {
+        Templates.runTemplateJS(pendingJs);
+        return;
     });
 };
 
@@ -736,7 +741,12 @@ const initCircularQuizTimer = async(timelimit) => {
     const update = () => {
         const seconds = parseTime(timeLeft.textContent);
         const fraction = total > 0 ? seconds / total : 1;
-        const state = fraction <= TIMER_CRITICAL_FRACTION ? 'critical' : fraction <= TIMER_WARNING_FRACTION ? 'warning' : '';
+        let state = '';
+        if (fraction <= TIMER_CRITICAL_FRACTION) {
+            state = 'critical';
+        } else if (fraction <= TIMER_WARNING_FRACTION) {
+            state = 'warning';
+        }
 
         text.textContent = formatTime(seconds, total >= 3600);
         ring.setAttribute('stroke-dashoffset', circumference * (1 - fraction));

@@ -158,6 +158,7 @@ class discussion {
                 $item['pinned'] = $discussion->is_pinned();
                 $item['time'] = self::relative_time($time);
                 $item['datetime'] = userdate($time, get_string('strftimedatetime', 'langconfig'));
+                $item['isodate'] = date('c', $time);
                 $item['day'] = userdate($time, '%d');
                 $item['month'] = userdate($time, '%b');
                 $item['excerpt'] = shorten_text(html_to_text($item['message'], 0, false), 200);
@@ -394,6 +395,7 @@ class discussion {
             'isown' => $post->get_author_id() == $USER->id,
             'time' => self::relative_time($post->get_time_created()),
             'datetime' => userdate($post->get_time_created(), get_string('strftimedatetime', 'langconfig')),
+            'isodate' => date('c', $post->get_time_created()),
             'message' => format_text($message, $post->get_message_format(), ['context' => $context]),
             'attachments' => $attachments,
             'hasattachments' => !empty($attachments),

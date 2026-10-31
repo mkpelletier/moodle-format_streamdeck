@@ -90,7 +90,6 @@ Feature: Streamdeck learner interface
     And I should see "12 mins" in the "#streamdeck-season-2" "css_element"
     And "#streamdeck-season-1" "css_element" should not be visible
 
-
   @javascript
   Scenario: Teachers describe an episode and learners can fold the description away
     Given the following "users" exist:

@@ -76,6 +76,8 @@ final class accent_colour_test extends \advanced_testcase {
         $this->assertStringContainsString('[data-bs-theme="light"][data-bs-theme]', $style);
         $this->assertStringContainsString('--sd-accent: #1db954;', $style);
         $this->assertStringContainsString('--sd-accent-rgb-light', \format_streamdeck\output\mobile::accent_style($course));
+        $template = \format_streamdeck\output\mobile::course_template($course);
+        $this->assertStringContainsString('<div class="format-streamdeck-app" style="--sd-accent-dark: ', $template);
     }
 
     /**

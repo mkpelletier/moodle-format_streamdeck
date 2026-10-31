@@ -38,7 +38,7 @@ class mobile {
      * @return array templates, javascript and otherdata for the app.
      */
     public static function mobile_course_view(array $args): array {
-        global $CFG, $OUTPUT;
+        global $CFG;
 
         $course = get_course((int) $args['courseid']);
         require_login($course);
@@ -47,9 +47,7 @@ class mobile {
             'templates' => [
                 [
                     'id' => 'main',
-                    'html' => $OUTPUT->render_from_template('format_streamdeck/mobile_course', [
-                        'accentstyle' => self::accent_style($course),
-                    ]),
+                    'html' => self::course_template($course),
                 ],
             ],
             'javascript' => file_get_contents($CFG->dirroot . '/course/format/streamdeck/mobile/course.js'),
@@ -59,6 +57,23 @@ class mobile {
                 'season' => '0',
             ],
         ];
+    }
+
+    /**
+     * The app's course template (mobile/course.html, an Angular template), with the course's accent colour.
+     *
+     * @param \stdClass $course
+     * @return string
+     */
+    public static function course_template(\stdClass $course): string {
+        global $CFG;
+        $html = file_get_contents($CFG->dirroot . '/course/format/streamdeck/mobile/course.html');
+        $style = self::accent_style($course);
+        if ($style === '') {
+            return $html;
+        }
+        $wrapper = '<div class="format-streamdeck-app">';
+        return str_replace($wrapper, '<div class="format-streamdeck-app" style="' . s($style) . '">', $html);
     }
 
     /**

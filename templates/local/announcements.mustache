@@ -37,7 +37,7 @@
         "forumname": "Announcements", "forumurl": "#", "newcount": "1 new", "hasitems": true, "hasmore": false,
         "canpost": false, "posturl": "",
         "items": [{"id": 5, "discussionid": 2, "title": "Welcome", "day": "31", "month": "Oct", "time": "2 hours ago",
-            "datetime": "", "author": "Terry Teacher", "avatar": "", "isnew": true, "pinned": false, "expanded": true,
+            "datetime": "", "isodate": "2026-10-31T21:00:00+00:00", "author": "Terry Teacher", "avatar": "", "isnew": true, "pinned": false, "expanded": true,
             "excerpt": "Welcome to the course.", "message": "<p>Welcome to the course.</p>", "attachments": [],
             "hasattachments": false, "candiscuss": false, "replies": "0 replies", "canedit": false, "candelete": false,
             "hasactions": false}]
@@ -91,7 +91,7 @@
                             {{#isnew}}<span class="sd-news-badge">{{#str}}new, format_streamdeck{{/str}}</span>{{/isnew}}
                             {{#avatar}}<img class="sd-avatar" src="{{avatar}}" alt="">{{/avatar}}
                             <span class="sd-news-author">{{author}}</span>
-                            <time class="sd-news-time" title="{{datetime}}">{{time}}</time>
+                            <time class="sd-news-time" datetime="{{isodate}}" title="{{datetime}}">{{time}}</time>
                         </div>
                         <p class="sd-news-excerpt">{{excerpt}}</p>
                         <div class="sd-news-body" id="sd-news-body-{{id}}"{{^expanded}} hidden{{/expanded}}>
